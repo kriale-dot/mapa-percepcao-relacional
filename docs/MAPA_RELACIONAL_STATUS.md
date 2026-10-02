@@ -5,14 +5,20 @@
 **Data do checkpoint:** 2026-10-02  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
-**Versão:** `0.1.0-dev`  
-**Marco atual:** fundação técnica em andamento  
-**Etapa atual:** Etapa 1 — backend e frontend integrados localmente  
-**Próximo passo:** validar build de produção do frontend e fechar a Etapa 1
+**Versão:** `0.1.0`  
+**Marco atual:** fundação técnica concluída  
+**Etapa atual:** Etapa 1 — concluída  
+**Próxima etapa:** Etapa 2 — modelagem funcional e primeira migração
 
 ## 1. Situação atual
 
-A estrutura inicial do repositório está concluída. O backend Slim 4 foi validado localmente e o frontend React/Vite/Tailwind está executando com comunicação real com a API local.
+A fundação técnica foi concluída e validada localmente: backend Slim 4, MySQL, frontend React/Vite/Tailwind e comunicação frontend → API estão funcionando.
+
+A modelagem conceitual inicial da V1 foi registrada em:
+
+```text
+docs/MODELO_DOMINIO_V1.md
+```
 
 ## 2. Etapa 0 — concluída
 
@@ -20,17 +26,18 @@ Concluído em 2026-10-02:
 
 - repositório GitHub criado;
 - acesso do conector autorizado;
-- README inicial criado;
-- CONTEXT criado;
-- STATUS criado;
+- README, CONTEXT e STATUS criados;
 - `.gitignore` criado;
-- diretórios-base representados no GitHub.
+- diretórios-base definidos.
 
-## 3. Backend — validado localmente
+## 3. Etapa 1 — concluída
 
-Implementado:
+### Backend
+
+Implementado e validado:
 
 - Slim 4;
+- PHP 8.2+;
 - carregamento de `.env`;
 - conexão PDO/MySQL;
 - Monolog;
@@ -38,87 +45,115 @@ Implementado:
 - `GET /api`;
 - `GET /api/health`;
 - `GET /api/health/database`;
-- runner de migrações SQL sequenciais;
-- controle por nome e checksum SHA-256;
-- scripts Composer `serve`, `migrate` e `check`.
-
-Validação executada em 2026-10-02:
-
+- migrações SQL sequenciais;
+- controle de migrações por checksum SHA-256;
 - `composer install`: OK;
-- banco `mapa_relacional`: acessível;
-- `composer migrate`: OK, 0 migrações funcionais pendentes;
-- tabela `schema_migrations`: criada;
-- `composer check`: todos os arquivos principais sem erros de sintaxe;
-- `composer serve`: OK em `localhost:8383`;
-- `GET /api/health`: OK;
-- `GET /api/health/database`: OK / banco conectado.
+- `composer migrate`: OK;
+- `composer check`: OK;
+- API local em `localhost:8383`: OK;
+- conexão real com MySQL: OK.
 
-## 4. Frontend — integração local validada
-
-Criado no GitHub:
-
-```text
-mapa-relacional-web/
-├── src/
-│   ├── services/api.js
-│   ├── App.jsx
-│   ├── main.jsx
-│   └── styles.css
-├── .env.example
-├── index.html
-├── package.json
-├── vite.config.js
-└── README.md
-```
+### Frontend
 
 Implementado e validado:
 
 - React 19;
 - Vite 8;
-- Tailwind CSS v4 via plugin Vite;
+- Tailwind CSS v4;
 - variável `VITE_API_URL`;
-- serviço central de acesso à API;
-- aplicação abriu corretamente em `http://localhost:5173`;
-- identidade visual/Tailwind aplicados corretamente;
-- consulta automática a `GET /api/health`;
-- indicador exibiu `API conectada` com o backend em execução;
-- comunicação frontend → API validada localmente.
+- serviço central de API;
+- tela institucional inicial;
+- identidade visual inicial;
+- frontend local em `localhost:5173`: OK;
+- frontend → `GET /api/health`: OK;
+- indicador `API conectada`: OK;
+- `npm run build`: OK;
+- build Vite de produção gerado em `dist/` sem erros.
 
-Observação operacional:
+Resultado do build validado em 2026-10-02:
 
-- backend local deve permanecer ativo em `localhost:8383`;
-- frontend local deve permanecer ativo em `localhost:5173`;
-- se o backend estiver encerrado, o frontend mostra `API indisponível`, comportamento esperado.
-
-## 5. Última validação da Etapa 1
-
-Pendente apenas validar o build de produção do frontend:
-
-```powershell
-cd mapa-relacional-web
-npm run build
+```text
+vite v8.3.2
+17 modules transformed
+dist/index.html
+dist/assets/*.css
+dist/assets/*.js
+build concluído com sucesso
 ```
 
-O resultado esperado é a criação de `dist/` sem erros.
+## 4. Etapa 2 — modelagem funcional
 
-Após esse teste, a Etapa 1 poderá ser encerrada e a próxima etapa será a definição/modelagem inicial do domínio antes da autenticação e dos cadastros.
+Documento inicial criado:
+
+```text
+docs/MODELO_DOMINIO_V1.md
+```
+
+Modelo conceitual proposto:
+
+- profissionais;
+- pessoas;
+- vínculos;
+- instrumentos;
+- versões;
+- seções;
+- itens;
+- alternativas;
+- aplicações;
+- participantes da aplicação;
+- respostas;
+- comparações;
+- resultados;
+- comentários profissionais;
+- relatórios;
+- convites;
+- auditoria.
+
+A primeira migração funcional deve permanecer enxuta e criar apenas a base necessária para cadastro, instrumento e coleta de respostas.
+
+## 5. Próximo passo
+
+Criar a primeira migração funcional:
+
+```text
+database/001_base_dominio.sql
+```
+
+Escopo previsto:
+
+1. profissionais;
+2. pessoas;
+3. vínculos;
+4. instrumentos;
+5. versões de instrumento;
+6. seções;
+7. itens;
+8. alternativas;
+9. aplicações;
+10. participantes da aplicação;
+11. respostas.
+
+Depois:
+
+- executar `composer migrate`;
+- confirmar tabelas;
+- iniciar endpoints de cadastro básicos.
 
 ## 6. Ainda não implementado
 
-- schema funcional do domínio;
+- primeira migração funcional do domínio;
 - autenticação;
 - perfis/permissões;
-- cadastros;
+- endpoints de cadastro;
 - motor de avaliação;
-- cálculo;
+- comparação automática;
 - resultados;
 - relatórios;
+- convites/acesso remoto;
 - deploy;
 - testes automatizados.
 
-## 7. Pendências de decisão
-
-Devem ser fechadas conforme a implementação avançar:
+## 7. Decisões ainda abertas
 
 - perfis oficiais do sistema;
 - fluxo de cadastro/autenticação dos participantes;
@@ -147,4 +182,4 @@ Ao concluir um marco ou correção, registrar:
 - pendências;
 - próximo passo.
 
-Não transformar este arquivo em changelog detalhado. Ele deve continuar curto o suficiente para ser lido rapidamente no início de uma nova conversa.
+O STATUS deve continuar curto o suficiente para ser lido rapidamente no início de uma nova conversa.
