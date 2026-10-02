@@ -301,9 +301,87 @@ Regra importante:
 
 Assim toda resposta fica congelada no contexto daquela aplicação.
 
-## 4. Comparações e resultados
+## 4. Fluxo de cadastro, dois acessos e identificação
 
-### 4.1 comparacoes
+O material-base define que uma avaliação é iniciada a partir de um e-mail de contato e gera dois acessos, um para cada participante.
+
+Para preservar essa regra sem armazenar senhas em texto puro, a implementação usará **tokens/códigos de acesso individuais com hash**.
+
+### 4.1 aplicacoes — campos adicionais
+
+Além dos campos já descritos, a aplicação precisa registrar:
+
+- email_contato;
+- tipo_vinculo_snapshot;
+- duracao_vinculo_texto opcional;
+- enviado_em opcional.
+
+O `vinculo_id` pode ser nulo no momento inicial, pois a aplicação pode existir antes de os dois participantes terem preenchido seus dados de identificação.
+
+### 4.2 aplicacao_participantes — snapshot de identificação
+
+Cada aplicação possui exatamente dois slots: A e B.
+
+Além de `pessoa_id` opcional, cada slot deve preservar os dados informados naquele preenchimento:
+
+- nome_snapshot;
+- idade_snapshot;
+- genero_snapshot;
+- lado A/B;
+- status;
+- iniciou_em;
+- concluiu_em.
+
+Isso evita que mudanças futuras no cadastro permanente da pessoa alterem o histórico da avaliação.
+
+### 4.3 acessos_aplicacao
+
+Cada participante recebe um acesso individual.
+
+Campos conceituais:
+
+- id;
+- aplicacao_participante_id;
+- token_hash;
+- status;
+- enviado_em;
+- primeiro_acesso_em;
+- ultimo_acesso_em;
+- concluido_em;
+- revogado_em;
+- created_at;
+- updated_at.
+
+Regras:
+
+- nunca armazenar o código de acesso em texto puro;
+- deve existir no máximo um acesso ativo por participante da aplicação;
+- o acesso pode permitir retomada enquanto o formulário não estiver concluído;
+- após conclusão ou revogação, não pode iniciar novo preenchimento.
+
+### 4.4 exclusão de item por “Não se aplica”
+
+A marcação “Não se aplica” tem efeito sobre a **aplicação inteira**, e não somente sobre uma linha de resposta.
+
+Criar a entidade `aplicacao_itens_excluidos`:
+
+- id;
+- aplicacao_id;
+- item_id;
+- marcado_por_participante_id;
+- motivo opcional;
+- created_at.
+
+Regras:
+
+- combinação `aplicacao_id + item_id` é única;
+- item excluído não entra no denominador da pontuação;
+- se o outro participante ainda não respondeu esse item, ele não deve ser apresentado;
+- se já houver resposta do outro participante, ela pode ser preservada para auditoria, mas deve ser ignorada no cálculo.
+
+## 5. Comparações e resultados
+
+### 5.1 comparacoes
 
 As comparações podem ser calculadas novamente enquanto a aplicação está em andamento, mas ao concluir a aplicação é recomendável persistir um snapshot técnico.
 
@@ -328,7 +406,7 @@ B_SOBRE_A
 
 Se qualquer uma das respostas necessárias estiver marcada como `nao_se_aplica`, a comparação não entra no denominador válido.
 
-### 4.2 resultados
+### 5.2 resultados
 
 Consolida o resultado técnico da aplicação.
 
@@ -361,9 +439,9 @@ Faixas atualmente registradas no projeto:
 
 As faixas não devem ficar codificadas somente na interface. Devem ser configuráveis/versionáveis no backend antes da versão de produção do instrumento.
 
-## 5. Comentários profissionais e devolutiva
+## 6. Comentários profissionais e devolutiva
 
-### 5.1 comentarios_profissionais
+### 6.1 comentarios_profissionais
 
 Permite ao profissional registrar observações sem alterar respostas ou resultados técnicos.
 
@@ -376,7 +454,7 @@ Campos:
 - created_at;
 - updated_at.
 
-### 5.2 relatorios
+### 6.2 relatorios
 
 Representa uma devolutiva ou relatório associado à aplicação.
 
@@ -394,7 +472,7 @@ Campos iniciais:
 
 A definição do formato final da devolutiva será feita em etapa posterior.
 
-## 6. Acesso e convite
+## 7. Acesso e convite
 
 O domínio deve permitir futuramente acesso por convite sem obrigar todos os participantes a possuírem conta.
 
@@ -408,7 +486,7 @@ Entidades previstas:
 
 A implementação será feita junto da etapa de autenticação/acesso remoto.
 
-## 7. Auditoria
+## 8. Auditoria
 
 Ações relevantes devem poder ser auditadas.
 
@@ -430,7 +508,7 @@ Campos esperados:
 - request_id;
 - created_at.
 
-## 8. Relações resumidas
+## 9. Relações resumidas
 
 ```text
 PROFISSIONAL
@@ -473,7 +551,7 @@ INSTRUMENTO
 
 A aplicação aponta para uma versão publicada específica do instrumento.
 
-## 9. Regras que a primeira migração deve preservar
+## 10. Regras que a primeira migração deve preservar
 
 A primeira migração funcional não deve tentar implementar o produto inteiro.
 
@@ -486,11 +564,13 @@ Ela deve criar apenas a base necessária para:
 5. seções, itens e alternativas;
 6. aplicações;
 7. participantes da aplicação;
-8. respostas.
+8. acessos individuais dos dois participantes;
+9. exclusões de itens por “Não se aplica”;
+10. respostas.
 
-Comparações, resultados, convites, relatórios e auditoria podem entrar em migrações posteriores para manter as etapas pequenas e testáveis.
+Comparações, resultados consolidados, relatórios e auditoria podem entrar em migrações posteriores para manter as etapas pequenas e testáveis.
 
-## 10. Decisões ainda abertas
+## 11. Decisões ainda abertas
 
 Este documento não fixa silenciosamente:
 
