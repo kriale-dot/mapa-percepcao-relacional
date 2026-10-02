@@ -1,0 +1,38 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# PHP / Composer
+/vendor/
+composer.lock
+
+# Node / Vite
+/node_modules/
+/dist/
+*.local
+
+# Logs and runtime
+*.log
+logs/
+storage/logs/
+storage/cache/
+tmp/
+temp/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Backups and secrets
+*.sql
+*.sql.gz
+*.bak
+*.key
+*.pem
+
+# Test / coverage artifacts
+coverage/
+.phpunit.cache/
