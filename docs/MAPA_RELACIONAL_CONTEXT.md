@@ -109,6 +109,24 @@ As faixas atuais do material-base são:
 
 Essas faixas devem ser tratadas como regra do instrumento atual e permanecer configuráveis/versionáveis caso o modelo seja refinado posteriormente.
 
+### Fluxo operacional inicial do instrumento
+
+O material-base da avaliação define também estas regras para a primeira versão:
+
+- para iniciar uma avaliação, existe um **e-mail de contato** associado à aplicação;
+- uma aplicação gera **dois acessos**, um para cada participante;
+- cada acesso dá direito ao preenchimento de um formulário por um dos participantes;
+- por segurança, a implementação deve tratar essas “senhas” como **códigos/tokens de acesso individuais**, armazenados somente em hash no banco;
+- cada participante informa, no contexto do formulário, dados de identificação como nome, idade e gênero;
+- para vínculos do tipo casal, o material-base também solicita tempo de união; no sistema generalizado isso será tratado como informação do vínculo/aplicação;
+- cada item apresenta duas perspectivas ao respondente: resposta sobre si e resposta sobre a outra pessoa;
+- quando um item é marcado como **“Não se aplica”**, ele deve ser excluído daquela aplicação, não ser apresentado ao outro participante quando ainda não respondido e não entrar no denominador da pontuação;
+- o profissional pode criar vários instrumentos/avaliações nesse formato;
+- o profissional visualiza os resultados e pode registrar comentário profissional;
+- o resultado deve poder ser disponibilizado aos participantes pelo e-mail de contato da aplicação.
+
+A plataforma é generalizada para diferentes vínculos, portanto termos conjugais do material-base devem ser convertidos para participante A/B e tipo de vínculo sem perder a lógica original.
+
 ## 5. Modelo conceitual inicial
 
 Entidades esperadas:
