@@ -7,23 +7,12 @@
 **Branch de referência:** `main`  
 **Versão:** `0.1.0-dev`  
 **Marco atual:** fundação técnica em andamento  
-**Etapa atual:** Etapa 1 — backend base criado  
-**Próximo passo:** validar backend local e iniciar frontend React/Vite/Tailwind
+**Etapa atual:** Etapa 1 — backend validado / frontend criado  
+**Próximo passo:** validar frontend local e comunicação com a API
 
 ## 1. Situação atual
 
-A estrutura inicial do repositório está concluída e a fundação do backend Slim 4 foi criada.
-
-Bases conceituais já registradas:
-
-- nome: Mapa de Percepção Relacional;
-- subtítulo: Instrumento de percepção mútua e conhecimento interpessoal;
-- aplicação para diferentes tipos de vínculo;
-- comparação de percepção entre duas pessoas;
-- site institucional como entrada pública;
-- área separada para participante;
-- área separada para profissional;
-- identidade visual e paleta aprovadas.
+A estrutura inicial do repositório está concluída. O backend Slim 4 foi criado e validado localmente; a fundação do frontend React/Vite/Tailwind foi criada no GitHub e aguarda validação local.
 
 ## 2. Etapa 0 — concluída
 
@@ -37,71 +26,87 @@ Concluído em 2026-10-02:
 - `.gitignore` criado;
 - diretórios-base representados no GitHub.
 
-## 3. Etapa 1 — backend base criado
+## 3. Backend — validado localmente
 
-Arquivos principais:
+Implementado:
+
+- Slim 4;
+- carregamento de `.env`;
+- conexão PDO/MySQL;
+- Monolog;
+- CORS por `FRONTEND_URL`;
+- `GET /api`;
+- `GET /api/health`;
+- `GET /api/health/database`;
+- runner de migrações SQL sequenciais;
+- controle por nome e checksum SHA-256;
+- scripts Composer `serve`, `migrate` e `check`.
+
+Validação executada em 2026-10-02:
+
+- `composer install`: OK;
+- banco `mapa_relacional`: acessível;
+- `composer migrate`: OK, 0 migrações funcionais pendentes;
+- tabela `schema_migrations`: criada;
+- `composer check`: todos os arquivos principais sem erros de sintaxe;
+- `composer serve`: OK em `localhost:8383`;
+- `GET /api/health`: OK;
+- `GET /api/health/database`: OK / banco conectado.
+
+## 4. Frontend — criado, validação pendente
+
+Criado no GitHub:
 
 ```text
-mapa-relacional-api/
-├── bin/migrate.php
-├── database/README.md
-├── public/index.php
-├── src/Config/Database.php
-├── src/Config/LoggerFactory.php
-├── src/Controller/HealthController.php
-├── src/Middleware/CorsMiddleware.php
-├── storage/logs/.gitkeep
+mapa-relacional-web/
+├── src/
+│   ├── services/api.js
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── styles.css
 ├── .env.example
-├── composer.json
+├── index.html
+├── package.json
+├── vite.config.js
 └── README.md
 ```
 
 Implementado:
 
-- dependências Slim 4 definidas no Composer;
-- autoload PSR-4 `App\\`;
-- carregamento de `.env`;
-- conexão PDO/MySQL;
-- log em arquivo com Monolog;
-- CORS configurado por `FRONTEND_URL`;
-- endpoint `GET /api`;
-- endpoint `GET /api/health`;
-- endpoint `GET /api/health/database`;
-- runner de migrações SQL sequenciais;
-- controle de migrações por nome e checksum SHA-256;
-- scripts Composer `serve`, `migrate` e `check`.
+- React 19;
+- Vite 8;
+- Tailwind CSS v4 via plugin Vite;
+- variável `VITE_API_URL`;
+- serviço central de acesso à API;
+- consulta automática a `GET /api/health`;
+- indicador visual de conexão da API;
+- primeira fundação visual do site institucional usando a paleta oficial;
+- layout responsivo básico.
 
-O `.gitignore` foi ajustado para **não ignorar migrações SQL nem `composer.lock`**, pois ambos devem ser versionados no projeto.
+## 5. Próxima validação local
 
-## 4. Validação ainda pendente
+Pendente executar:
 
-O código foi criado no GitHub, mas ainda precisa ser executado no ambiente local.
+```powershell
+git pull
+cd mapa-relacional-web
+Copy-Item .env.example .env
+npm install
+npm run dev
+```
 
-Pendente confirmar:
+Depois confirmar:
 
-- `composer install`;
-- criação do banco local `mapa_relacional`;
-- cópia de `.env.example` para `.env`;
-- `composer migrate`;
-- `composer check`;
-- servidor local em `localhost:8383`;
-- resposta de `GET /api/health`;
-- resposta de `GET /api/health/database`.
+- aplicação abre em `http://localhost:5173`;
+- Tailwind é aplicado corretamente;
+- cabeçalho mostra `API conectada`;
+- console do navegador sem erros relevantes;
+- `npm run build` conclui sem erros.
 
-Não considerar o backend validado até esses testes serem executados.
-
-## 5. Próxima sequência da Etapa 1
-
-1. validar o backend local;
-2. iniciar projeto React/Vite;
-3. adicionar Tailwind CSS v4;
-4. criar configuração de API no frontend;
-5. testar frontend → `GET /api/health`;
-6. fechar a Etapa 1 somente depois da execução local dos dois lados.
+A Etapa 1 só será encerrada depois desta validação.
 
 ## 6. Ainda não implementado
 
-- frontend funcional React/Vite;
 - schema funcional do domínio;
 - autenticação;
 - perfis/permissões;
