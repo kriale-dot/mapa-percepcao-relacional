@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Config\Database;
 use Dotenv\Dotenv;
+use PDO;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -61,11 +62,9 @@ foreach ($files as $file) {
         continue;
     }
 
-    $pdo->beginTransaction();
-
     try {
-        if (trim($sql) !== '') {
-            $pdo->exec($sql);
+        foreach (splitSqlStatements($sql) as $statement) {
+            $pdo->exec($statement);
         }
 
         $insert->execute([
@@ -73,17 +72,122 @@ foreach ($files as $file) {
             'checksum' => $checksum,
         ]);
 
-        $pdo->commit();
         $applied++;
 
         echo "[ok] {$filename}\n";
     } catch (Throwable $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
-
-        throw $e;
+        throw new RuntimeException(
+            "Falha ao aplicar {$filename}. A migracao nao foi registrada em schema_migrations. "
+            . "Como MySQL faz commit implicito em DDL, confirme o estado do banco antes de repetir. "
+            . "Erro original: {$e->getMessage()}",
+            0,
+            $e
+        );
     }
 }
 
 echo "Migracoes aplicadas nesta execucao: {$applied}\n";
+
+/**
+ * Divide um arquivo SQL em comandos sem depender de multi-statements do PDO.
+ * Respeita strings simples/duplas, identificadores com crase e comentarios SQL.
+ *
+ * @return list<string>
+ */
+function splitSqlStatements(string $sql): array
+{
+    $statements = [];
+    $buffer = '';
+    $length = strlen($sql);
+    $quote = null;
+    $lineComment = false;
+    $blockComment = false;
+
+    for ($i = 0; $i < $length; $i++) {
+        $char = $sql[$i];
+        $next = $i + 1 < $length ? $sql[$i + 1] : '';
+
+        if ($lineComment) {
+            if ($char === "\n") {
+                $lineComment = false;
+                $buffer .= $char;
+            }
+            continue;
+        }
+
+        if ($blockComment) {
+            if ($char === '*' && $next === '/') {
+                $blockComment = false;
+                $i++;
+            }
+            continue;
+        }
+
+        if ($quote === null) {
+            if ($char === '-' && $next === '-') {
+                $lineComment = true;
+                $i++;
+                continue;
+            }
+
+            if ($char === '#') {
+                $lineComment = true;
+                continue;
+            }
+
+            if ($char === '/' && $next === '*') {
+                $blockComment = true;
+                $i++;
+                continue;
+            }
+
+            if ($char === "'" || $char === '"' || $char === '`') {
+                $quote = $char;
+                $buffer .= $char;
+                continue;
+            }
+
+            if ($char === ';') {
+                $statement = trim($buffer);
+
+                if ($statement !== '') {
+                    $statements[] = $statement;
+                }
+
+                $buffer = '';
+                continue;
+            }
+
+            $buffer .= $char;
+            continue;
+        }
+
+        $buffer .= $char;
+
+        if ($char === '\\') {
+            if ($next !== '') {
+                $buffer .= $next;
+                $i++;
+            }
+            continue;
+        }
+
+        if ($char === $quote) {
+            if ($next === $quote && $quote !== '`') {
+                $buffer .= $next;
+                $i++;
+                continue;
+            }
+
+            $quote = null;
+        }
+    }
+
+    $statement = trim($buffer);
+
+    if ($statement !== '') {
+        $statements[] = $statement;
+    }
+
+    return $statements;
+}
