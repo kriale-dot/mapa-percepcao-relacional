@@ -7,12 +7,12 @@
 **Branch de referência:** `main`  
 **Versão:** `0.1.0-dev`  
 **Marco atual:** fundação técnica em andamento  
-**Etapa atual:** Etapa 1 — backend validado / frontend criado  
-**Próximo passo:** validar frontend local e comunicação com a API
+**Etapa atual:** Etapa 1 — backend e frontend integrados localmente  
+**Próximo passo:** validar build de produção do frontend e fechar a Etapa 1
 
 ## 1. Situação atual
 
-A estrutura inicial do repositório está concluída. O backend Slim 4 foi criado e validado localmente; a fundação do frontend React/Vite/Tailwind foi criada no GitHub e aguarda validação local.
+A estrutura inicial do repositório está concluída. O backend Slim 4 foi validado localmente e o frontend React/Vite/Tailwind está executando com comunicação real com a API local.
 
 ## 2. Etapa 0 — concluída
 
@@ -53,7 +53,7 @@ Validação executada em 2026-10-02:
 - `GET /api/health`: OK;
 - `GET /api/health/database`: OK / banco conectado.
 
-## 4. Frontend — criado, validação pendente
+## 4. Frontend — integração local validada
 
 Criado no GitHub:
 
@@ -71,39 +71,37 @@ mapa-relacional-web/
 └── README.md
 ```
 
-Implementado:
+Implementado e validado:
 
 - React 19;
 - Vite 8;
 - Tailwind CSS v4 via plugin Vite;
 - variável `VITE_API_URL`;
 - serviço central de acesso à API;
+- aplicação abriu corretamente em `http://localhost:5173`;
+- identidade visual/Tailwind aplicados corretamente;
 - consulta automática a `GET /api/health`;
-- indicador visual de conexão da API;
-- primeira fundação visual do site institucional usando a paleta oficial;
-- layout responsivo básico.
+- indicador exibiu `API conectada` com o backend em execução;
+- comunicação frontend → API validada localmente.
 
-## 5. Próxima validação local
+Observação operacional:
 
-Pendente executar:
+- backend local deve permanecer ativo em `localhost:8383`;
+- frontend local deve permanecer ativo em `localhost:5173`;
+- se o backend estiver encerrado, o frontend mostra `API indisponível`, comportamento esperado.
+
+## 5. Última validação da Etapa 1
+
+Pendente apenas validar o build de produção do frontend:
 
 ```powershell
-git pull
 cd mapa-relacional-web
-Copy-Item .env.example .env
-npm install
-npm run dev
+npm run build
 ```
 
-Depois confirmar:
+O resultado esperado é a criação de `dist/` sem erros.
 
-- aplicação abre em `http://localhost:5173`;
-- Tailwind é aplicado corretamente;
-- cabeçalho mostra `API conectada`;
-- console do navegador sem erros relevantes;
-- `npm run build` conclui sem erros.
-
-A Etapa 1 só será encerrada depois desta validação.
+Após esse teste, a Etapa 1 poderá ser encerrada e a próxima etapa será a definição/modelagem inicial do domínio antes da autenticação e dos cadastros.
 
 ## 6. Ainda não implementado
 
