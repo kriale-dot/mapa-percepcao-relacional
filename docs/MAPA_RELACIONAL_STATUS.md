@@ -6,9 +6,9 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** primeira migração funcional criada  
-**Etapa atual:** Etapa 2 — modelagem funcional / validação da migração pendente  
-**Próximo passo:** aplicar `001_base_dominio.sql` no banco local e validar tabelas
+**Marco atual:** primeira migração funcional validada  
+**Etapa atual:** Etapa 2 — primeira migração validada  
+**Próximo passo:** validar automaticamente a estrutura do domínio e iniciar autenticação profissional
 
 ## 1. Situação atual
 
@@ -95,27 +95,38 @@ Motivo:
 
 O runner agora divide e executa os comandos SQL individualmente, registra a migração somente após sucesso completo e mantém verificação por checksum SHA-256.
 
-## 6. Validação local pendente
+## 6. Validação local da migração
 
-Executar:
+A migração `001_base_dominio.sql` foi executada com sucesso em 2026-10-02 após a correção de compatibilidade dos `CHECK`.
 
-```powershell
-git pull
-cd mapa-relacional-api
-composer check
-composer migrate
-```
-
-Resultado esperado:
+Resultado confirmado:
 
 ```text
 [ok] 001_base_dominio.sql
 Migracoes aplicadas nesta execucao: 1
 ```
 
-Depois confirmar no MySQL a existência das 13 tabelas acima, além de `schema_migrations`.
+Foi adicionado também:
 
-Não considerar a Etapa 2 concluída até essa validação.
+```text
+bin/check-domain.php
+composer check-domain
+```
+
+Esse comando verifica automaticamente:
+
+- conexão com o banco configurado;
+- presença de `schema_migrations`;
+- presença das 13 tabelas funcionais;
+- registro de `001_base_dominio.sql` em `schema_migrations`.
+
+Executar após `git pull`:
+
+```powershell
+composer check-domain
+```
+
+A primeira migração funcional é considerada validada.
 
 
 ## 6.1 Correção da primeira execução da migração
