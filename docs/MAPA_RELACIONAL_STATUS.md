@@ -117,6 +117,25 @@ Depois confirmar no MySQL a existência das 13 tabelas acima, além de `schema_m
 
 Não considerar a Etapa 2 concluída até essa validação.
 
+
+## 6.1 Correção da primeira execução da migração
+
+Na primeira tentativa local de `001_base_dominio.sql`, o banco retornou:
+
+```text
+SQLSTATE[HY000]: General error: 1901
+Function or expression 'pessoa_a_id' cannot be used in the CHECK clause
+```
+
+A migração não foi registrada em `schema_migrations`.
+
+Correção aplicada em 2026-10-02:
+
+- removido `CHECK (pessoa_a_id <> pessoa_b_id)`;
+- removido o `CHECK` de limite de idade do participante;
+- essas regras passam a ser validadas no backend para manter compatibilidade com o banco local;
+- como as tabelas usam `CREATE TABLE IF NOT EXISTS`, uma nova execução preserva tabelas já criadas antes da falha e continua a partir das ausentes.
+
 ## 7. Próximos passos após validar a migração
 
 1. criar endpoint de configuração/cadastro inicial do profissional;
