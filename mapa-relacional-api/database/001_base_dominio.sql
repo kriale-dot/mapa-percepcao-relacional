@@ -56,9 +56,7 @@ CREATE TABLE IF NOT EXISTS vinculos (
         ON UPDATE CASCADE ON DELETE RESTRICT,
     CONSTRAINT fk_vinculos_pessoa_b
         FOREIGN KEY (pessoa_b_id) REFERENCES pessoas(id)
-        ON UPDATE CASCADE ON DELETE RESTRICT,
-    CONSTRAINT chk_vinculos_pessoas_distintas
-        CHECK (pessoa_a_id <> pessoa_b_id)
+        ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS instrumentos (
@@ -194,9 +192,7 @@ CREATE TABLE IF NOT EXISTS aplicacao_participantes (
         FOREIGN KEY (pessoa_id) REFERENCES pessoas(id)
         ON UPDATE CASCADE ON DELETE SET NULL,
     CONSTRAINT chk_aplicacao_participantes_lado
-        CHECK (lado IN ('A', 'B')),
-    CONSTRAINT chk_aplicacao_participantes_idade
-        CHECK (idade_snapshot IS NULL OR idade_snapshot <= 150)
+        CHECK (lado IN ('A', 'B'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS acessos_aplicacao (
