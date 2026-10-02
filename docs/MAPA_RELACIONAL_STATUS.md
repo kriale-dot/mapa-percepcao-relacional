@@ -5,88 +5,27 @@
 **Data do checkpoint:** 2026-10-02  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
-**Versão:** `0.0.0`  
-**Marco atual:** estrutura inicial do projeto criada  
-**Etapa atual:** Etapa 0 — concluída  
-**Próxima etapa:** Etapa 1 — fundação técnica
+**Versão:** `0.1.0-dev`  
+**Marco atual:** fundação técnica em andamento  
+**Etapa atual:** Etapa 1 — backend base criado  
+**Próximo passo:** validar backend local e iniciar frontend React/Vite/Tailwind
 
 ## 1. Situação atual
 
-A estrutura inicial do repositório foi criada no GitHub.
+A estrutura inicial do repositório está concluída e a fundação do backend Slim 4 foi criada.
 
-Já estão definidas e registradas as bases conceituais do produto:
+Bases conceituais já registradas:
 
 - nome: Mapa de Percepção Relacional;
 - subtítulo: Instrumento de percepção mútua e conhecimento interpessoal;
-- aplicação para diferentes tipos de vínculo, não somente casais;
+- aplicação para diferentes tipos de vínculo;
 - comparação de percepção entre duas pessoas;
 - site institucional como entrada pública;
 - área separada para participante;
 - área separada para profissional;
-- identidade visual e paleta aprovadas;
-- logotipo já criado.
+- identidade visual e paleta aprovadas.
 
-## 2. Estrutura inicial
-
-```text
-mapa-percepcao-relacional/
-├── mapa-relacional-api/
-├── mapa-relacional-web/
-├── docs/
-│   ├── MAPA_RELACIONAL_CONTEXT.md
-│   └── MAPA_RELACIONAL_STATUS.md
-├── deploy/
-├── README.md
-└── .gitignore
-```
-
-Arquitetura lógica:
-
-```text
-Site institucional
-       ↓
-Frontend React/Vite
-       ↓
-API Slim 4
-       ↓
-MySQL
-```
-
-Áreas previstas:
-
-```text
-/                    → institucional
-/avaliacao/...       → participante
-/profissional/...    → profissional
-```
-
-## 3. Regra funcional central registrada
-
-Para participantes A e B:
-
-```text
-A → A
-A → B
-B → B
-B → A
-```
-
-Comparações:
-
-```text
-A → B × B → B
-B → A × A → A
-```
-
-Itens “Não se aplica” devem ser excluídos das comparações válidas.
-
-O modelo percentual atual é:
-
-```text
-acertos / comparações válidas × 100
-```
-
-## 4. Etapa 0 — concluída
+## 2. Etapa 0 — concluída
 
 Concluído em 2026-10-02:
 
@@ -98,24 +37,74 @@ Concluído em 2026-10-02:
 - `.gitignore` criado;
 - diretórios-base representados no GitHub.
 
-## 5. Próxima etapa — Etapa 1: fundação técnica
+## 3. Etapa 1 — backend base criado
 
-1. iniciar API Slim 4;
-2. configurar `.env.example`;
-3. criar conexão MySQL;
-4. configurar migrações;
-5. criar projeto React/Vite/Tailwind;
-6. configurar comunicação frontend ↔ API;
-7. criar health check;
-8. validar execução local de backend e frontend.
+Arquivos principais:
+
+```text
+mapa-relacional-api/
+├── bin/migrate.php
+├── database/README.md
+├── public/index.php
+├── src/Config/Database.php
+├── src/Config/LoggerFactory.php
+├── src/Controller/HealthController.php
+├── src/Middleware/CorsMiddleware.php
+├── storage/logs/.gitkeep
+├── .env.example
+├── composer.json
+└── README.md
+```
+
+Implementado:
+
+- dependências Slim 4 definidas no Composer;
+- autoload PSR-4 `App\\`;
+- carregamento de `.env`;
+- conexão PDO/MySQL;
+- log em arquivo com Monolog;
+- CORS configurado por `FRONTEND_URL`;
+- endpoint `GET /api`;
+- endpoint `GET /api/health`;
+- endpoint `GET /api/health/database`;
+- runner de migrações SQL sequenciais;
+- controle de migrações por nome e checksum SHA-256;
+- scripts Composer `serve`, `migrate` e `check`.
+
+O `.gitignore` foi ajustado para **não ignorar migrações SQL nem `composer.lock`**, pois ambos devem ser versionados no projeto.
+
+## 4. Validação ainda pendente
+
+O código foi criado no GitHub, mas ainda precisa ser executado no ambiente local.
+
+Pendente confirmar:
+
+- `composer install`;
+- criação do banco local `mapa_relacional`;
+- cópia de `.env.example` para `.env`;
+- `composer migrate`;
+- `composer check`;
+- servidor local em `localhost:8383`;
+- resposta de `GET /api/health`;
+- resposta de `GET /api/health/database`.
+
+Não considerar o backend validado até esses testes serem executados.
+
+## 5. Próxima sequência da Etapa 1
+
+1. validar o backend local;
+2. iniciar projeto React/Vite;
+3. adicionar Tailwind CSS v4;
+4. criar configuração de API no frontend;
+5. testar frontend → `GET /api/health`;
+6. fechar a Etapa 1 somente depois da execução local dos dois lados.
 
 ## 6. Ainda não implementado
 
-- estrutura funcional PHP/Slim;
-- estrutura funcional React/Vite;
-- banco de dados;
-- migrações;
+- frontend funcional React/Vite;
+- schema funcional do domínio;
 - autenticação;
+- perfis/permissões;
 - cadastros;
 - motor de avaliação;
 - cálculo;
