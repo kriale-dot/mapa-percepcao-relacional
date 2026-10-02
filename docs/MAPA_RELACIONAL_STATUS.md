@@ -5,168 +5,144 @@
 **Data do checkpoint:** 2026-10-02  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
-**Versão:** `0.1.0`  
-**Marco atual:** fundação técnica concluída  
-**Etapa atual:** Etapa 1 — concluída  
-**Próxima etapa:** Etapa 2 — modelagem funcional e primeira migração
+**Versão:** `0.2.0-dev`  
+**Marco atual:** primeira migração funcional criada  
+**Etapa atual:** Etapa 2 — modelagem funcional / validação da migração pendente  
+**Próximo passo:** aplicar `001_base_dominio.sql` no banco local e validar tabelas
 
 ## 1. Situação atual
 
-A fundação técnica foi concluída e validada localmente: backend Slim 4, MySQL, frontend React/Vite/Tailwind e comunicação frontend → API estão funcionando.
+A fundação técnica está concluída. A modelagem funcional foi revisada com base no documento original da avaliação e a primeira migração do domínio foi criada no GitHub.
 
-A modelagem conceitual inicial da V1 foi registrada em:
+Documentos principais:
 
 ```text
+docs/MAPA_RELACIONAL_CONTEXT.md
+docs/MAPA_RELACIONAL_STATUS.md
 docs/MODELO_DOMINIO_V1.md
 ```
 
-## 2. Etapa 0 — concluída
+## 2. Etapa 1 — concluída
 
-Concluído em 2026-10-02:
+Validado localmente:
 
-- repositório GitHub criado;
-- acesso do conector autorizado;
-- README, CONTEXT e STATUS criados;
-- `.gitignore` criado;
-- diretórios-base definidos.
-
-## 3. Etapa 1 — concluída
-
-### Backend
-
-Implementado e validado:
-
-- Slim 4;
-- PHP 8.2+;
-- carregamento de `.env`;
-- conexão PDO/MySQL;
-- Monolog;
-- CORS por `FRONTEND_URL`;
-- `GET /api`;
-- `GET /api/health`;
-- `GET /api/health/database`;
-- migrações SQL sequenciais;
-- controle de migrações por checksum SHA-256;
-- `composer install`: OK;
-- `composer migrate`: OK;
-- `composer check`: OK;
-- API local em `localhost:8383`: OK;
-- conexão real com MySQL: OK.
-
-### Frontend
-
-Implementado e validado:
-
+- Slim 4 / PHP 8.2+;
+- MySQL/PDO;
+- runner de migrações;
 - React 19;
 - Vite 8;
 - Tailwind CSS v4;
-- variável `VITE_API_URL`;
-- serviço central de API;
-- tela institucional inicial;
-- identidade visual inicial;
-- frontend local em `localhost:5173`: OK;
-- frontend → `GET /api/health`: OK;
-- indicador `API conectada`: OK;
-- `npm run build`: OK;
-- build Vite de produção gerado em `dist/` sem erros.
+- frontend ↔ API;
+- `composer check`;
+- `npm run build`.
 
-Resultado do build validado em 2026-10-02:
+## 3. Requisitos operacionais incorporados na Etapa 2
 
-```text
-vite v8.3.2
-17 modules transformed
-dist/index.html
-dist/assets/*.css
-dist/assets/*.js
-build concluído com sucesso
-```
+O modelo agora contempla explicitamente:
 
-## 4. Etapa 2 — modelagem funcional
+- e-mail de contato por aplicação;
+- dois acessos individuais, um por participante;
+- tokens/códigos armazenados somente em hash;
+- identificação do participante no preenchimento;
+- duração do vínculo como snapshot da aplicação;
+- duas perspectivas por item: sobre si e sobre o outro;
+- exclusão global do item quando marcado “Não se aplica”;
+- item excluído fora do cálculo e oculto do outro participante quando ainda não respondido;
+- possibilidade de vários instrumentos/avaliações criados pelo profissional;
+- resultado e comentário profissional em etapas posteriores.
 
-Documento inicial criado:
+## 4. Primeira migração criada
+
+Arquivo:
 
 ```text
-docs/MODELO_DOMINIO_V1.md
+mapa-relacional-api/database/001_base_dominio.sql
 ```
 
-Modelo conceitual proposto:
+Tabelas previstas pela migração:
 
-- profissionais;
-- pessoas;
-- vínculos;
-- instrumentos;
-- versões;
-- seções;
-- itens;
-- alternativas;
-- aplicações;
-- participantes da aplicação;
-- respostas;
-- comparações;
-- resultados;
-- comentários profissionais;
-- relatórios;
-- convites;
-- auditoria.
+1. `profissionais`;
+2. `pessoas`;
+3. `vinculos`;
+4. `instrumentos`;
+5. `instrumento_versoes`;
+6. `secoes`;
+7. `itens`;
+8. `alternativas`;
+9. `aplicacoes`;
+10. `aplicacao_participantes`;
+11. `acessos_aplicacao`;
+12. `aplicacao_itens_excluidos`;
+13. `respostas`.
 
-A primeira migração funcional deve permanecer enxuta e criar apenas a base necessária para cadastro, instrumento e coleta de respostas.
+O `vinculo_id` da aplicação pode ser nulo inicialmente, permitindo gerar os dois acessos antes de os participantes terem preenchido sua identificação.
 
-## 5. Próximo passo
+## 5. Correção do runner de migrações
 
-Criar a primeira migração funcional:
+O arquivo:
 
 ```text
-database/001_base_dominio.sql
+mapa-relacional-api/bin/migrate.php
 ```
 
-Escopo previsto:
+foi ajustado antes da primeira migração DDL real.
 
-1. profissionais;
-2. pessoas;
-3. vínculos;
-4. instrumentos;
-5. versões de instrumento;
-6. seções;
-7. itens;
-8. alternativas;
-9. aplicações;
-10. participantes da aplicação;
-11. respostas.
+Motivo:
 
-Depois:
+- MySQL executa commit implícito em comandos DDL;
+- a versão anterior envolvia o arquivo SQL em transação PDO;
+- isso poderia causar comportamento incorreto ao criar tabelas.
 
-- executar `composer migrate`;
-- confirmar tabelas;
-- iniciar endpoints de cadastro básicos.
+O runner agora divide e executa os comandos SQL individualmente, registra a migração somente após sucesso completo e mantém verificação por checksum SHA-256.
 
-## 6. Ainda não implementado
+## 6. Validação local pendente
 
-- primeira migração funcional do domínio;
-- autenticação;
-- perfis/permissões;
-- endpoints de cadastro;
-- motor de avaliação;
+Executar:
+
+```powershell
+git pull
+cd mapa-relacional-api
+composer check
+composer migrate
+```
+
+Resultado esperado:
+
+```text
+[ok] 001_base_dominio.sql
+Migracoes aplicadas nesta execucao: 1
+```
+
+Depois confirmar no MySQL a existência das 13 tabelas acima, além de `schema_migrations`.
+
+Não considerar a Etapa 2 concluída até essa validação.
+
+## 7. Próximos passos após validar a migração
+
+1. criar endpoint de configuração/cadastro inicial do profissional;
+2. criar CRUD de instrumentos, versões, seções e itens;
+3. criar fluxo de nova aplicação com e-mail de contato;
+4. gerar os dois slots A/B e os dois acessos;
+5. iniciar o formulário digital;
+6. implementar comparação e resultado em migração posterior.
+
+## 8. Ainda não implementado
+
+- autenticação profissional;
+- CRUD funcional;
+- envio real de e-mail;
+- geração/entrega dos códigos de acesso;
+- formulário de avaliação;
 - comparação automática;
 - resultados;
+- barras de resultado;
+- comentários profissionais;
+- envio de resultado aos participantes;
 - relatórios;
-- convites/acesso remoto;
-- deploy;
-- testes automatizados.
+- auditoria;
+- deploy.
 
-## 7. Decisões ainda abertas
-
-- perfis oficiais do sistema;
-- fluxo de cadastro/autenticação dos participantes;
-- modo de convite;
-- envio por e-mail/SMS/WhatsApp;
-- política de disponibilização dos resultados;
-- configuração definitiva das faixas interpretativas;
-- conteúdo definitivo do site institucional;
-- domínio de produção.
-
-Essas decisões não devem ser inventadas silenciosamente durante o desenvolvimento.
-
-## 8. Regra para atualizar este STATUS
+## 9. Regra para atualizar este STATUS
 
 Ao concluir um marco ou correção, registrar:
 
