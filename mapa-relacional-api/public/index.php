@@ -51,6 +51,7 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $professionalController
 ) {
     $group->get('/me', [$authController, 'me']);
+    $group->put('/senha', [$authController, 'changePassword']);
     $group->get('/perfil', [$professionalController, 'profile']);
     $group->put('/perfil', [$professionalController, 'updateProfile']);
 })->add(new ProfessionalAuthMiddleware());
