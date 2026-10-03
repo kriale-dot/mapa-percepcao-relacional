@@ -247,6 +247,21 @@ A tabela `profissionais` possui os campos de autenticação `senha_hash`, `senha
 
 Após login válido, a API emitirá JWT conforme as variáveis `JWT_SECRET` e `JWT_TTL_SECONDS`. A autorização das rotas profissionais deve ser validada no backend.
 
+### Configuração inicial do primeiro profissional
+
+A criação do primeiro profissional é feita **somente por linha de comando**, sem endpoint público de cadastro.
+
+Comandos oficiais:
+
+```text
+composer setup-professional
+composer check-professional
+```
+
+O setup inicial só é permitido quando a tabela `profissionais` está vazia. A senha inicial é recebida pela variável temporária de ambiente `SETUP_PROFESSIONAL_PASSWORD`, convertida imediatamente com `password_hash()` e nunca gravada em texto puro ou em arquivo versionado.
+
+Depois que existir pelo menos um profissional, o comando de setup inicial deve recusar nova criação.
+
 ## 8. Princípios de desenvolvimento
 
 - Não alterar regras estruturais sem atualizar este documento.
