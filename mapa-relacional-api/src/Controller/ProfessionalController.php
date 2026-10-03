@@ -90,12 +90,16 @@ final class ProfessionalController
         }
 
         foreach ([$fotoUrl, $logoUrl] as $url) {
+            if ($url === null) {
+                continue;
+            }
+
+            $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+
             if (
-                $url !== null
-                && (
-                    strlen($url) > 500
-                    || filter_var($url, FILTER_VALIDATE_URL) === false
-                )
+                strlen($url) > 500
+                || filter_var($url, FILTER_VALIDATE_URL) === false
+                || !in_array($scheme, ['http', 'https'], true)
             ) {
                 return $this->validation($response, 'URL de imagem invalida.');
             }
