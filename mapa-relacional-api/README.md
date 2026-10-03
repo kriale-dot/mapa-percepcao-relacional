@@ -18,7 +18,8 @@ Backend da plataforma **Mapa de Percepção Relacional**.
 mapa-relacional-api/
 ├── bin/
 │   └── migrate.php
-├── database/
+├── migrations/
+│   ├── 001_base_dominio.sql
 │   └── README.md
 ├── public/
 │   └── index.php
@@ -32,6 +33,8 @@ mapa-relacional-api/
 │       └── CorsMiddleware.php
 ├── storage/
 │   └── logs/
+├── vendor/              # gerado localmente; não versionado
+├── .env                  # local; não versionado
 ├── .env.example
 └── composer.json
 ```
@@ -94,7 +97,7 @@ O endpoint de aplicação não depende do banco. O endpoint de banco executa uma
 
 ## Migrações
 
-Os arquivos SQL serão adicionados em `database/` com nomes sequenciais:
+Os arquivos SQL serão adicionados em `migrations/` com nomes sequenciais:
 
 ```text
 001_nome.sql
