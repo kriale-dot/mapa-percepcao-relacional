@@ -193,3 +193,20 @@ Na V1 desta etapa:
 - nome, e-mail, telefone, descrição, atuação e dados de contato podem ser editados pelo profissional autenticado;
 - o status é exibido, porém não pode ser alterado pelo próprio formulário de perfil, pois participa da regra de autorização;
 - as rotas de leitura e atualização do perfil permanecem protegidas pelo middleware JWT.
+
+## D-017 — Alteração segura de senha
+**Data:** 2026-10-03  
+**Status:** vigente
+
+A troca de senha do profissional é autenticada e exige a senha atual.
+
+Regras:
+
+- endpoint protegido: `PUT /api/profissional/senha`;
+- a nova senha deve ter pelo menos 8 caracteres e ser diferente da senha atual;
+- a senha atual é validada com `password_verify()`;
+- a nova senha é armazenada somente por `password_hash(PASSWORD_DEFAULT)`;
+- `senha_alterada_em` é atualizado após sucesso;
+- o JWT contém uma impressão digital SHA-256 do hash vigente da senha;
+- o middleware compara essa impressão com o hash atual do banco, invalidando tokens antigos após uma troca de senha;
+- após alterar a senha, o frontend remove o JWT local e exige novo login.
