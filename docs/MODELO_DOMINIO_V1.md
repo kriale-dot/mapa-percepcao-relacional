@@ -85,8 +85,11 @@ Campos conceituais mínimos:
 - id;
 - nome;
 - email;
+- senha_hash, nulo somente enquanto a configuração inicial ainda não foi concluída;
 - telefone opcional;
 - status;
+- senha_alterada_em;
+- ultimo_login_em;
 - created_at;
 - updated_at.
 
