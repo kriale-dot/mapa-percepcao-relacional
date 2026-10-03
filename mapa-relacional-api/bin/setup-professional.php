@@ -82,7 +82,7 @@ $stmt = $pdo->prepare(
 
 $stmt->execute([
     'nome' => $nome,
-    'email' => mb_strtolower(trim($email)),
+    'email' => strtolower(trim($email)),
     'senha_hash' => $hash,
     'telefone' => $telefone !== '' ? $telefone : null,
     'status' => 'ATIVO',
@@ -93,7 +93,7 @@ $id = (int) $pdo->lastInsertId();
 echo "[OK] Profissional inicial cadastrado com sucesso.\n";
 echo "ID: {$id}\n";
 echo "Nome: {$nome}\n";
-echo "E-mail: " . mb_strtolower(trim($email)) . "\n";
+echo "E-mail: " . strtolower(trim($email)) . "\n";
 echo "Status: ATIVO\n";
 echo "A senha foi armazenada somente como hash.\n";
 
