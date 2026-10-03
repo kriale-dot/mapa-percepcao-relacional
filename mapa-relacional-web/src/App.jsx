@@ -34,7 +34,7 @@ function App() {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
           <div>
             <p className="text-lg font-semibold tracking-tight">
-              Mapa de Percepção Relacional
+              Avaliação de Percepção Relacional
             </p>
             <p className="text-xs text-[#385048]/70">
               Percepção mútua e conhecimento interpessoal
@@ -145,7 +145,7 @@ function App() {
       </main>
 
       <footer className="mx-auto max-w-6xl px-6 py-8 text-sm text-[#385048]/60">
-        Mapa de Percepção Relacional
+        Avaliação de Percepção Relacional
       </footer>
     </div>
   )
