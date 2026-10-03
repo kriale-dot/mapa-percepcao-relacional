@@ -67,6 +67,7 @@ echo "[OK] Estrutura base do dominio presente.\n";
 $requiredMigrations = [
     '001_base_dominio.sql',
     '002_profissional_autenticacao.sql',
+    '003_profissional_perfil.sql',
 ];
 
 $migrationStmt = $pdo->query(
@@ -99,6 +100,11 @@ $requiredProfessionalColumns = [
     'senha_hash',
     'senha_alterada_em',
     'ultimo_login_em',
+    'descricao',
+    'atuacao',
+    'foto_url',
+    'logo_url',
+    'dados_contato',
 ];
 
 $columnStmt = $pdo->prepare(
@@ -122,7 +128,7 @@ $missingProfessionalColumns = array_values(
 );
 
 if ($missingProfessionalColumns !== []) {
-    echo "[ERRO] Colunas de autenticacao ausentes em profissionais:\n";
+    echo "[ERRO] Colunas obrigatorias ausentes em profissionais:\n";
 
     foreach ($missingProfessionalColumns as $column) {
         echo "  - {$column}\n";
@@ -131,5 +137,5 @@ if ($missingProfessionalColumns !== []) {
     exit(1);
 }
 
-echo "[OK] Estrutura de autenticacao do profissional presente.\n";
+echo "[OK] Estrutura de autenticacao e perfil do profissional presente.\n";
 echo "Status: OK\n";
