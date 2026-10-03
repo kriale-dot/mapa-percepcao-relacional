@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import ProfessionalProfile from './pages/ProfessionalProfile'
+import ProfessionalPassword from './pages/ProfessionalPassword'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -40,6 +41,10 @@ function App() {
 
   if (path === '/profissional/perfil') {
     return <ProfessionalProfile />
+  }
+
+  if (path === '/profissional/senha') {
+    return <ProfessionalPassword />
   }
 
   if (path.startsWith('/profissional')) {
