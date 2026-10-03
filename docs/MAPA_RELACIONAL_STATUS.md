@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.5 concluída — login e sessão no frontend profissional  
-**Próximo passo:** retomar a validação adiada da Etapa 3.4 e, em seguida, encerrar a Etapa 3 de autenticação
+**Etapa atual:** Etapa 3.6 — perfil profissional  
+**Próximo passo:** implementar o perfil profissional (RF-003); os testes manuais pendentes da Etapa 3.4 foram dispensados por decisão do usuário
 
 ## 1. Situação atual
 
@@ -498,19 +498,21 @@ O middleware:
 - injeta os dados autenticados no atributo `auth.professional` da requisição;
 - responde `401` quando o token está ausente, inválido ou expirado.
 
-### Validação local adiada
+### Validação manual dispensada
 
-A implementação da Etapa 3.4 está concluída no código, mas a validação completa foi adiada temporariamente a pedido do usuário.
+A implementação da Etapa 3.4 permanece concluída no código.
 
-Ainda precisam ser confirmados posteriormente em `GET /api/profissional/me`:
+Em 2026-10-03, por decisão explícita do usuário, foram dispensados os testes manuais específicos no Postman para:
 
-1. sem token — retorno `401`;
-2. com token inválido — retorno `401`;
-3. com token válido — retorno `200` com os dados do profissional autenticado.
+1. requisição sem token — esperado `401`;
+2. requisição com token inválido — esperado `401`;
+3. requisição com token válido — esperado `200`.
 
-O `JWT_SECRET` local já foi configurado com valor válido e o login com emissão de JWT foi confirmado. Permanecem adiados apenas os três testes específicos da rota protegida.
+O fluxo com token válido foi exercitado indiretamente durante a validação da Etapa 3.5, pois o frontend autenticado consultou `GET /api/profissional/me` e exibiu corretamente os dados do profissional.
 
-**Próxima subetapa em andamento:** Etapa 3.5 — sessão/autenticação no frontend profissional.
+A ausência dos dois testes negativos específicos fica registrada como validação não executada, sem remoção do middleware nem alteração da proteção implementada.
+
+**Etapa 3.4: implementação concluída; validação manual específica dispensada.**
 
 ## 16. Etapa 3.5 — login e sessão no frontend profissional
 
@@ -552,4 +554,4 @@ Foram confirmados:
 
 **Etapa 3.5 concluída.**
 
-**Próximo passo:** retomar os três testes adiados da Etapa 3.4 e, depois, encerrar oficialmente a Etapa 3 de autenticação.
+**Próximo passo:** Etapa 3.6 — implementar o perfil profissional conforme RF-003. Depois, implementar a alteração segura de senha (RF-004) antes de encerrar a Etapa 3.
