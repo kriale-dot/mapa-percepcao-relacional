@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import ProfessionalProfile from './pages/ProfessionalProfile'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -35,6 +36,10 @@ function App() {
 
   if (path === '/profissional/login') {
     return <ProfessionalLogin />
+  }
+
+  if (path === '/profissional/perfil') {
+    return <ProfessionalProfile />
   }
 
   if (path.startsWith('/profissional')) {
@@ -378,13 +383,22 @@ function ProfessionalArea() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold transition hover:bg-[#A8C8B8]/10"
-          >
-            Sair
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => navigate('/profissional/perfil')}
+              className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold transition hover:bg-[#A8C8B8]/10"
+            >
+              Meu perfil
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold transition hover:bg-[#A8C8B8]/10"
+            >
+              Sair
+            </button>
+          </div>
         </div>
       </header>
 
