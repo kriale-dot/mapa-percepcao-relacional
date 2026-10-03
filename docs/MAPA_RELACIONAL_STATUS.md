@@ -20,6 +20,7 @@ Documentos principais:
 docs/MAPA_RELACIONAL_CONTEXT.md
 docs/MAPA_RELACIONAL_STATUS.md
 docs/DECISOES.md
+docs/REQUISITOS_SISTEMA.md
 docs/MODELO_DOMINIO_V1.md
 ```
 
@@ -37,6 +38,29 @@ Em 2026-10-03 a estrutura do repositório foi alinhada ao padrão de continuidad
 `.env` e `vendor/` continuam intencionalmente fora do GitHub. O primeiro é local e pode conter configuração sensível; o segundo é gerado por `composer install`.
 
 A mudança de pasta da migração mantém o mesmo arquivo `001_base_dominio.sql`, portanto o nome registrado em `schema_migrations` continua válido. A validação local foi concluída com sucesso em 2026-10-03.
+
+## 1.2 Documento de requisitos
+
+Em 2026-10-03 foi criado:
+
+```text
+docs/REQUISITOS_SISTEMA.md
+```
+
+O documento consolida:
+
+- escopo do produto;
+- atores;
+- requisitos funcionais;
+- regras de negócio;
+- requisitos não funcionais;
+- fluxos principais;
+- critérios gerais de aceitação da V1;
+- itens fora de escopo;
+- decisões ainda abertas;
+- priorização sugerida das próximas etapas.
+
+O próximo passo técnico permanece a Etapa 3 — autenticação e configuração inicial do profissional.
 
 ## 2. Etapa 1 — concluída
 
