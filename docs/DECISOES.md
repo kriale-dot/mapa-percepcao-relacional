@@ -122,3 +122,25 @@ A migration `002_profissional_autenticacao.sql` acrescenta à tabela `profission
 `senha_hash` é nulo apenas durante a configuração inicial. Um profissional sem hash de senha não poderá autenticar.
 
 Após autenticação válida, a API utilizará JWT. A proteção das rotas será implementada nas próximas subetapas da Etapa 3.
+
+## D-012 — Primeiro profissional criado somente por CLI
+**Data:** 2026-10-03  
+**Status:** vigente
+
+A configuração inicial do primeiro profissional não terá cadastro público.
+
+O bootstrap é realizado pelo comando:
+
+```text
+composer setup-professional
+```
+
+Regras:
+
+- só pode executar com a tabela `profissionais` vazia;
+- nome, e-mail e telefone são informados no terminal;
+- a senha inicial entra somente pela variável temporária `SETUP_PROFESSIONAL_PASSWORD`;
+- a senha é transformada imediatamente por `password_hash(PASSWORD_DEFAULT)`;
+- senha em texto puro não é persistida nem registrada pelo sistema;
+- após existir um profissional, o setup inicial é bloqueado;
+- `composer check-professional` valida a configuração sem precisar conhecer a senha.
