@@ -1,6 +1,6 @@
 {
   "name": "kriale/mapa-relacional-api",
-  "description": "API do Mapa de Percepcao Relacional",
+  "description": "API da Avaliacao de Percepcao Relacional",
   "type": "project",
   "require": {
     "php": "^8.2",
@@ -27,8 +27,12 @@
       "php -l src/Controller/HealthController.php",
       "php -l src/Middleware/CorsMiddleware.php",
       "php -l bin/migrate.php",
-      "php -l bin/check-domain.php"
+      "php -l bin/check-domain.php",
+      "php -l bin/setup-professional.php",
+      "php -l bin/check-professional.php"
     ],
-    "check-domain": "php bin/check-domain.php"
+    "check-domain": "php bin/check-domain.php",
+    "setup-professional": "php bin/setup-professional.php",
+    "check-professional": "php bin/check-professional.php"
   }
 }
