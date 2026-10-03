@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.6 — perfil profissional  
-**Próximo passo:** implementar o perfil profissional (RF-003); os testes manuais pendentes da Etapa 3.4 foram dispensados por decisão do usuário
+**Etapa atual:** Etapa 3.6 em validação — perfil profissional  
+**Próximo passo:** aplicar a migration 003, validar API e frontend do perfil profissional
 
 ## 1. Situação atual
 
@@ -555,3 +555,72 @@ Foram confirmados:
 **Etapa 3.5 concluída.**
 
 **Próximo passo:** Etapa 3.6 — implementar o perfil profissional conforme RF-003. Depois, implementar a alteração segura de senha (RF-004) antes de encerrar a Etapa 3.
+
+## 17. Etapa 3.6 — perfil profissional
+
+Implementação criada no GitHub em 2026-10-03.
+
+Arquivos principais:
+
+- `mapa-relacional-api/migrations/003_profissional_perfil.sql`;
+- `mapa-relacional-api/src/Controller/ProfessionalController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/bin/check-domain.php`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalProfile.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+A migration 003 adiciona ao profissional:
+
+- `descricao`;
+- `atuacao`;
+- `foto_url`;
+- `logo_url`;
+- `dados_contato`.
+
+Rotas protegidas adicionadas:
+
+```text
+GET /api/profissional/perfil
+PUT /api/profissional/perfil
+```
+
+No frontend foi criada a rota:
+
+```text
+/profissional/perfil
+```
+
+O formulário permite editar nome, e-mail, telefone, apresentação, atuação, dados de contato, URL da fotografia e URL do logotipo. O status é exibido como somente leitura.
+
+### Validação local pendente
+
+Após `git pull`:
+
+```powershell
+cd mapa-relacional-api
+composer migrate
+composer check-domain
+composer check
+```
+
+Depois, no frontend:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. botão `Meu perfil` na área profissional;
+2. carregamento dos dados existentes;
+3. alteração e salvamento dos campos;
+4. recarga da página preservando as alterações;
+5. retorno à área profissional;
+6. acesso continuando protegido por sessão JWT.
+
+A Etapa 3.6 será concluída após essa validação local.
+
+**Próxima subetapa prevista:** Etapa 3.7 — alteração segura de senha (RF-004).
