@@ -8,7 +8,7 @@
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
 **Etapa atual:** Etapa 3.2 em validação — profissional inicial já cadastrado no banco  
-**Próximo passo:** validar o profissional já existente com `composer check-professional` e corrigir apenas campos de autenticação, se necessário
+**Próximo passo:** sincronizar o ambiente local, validar o profissional existente e testar `POST /api/auth/login` com emissão de JWT
 
 ## 1. Situação atual
 
@@ -403,3 +403,65 @@ Se houver erro, corrigir somente os campos necessários do profissional já cada
 A Etapa 3.2 será marcada como concluída quando o profissional existente passar na validação.
 
 **Próxima subetapa prevista:** Etapa 3.3 — login da API e emissão de JWT.
+
+## 14. Etapa 3.3 — login da API e emissão de JWT
+
+Implementação criada no GitHub em 2026-10-03, consultando somente os arquivos necessários ao fluxo de autenticação.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/AuthController.php`;
+- `mapa-relacional-api/src/Service/JwtService.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`.
+
+Endpoint criado:
+
+```text
+POST /api/auth/login
+```
+
+Corpo aceito:
+
+```json
+{
+  "email": "profissional@exemplo.com",
+  "senha": "senha-do-profissional"
+}
+```
+
+O backend:
+
+- valida e-mail e senha;
+- busca o profissional pelo e-mail;
+- exige `status = ATIVO`;
+- valida a senha com `password_verify()`;
+- atualiza `ultimo_login_em` após autenticação válida;
+- refaz o hash automaticamente quando `password_needs_rehash()` indicar necessidade;
+- emite JWT HS256 usando `JWT_SECRET` e `JWT_TTL_SECONDS`;
+- retorna o token sem expor `senha_hash`;
+- usa resposta genérica para credenciais inválidas.
+
+Claims atuais do JWT profissional:
+
+- `iss`;
+- `sub` = ID do profissional;
+- `iat`;
+- `nbf`;
+- `exp`;
+- `type = professional`;
+- `email`.
+
+### Validação local pendente
+
+Antes do teste de login, o profissional já existente deve passar em:
+
+```powershell
+composer check-professional
+```
+
+Depois executar `composer check`, iniciar a API e testar o login com credenciais válidas e inválidas.
+
+A Etapa 3.3 só será considerada concluída após a validação local da emissão do JWT.
+
+**Próxima subetapa prevista:** Etapa 3.4 — middleware JWT e proteção das rotas profissionais.
