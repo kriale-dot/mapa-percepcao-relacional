@@ -6,13 +6,13 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** estrutura do repositório padronizada para continuidade rápida  
-**Etapa atual:** Etapa 2 — fundação técnica e estrutura de continuidade organizadas  
-**Próximo passo:** após `git pull`, executar `composer check-domain` e `npm run build`; em seguida iniciar autenticação profissional
+**Marco atual:** banco base recriado e domínio validado com sucesso  
+**Etapa atual:** Etapa 2 concluída — fundação técnica, migração base e validação do domínio  
+**Próximo passo:** iniciar a Etapa 3 — autenticação e configuração inicial do profissional
 
 ## 1. Situação atual
 
-A fundação técnica está concluída. A modelagem funcional foi revisada com base no documento original da avaliação e a primeira migração do domínio foi criada no GitHub.
+A fundação técnica está concluída. A modelagem funcional foi revisada, a primeira migração do domínio foi aplicada em banco recriado do zero e a estrutura foi validada localmente com `composer check-domain`.
 
 Documentos principais:
 
@@ -36,7 +36,7 @@ Em 2026-10-03 a estrutura do repositório foi alinhada ao padrão de continuidad
 
 `.env` e `vendor/` continuam intencionalmente fora do GitHub. O primeiro é local e pode conter configuração sensível; o segundo é gerado por `composer install`.
 
-A mudança de pasta da migração mantém o mesmo arquivo `001_base_dominio.sql`, portanto o nome registrado em `schema_migrations` continua válido. A validação local após `git pull` ainda deve ser executada.
+A mudança de pasta da migração mantém o mesmo arquivo `001_base_dominio.sql`, portanto o nome registrado em `schema_migrations` continua válido. A validação local foi concluída com sucesso em 2026-10-03.
 
 ## 2. Etapa 1 — concluída
 
@@ -163,14 +163,47 @@ Correção aplicada em 2026-10-02:
 - essas regras passam a ser validadas no backend para manter compatibilidade com o banco local;
 - como as tabelas usam `CREATE TABLE IF NOT EXISTS`, uma nova execução preserva tabelas já criadas antes da falha e continua a partir das ausentes.
 
+## 6.2 Recriação e validação limpa do banco
+
+Em 2026-10-03 o banco `mapa_relacional` foi recriado para validar o fluxo desde zero.
+
+Fluxo adotado:
+
+```text
+criar banco vazio
+→ composer migrate
+→ schema_migrations criada pelo runner
+→ 001_base_dominio.sql aplicada
+→ composer check-domain
+```
+
+A validação final foi confirmada com sucesso.
+
+Estrutura esperada e validada:
+
+- `schema_migrations`;
+- 13 tabelas funcionais do domínio;
+- registro de `001_base_dominio.sql` em `schema_migrations`.
+
+Durante a validação foi corrigido `bin/check-domain.php` para usar `PDO::FETCH_COLUMN`, evitando dependência da capitalização de `table_name` retornada pelo driver MySQL/PDO.
+
+Commit da correção final do validador:
+
+```text
+dcdcf340b78c58a41ddc90a67c191acc90b35425
+```
+
+A Etapa 2 é considerada concluída.
+
 ## 7. Próximos passos após validar a migração
 
-1. criar endpoint de configuração/cadastro inicial do profissional;
-2. criar CRUD de instrumentos, versões, seções e itens;
-3. criar fluxo de nova aplicação com e-mail de contato;
-4. gerar os dois slots A/B e os dois acessos;
-5. iniciar o formulário digital;
-6. implementar comparação e resultado em migração posterior.
+1. implementar autenticação do profissional;
+2. criar endpoint de configuração/cadastro inicial do profissional;
+3. criar CRUD de instrumentos, versões, seções e itens;
+4. criar fluxo de nova aplicação com e-mail de contato;
+5. gerar os dois slots A/B e os dois acessos;
+6. iniciar o formulário digital;
+7. implementar comparação e resultado em migração posterior.
 
 ## 8. Ainda não implementado
 
@@ -207,8 +240,17 @@ Ao concluir um marco ou correção, registrar:
 O STATUS deve continuar curto o suficiente para ser lido rapidamente no início de uma nova conversa.
 
 
-## Correção do check-domain em 2026-10-03
+## Correções do check-domain em 2026-10-03
 
-Foi corrigido `mapa-relacional-api/bin/check-domain.php` para ler a chave retornada pelo MySQL como `table_name` em vez de `TABLE_NAME`. O erro anterior gerava `Undefined array key "TABLE_NAME"` durante `composer check-domain`.
+O validador apresentou incompatibilidade de capitalização no retorno de `information_schema.tables`.
 
-Commit da correção: `31e9566a8b0c5d2589959a309332bba54f135a1f`.
+Primeira correção:
+- troca de `TABLE_NAME` para `table_name`.
+
+Correção definitiva:
+- uso de `PDO::FETCH_COLUMN` para ler diretamente os nomes das tabelas;
+- remoção do aviso `use PDO has no effect`;
+- validação final concluída com sucesso.
+
+Commit final da correção:
+`dcdcf340b78c58a41ddc90a67c191acc90b35425`.
