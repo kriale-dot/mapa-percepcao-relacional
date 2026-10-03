@@ -13,19 +13,36 @@ if (is_file($root . '/.env')) {
     Dotenv::createImmutable($root)->safeLoad();
 }
 
-$password = (string) ($_SERVER['SETUP_PROFESSIONAL_PASSWORD']
-    ?? $_ENV['SETUP_PROFESSIONAL_PASSWORD']
-    ?? getenv('SETUP_PROFESSIONAL_PASSWORD')
-    ?: '');
+$password = envValue('SETUP_PROFESSIONAL_PASSWORD');
 
 if ($password === '') {
     fwrite(STDERR, "[ERRO] SETUP_PROFESSIONAL_PASSWORD nao foi informada.\n");
-    fwrite(STDERR, "Defina a senha somente na sessao atual do terminal e execute novamente.\n");
     exit(1);
 }
 
 if (strlen($password) < 8) {
     fwrite(STDERR, "[ERRO] A senha inicial deve ter pelo menos 8 caracteres.\n");
+    exit(1);
+}
+
+$nome = envValue('SETUP_PROFESSIONAL_NAME');
+$email = envValue('SETUP_PROFESSIONAL_EMAIL');
+$telefone = envValue('SETUP_PROFESSIONAL_PHONE');
+
+if ($nome === '') {
+    fwrite(STDERR, "[ERRO] SETUP_PROFESSIONAL_NAME nao foi informada.\n");
+    exit(1);
+}
+
+if ($email === '') {
+    fwrite(STDERR, "[ERRO] SETUP_PROFESSIONAL_EMAIL nao foi informado.\n");
+    exit(1);
+}
+
+$email = strtolower(trim($email));
+
+if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+    fwrite(STDERR, "[ERRO] E-mail invalido.\n");
     exit(1);
 }
 
@@ -52,16 +69,6 @@ if ($count > 0) {
     exit(1);
 }
 
-$nome = promptRequired('Nome da profissional: ');
-$email = promptRequired('E-mail: ');
-
-if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-    fwrite(STDERR, "[ERRO] E-mail invalido.\n");
-    exit(1);
-}
-
-$telefone = promptOptional('Telefone (opcional): ');
-
 $stmt = $pdo->prepare(
     'INSERT INTO profissionais (
         nome,
@@ -81,10 +88,10 @@ $stmt = $pdo->prepare(
 );
 
 $stmt->execute([
-    'nome' => $nome,
-    'email' => strtolower(trim($email)),
+    'nome' => trim($nome),
+    'email' => $email,
     'senha_hash' => $hash,
-    'telefone' => $telefone !== '' ? $telefone : null,
+    'telefone' => $telefone !== '' ? trim($telefone) : null,
     'status' => 'ATIVO',
 ]);
 
@@ -92,36 +99,20 @@ $id = (int) $pdo->lastInsertId();
 
 echo "[OK] Profissional inicial cadastrado com sucesso.\n";
 echo "ID: {$id}\n";
-echo "Nome: {$nome}\n";
-echo "E-mail: " . strtolower(trim($email)) . "\n";
+echo "Nome: " . trim($nome) . "\n";
+echo "E-mail: {$email}\n";
 echo "Status: ATIVO\n";
 echo "A senha foi armazenada somente como hash.\n";
 
-/**
- * @return non-empty-string
- */
-function promptRequired(string $label): string
+function envValue(string $name): string
 {
-    $value = promptOptional($label);
+    $value = $_SERVER[$name]
+        ?? $_ENV[$name]
+        ?? getenv($name);
 
-    if ($value === '') {
-        fwrite(STDERR, "[ERRO] Campo obrigatorio nao informado.\n");
-        exit(1);
+    if ($value === false || $value === null) {
+        return '';
     }
 
-    return $value;
-}
-
-function promptOptional(string $label): string
-{
-    fwrite(STDOUT, $label);
-
-    $line = fgets(STDIN);
-
-    if ($line === false) {
-        fwrite(STDERR, "[ERRO] Nao foi possivel ler a entrada.\n");
-        exit(1);
-    }
-
-    return trim($line);
+    return trim((string) $value);
 }
