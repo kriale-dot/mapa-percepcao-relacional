@@ -203,7 +203,23 @@ mapa-percepcao-relacional/
 └── .gitignore
 ```
 
-O banco deve evoluir por migrações SQL sequenciais.
+O banco deve evoluir por migrações SQL sequenciais armazenadas em:
+
+```text
+mapa-relacional-api/migrations/
+```
+
+### Fluxo padrão para recriar/validar o banco
+
+Quando for necessário recriar o banco de desenvolvimento do zero:
+
+```text
+1. criar o banco vazio;
+2. executar composer migrate;
+3. executar composer check-domain.
+```
+
+O arquivo de migration não deve ser importado manualmente quando o objetivo for validar o fluxo normal da aplicação. O runner é responsável por criar e manter `schema_migrations`.
 
 ## 8. Princípios de desenvolvimento
 
