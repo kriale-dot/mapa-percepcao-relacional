@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.2 em validação — profissional inicial já cadastrado no banco  
-**Próximo passo:** sincronizar o ambiente local, validar o profissional existente e testar `POST /api/auth/login` com emissão de JWT
+**Etapa atual:** Etapa 3.3 concluída — login da API e emissão de JWT  
+**Próximo passo:** iniciar a Etapa 3.4 — middleware JWT e proteção das rotas profissionais
 
 ## 1. Situação atual
 
@@ -452,16 +452,20 @@ Claims atuais do JWT profissional:
 - `type = professional`;
 - `email`.
 
-### Validação local pendente
+### Validação local concluída
 
-Antes do teste de login, o profissional já existente deve passar em:
+Em 2026-10-03 a Etapa 3.3 foi validada com sucesso no ambiente local.
 
-```powershell
-composer check-professional
-```
+Foram confirmados sem erros:
 
-Depois executar `composer check`, iniciar a API e testar o login com credenciais válidas e inválidas.
+- `composer check-professional`;
+- `composer check`;
+- inicialização da API;
+- autenticação com credenciais válidas;
+- emissão do JWT profissional;
+- retorno dos dados do profissional sem exposição de `senha_hash`;
+- comportamento de credenciais inválidas.
 
-A Etapa 3.3 só será considerada concluída após a validação local da emissão do JWT.
+**Etapa 3.3 concluída.**
 
-**Próxima subetapa prevista:** Etapa 3.4 — middleware JWT e proteção das rotas profissionais.
+**Próxima subetapa:** Etapa 3.4 — middleware JWT e proteção das rotas profissionais.
