@@ -534,24 +534,23 @@ Implementado:
 - logout local com remoção do JWT;
 - botão da página pública direcionando para a área profissional.
 
-### Validação local pendente
+### Validação local em andamento
 
-Após `git pull`, executar no frontend:
+Em 2026-10-03 foi confirmado visualmente no ambiente local:
 
-```powershell
-npm run build
-npm run dev
-```
+- frontend iniciado com sucesso;
+- acesso à tela profissional;
+- login com credenciais válidas;
+- entrada em `/profissional`;
+- sessão autenticada validada pela API;
+- dados do profissional exibidos corretamente na interface.
 
-Validar:
+Ainda falta confirmar:
 
-1. acesso a `/profissional/login`;
-2. login com credenciais válidas;
-3. entrada em `/profissional`;
-4. recarregar a página e manter a sessão;
-5. clicar em `Sair` e retornar ao login;
-6. credenciais inválidas exibirem mensagem sem abrir a área profissional.
+1. recarregar a página e manter a sessão;
+2. clicar em `Sair` e retornar ao login;
+3. credenciais inválidas exibirem mensagem sem abrir a área profissional.
 
-A Etapa 3.5 será concluída após essa validação local.
+A Etapa 3.5 será concluída após esses três testes finais.
 
 **Próximo passo após validação:** fechar a Etapa 3 de autenticação, retomando antes os testes adiados da Etapa 3.4.
