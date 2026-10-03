@@ -249,18 +249,28 @@ Após login válido, a API emitirá JWT conforme as variáveis `JWT_SECRET` e `J
 
 ### Configuração inicial do primeiro profissional
 
-A criação do primeiro profissional é feita **somente por linha de comando**, sem endpoint público de cadastro.
+Não haverá endpoint público para criação do primeiro profissional.
 
-Comandos oficiais:
+No ambiente de desenvolvimento, o primeiro profissional pode ser provisionado diretamente no banco de dados, inclusive via phpMyAdmin/SQL, ou pelo utilitário de CLI disponível no repositório.
+
+Comandos auxiliares existentes:
 
 ```text
 composer setup-professional
 composer check-professional
 ```
 
-O setup inicial só é permitido quando a tabela `profissionais` está vazia. Para funcionar de forma consistente também quando chamado pelo Composer, os dados iniciais são fornecidos por variáveis temporárias de ambiente: `SETUP_PROFESSIONAL_NAME`, `SETUP_PROFESSIONAL_EMAIL`, `SETUP_PROFESSIONAL_PHONE` (opcional) e `SETUP_PROFESSIONAL_PASSWORD`. A senha é convertida imediatamente com `password_hash()` e nunca gravada em texto puro ou em arquivo versionado.
+Regras permanentes:
 
-Depois que existir pelo menos um profissional, o comando de setup inicial deve recusar nova criação.
+- se já existir um profissional na tabela `profissionais`, não executar novamente o setup de criação;
+- o e-mail deve identificar o profissional de forma única;
+- a senha nunca pode ser armazenada em texto puro;
+- `senha_hash` deve conter um hash gerado pelo PHP e compatível com `password_verify()`;
+- o profissional habilitado para login deve estar com `status = ATIVO`;
+- `senha_alterada_em` deve registrar a definição da senha;
+- `ultimo_login_em` permanece nulo até o primeiro login válido.
+
+No banco local atual, o primeiro profissional já está cadastrado. Portanto, o fluxo de desenvolvimento deve preservar esse registro e apenas completar/corrigir campos de autenticação caso a validação aponte alguma pendência.
 
 ## 8. Princípios de desenvolvimento
 
