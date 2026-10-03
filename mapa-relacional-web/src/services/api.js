@@ -64,4 +64,15 @@ export function updateProfessionalProfile(profile) {
   })
 }
 
+export function changeProfessionalPassword(senhaAtual, novaSenha) {
+  return request('/api/profissional/senha', {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify({
+      senha_atual: senhaAtual,
+      nova_senha: novaSenha,
+    }),
+  })
+}
+
 export { API_URL }
