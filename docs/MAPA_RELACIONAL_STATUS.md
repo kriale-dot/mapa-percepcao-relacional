@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.6 concluída — perfil profissional  
-**Próximo passo:** iniciar a Etapa 3.7 — alteração segura de senha (RF-004)
+**Etapa atual:** Etapa 3.7 em validação — alteração segura de senha  
+**Próximo passo:** sincronizar, validar troca de senha e novo login; depois encerrar a Etapa 3
 
 ## 1. Situação atual
 
@@ -613,3 +613,87 @@ Foram confirmados:
 **Etapa 3.6 concluída.**
 
 **Próxima subetapa:** Etapa 3.7 — alteração segura de senha (RF-004).
+
+## 18. Etapa 3.7 — alteração segura de senha
+
+Implementação criada no GitHub em 2026-10-03.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/AuthController.php`;
+- `mapa-relacional-api/src/Service/JwtService.php`;
+- `mapa-relacional-api/src/Middleware/ProfessionalAuthMiddleware.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalPassword.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalProfile.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Endpoint protegido:
+
+```text
+PUT /api/profissional/senha
+```
+
+Corpo:
+
+```json
+{
+  "senha_atual": "senha-atual",
+  "nova_senha": "nova-senha"
+}
+```
+
+Regras implementadas:
+
+- exige sessão profissional válida;
+- exige senha atual correta;
+- nova senha com mínimo de 8 caracteres;
+- nova senha diferente da atual;
+- armazenamento somente com `password_hash(PASSWORD_DEFAULT)`;
+- atualização de `senha_alterada_em`;
+- JWT vinculado ao hash atual por impressão digital;
+- tokens anteriores à alteração deixam de ser aceitos após o hash mudar;
+- frontend encerra a sessão depois da troca e solicita novo login.
+
+No frontend foi criada:
+
+```text
+/profissional/senha
+```
+
+A tela também exige confirmação da nova senha antes do envio.
+
+### Validação local pendente
+
+Após `git pull`:
+
+```powershell
+cd mapa-relacional-api
+composer check
+```
+
+Reiniciar a API. Depois:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Observação: tokens JWT emitidos antes desta atualização não possuem a nova impressão digital de senha e serão rejeitados. Portanto, após sincronizar o código, é esperado precisar fazer login novamente.
+
+Validar:
+
+1. entrar novamente na área profissional;
+2. abrir `Meu perfil` → `Alterar senha`;
+3. testar senha atual incorreta — deve rejeitar;
+4. testar nova senha com menos de 8 caracteres — deve rejeitar;
+5. alterar para uma nova senha válida;
+6. confirmar encerramento automático da sessão;
+7. confirmar que a senha antiga não autentica;
+8. confirmar login com a nova senha.
+
+A Etapa 3.7 será concluída após essa validação.
+
+**Próximo passo previsto:** encerrar oficialmente a Etapa 3 — autenticação profissional.
