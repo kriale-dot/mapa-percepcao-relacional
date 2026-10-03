@@ -258,7 +258,7 @@ composer setup-professional
 composer check-professional
 ```
 
-O setup inicial só é permitido quando a tabela `profissionais` está vazia. A senha inicial é recebida pela variável temporária de ambiente `SETUP_PROFESSIONAL_PASSWORD`, convertida imediatamente com `password_hash()` e nunca gravada em texto puro ou em arquivo versionado.
+O setup inicial só é permitido quando a tabela `profissionais` está vazia. Para funcionar de forma consistente também quando chamado pelo Composer, os dados iniciais são fornecidos por variáveis temporárias de ambiente: `SETUP_PROFESSIONAL_NAME`, `SETUP_PROFESSIONAL_EMAIL`, `SETUP_PROFESSIONAL_PHONE` (opcional) e `SETUP_PROFESSIONAL_PASSWORD`. A senha é convertida imediatamente com `password_hash()` e nunca gravada em texto puro ou em arquivo versionado.
 
 Depois que existir pelo menos um profissional, o comando de setup inicial deve recusar nova criação.
 
