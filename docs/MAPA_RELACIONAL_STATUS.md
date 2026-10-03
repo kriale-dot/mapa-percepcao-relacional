@@ -6,9 +6,9 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** banco base recriado e domínio validado com sucesso  
-**Etapa atual:** Etapa 2 concluída — fundação técnica, migração base e validação do domínio  
-**Próximo passo:** iniciar a Etapa 3.1 — estrutura de autenticação do profissional no banco de dados
+**Marco atual:** estrutura de autenticação profissional criada no repositório; validação local pendente  
+**Etapa atual:** Etapa 3.1 em validação — estrutura de autenticação do profissional  
+**Próximo passo:** sincronizar o ambiente local, aplicar a migration 002 e executar as validações
 
 ## 1. Situação atual
 
@@ -306,3 +306,43 @@ Estado confirmado antes desta atualização:
 - o repositório está clonado diretamente na pasta `Desenvolvimento`, sem subpasta intermediária do projeto.
 
 Após qualquer alteração feita diretamente no GitHub durante o desenvolvimento assistido, o ambiente local deve ser atualizado com `git pull` antes de continuar modificações locais.
+
+## 12. Etapa 3.1 — autenticação profissional
+
+Implementação criada no GitHub em 2026-10-03.
+
+Arquivos principais alterados:
+
+- `mapa-relacional-api/migrations/002_profissional_autenticacao.sql`;
+- `mapa-relacional-api/bin/check-domain.php`;
+- `docs/MODELO_DOMINIO_V1.md`;
+- `docs/MAPA_RELACIONAL_CONTEXT.md`;
+- `docs/DECISOES.md`.
+
+A migration 002 adiciona à tabela `profissionais`:
+
+- `senha_hash`;
+- `senha_alterada_em`;
+- `ultimo_login_em`.
+
+O `check-domain.php` passou a validar também:
+
+- registro de `001_base_dominio.sql`;
+- registro de `002_profissional_autenticacao.sql`;
+- presença das três colunas de autenticação em `profissionais`.
+
+### Validação local pendente
+
+Na raiz local do projeto, atualizar o repositório e depois executar na API:
+
+```powershell
+git pull
+cd .\\mapa-relacional-api
+composer migrate
+composer check-domain
+composer check
+```
+
+A Etapa 3.1 só será marcada como concluída depois que esses comandos forem executados com sucesso no ambiente local.
+
+**Próxima subetapa após validação:** Etapa 3.2 — configuração/cadastro inicial do profissional.
