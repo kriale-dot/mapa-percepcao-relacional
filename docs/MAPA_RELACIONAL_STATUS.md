@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.3 concluída — login da API e emissão de JWT  
-**Próximo passo:** iniciar a Etapa 3.4 — middleware JWT e proteção das rotas profissionais
+**Etapa atual:** Etapa 3.4 em validação — middleware JWT e proteção das rotas profissionais  
+**Próximo passo:** sincronizar o ambiente local e validar acesso protegido com token válido, ausente e inválido
 
 ## 1. Situação atual
 
@@ -390,19 +390,13 @@ Para estar apto ao login, o registro existente deve possuir:
 - `senha_alterada_em` preenchido;
 - `ultimo_login_em` pode permanecer `NULL` até o primeiro login válido.
 
-### Validação local pendente
+### Validação local concluída
 
-Executar:
+O profissional existente foi validado com sucesso por `composer check-professional` em 2026-10-03.
 
-```powershell
-composer check-professional
-```
+**Etapa 3.2 concluída.**
 
-Se houver erro, corrigir somente os campos necessários do profissional já cadastrado, inclusive via phpMyAdmin/SQL, sem criar um segundo registro.
-
-A Etapa 3.2 será marcada como concluída quando o profissional existente passar na validação.
-
-**Próxima subetapa prevista:** Etapa 3.3 — login da API e emissão de JWT.
+**Próxima subetapa:** Etapa 3.3 — login da API e emissão de JWT.
 
 ## 14. Etapa 3.3 — login da API e emissão de JWT
 
@@ -469,3 +463,47 @@ Foram confirmados sem erros:
 **Etapa 3.3 concluída.**
 
 **Próxima subetapa:** Etapa 3.4 — middleware JWT e proteção das rotas profissionais.
+
+## 15. Etapa 3.4 — middleware JWT e proteção das rotas profissionais
+
+Implementação criada no GitHub em 2026-10-03.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Middleware/ProfessionalAuthMiddleware.php`;
+- `mapa-relacional-api/src/Service/JwtService.php`;
+- `mapa-relacional-api/src/Controller/AuthController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`.
+
+Foi criado o grupo protegido:
+
+```text
+/api/profissional/*
+```
+
+Endpoint inicial de validação da sessão:
+
+```text
+GET /api/profissional/me
+```
+
+O middleware:
+
+- exige cabeçalho `Authorization: Bearer <token>`;
+- valida assinatura HS256 e expiração pelo `firebase/php-jwt`;
+- valida `iss`, `type = professional` e `sub`;
+- consulta o profissional no banco em cada requisição protegida;
+- exige `status = ATIVO`;
+- injeta os dados autenticados no atributo `auth.professional` da requisição;
+- responde `401` quando o token está ausente, inválido ou expirado.
+
+### Validação local pendente
+
+Após `git pull`, executar `composer check`, iniciar a API, obter um JWT via login e testar `GET /api/profissional/me`:
+
+1. sem token — deve retornar `401`;
+2. com token inválido — deve retornar `401`;
+3. com token válido — deve retornar `200` com os dados do profissional autenticado.
+
+**Próxima subetapa prevista:** Etapa 3.5 — sessão/autenticação no frontend profissional.
