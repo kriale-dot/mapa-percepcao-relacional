@@ -41,7 +41,7 @@ $app->get('/api/health/database', [$healthController, 'database']);
 
 $app->get('/api', function ($request, $response) {
     $payload = json_encode([
-        'name' => 'Mapa de Percepcao Relacional API',
+        'name' => 'Avaliacao de Percepcao Relacional API',
         'status' => 'ok',
         'version' => '0.1.0'
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
