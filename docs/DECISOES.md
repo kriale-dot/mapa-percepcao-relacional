@@ -125,7 +125,7 @@ Após autenticação válida, a API utilizará JWT. A proteção das rotas será
 
 ## D-012 — Primeiro profissional criado somente por CLI
 **Data:** 2026-10-03  
-**Status:** vigente
+**Status:** substituída por D-013
 
 A configuração inicial do primeiro profissional não terá cadastro público.
 
@@ -144,3 +144,23 @@ Regras:
 - senha em texto puro não é persistida nem registrada pelo sistema;
 - após existir um profissional, o setup inicial é bloqueado;
 - `composer check-professional` valida a configuração sem precisar conhecer a senha.
+
+## D-013 — Provisionamento inicial sem cadastro público
+**Data:** 2026-10-03  
+**Status:** vigente
+
+Substitui D-012 quanto ao meio de provisionamento.
+
+Não haverá endpoint público para criação do primeiro profissional. Em desenvolvimento, o primeiro profissional pode ser provisionado diretamente no banco de dados/phpMyAdmin ou pelo utilitário de CLI, desde que a senha seja armazenada somente como hash compatível com `password_verify()`.
+
+Se já existir um profissional inicial, o registro deve ser preservado e não deve ser criada duplicata.
+
+## D-014 — Proteção das rotas profissionais por middleware JWT
+**Data:** 2026-10-03  
+**Status:** vigente
+
+Todas as rotas profissionais sob `/api/profissional` devem passar pelo middleware de autenticação JWT.
+
+O middleware exige `Authorization: Bearer <token>`, valida o JWT HS256, o emissor, a expiração, o tipo `professional` e o `sub` com o ID do profissional. Além da validação criptográfica, o profissional é consultado no banco em cada requisição protegida e precisa continuar com `status = ATIVO`.
+
+Essa consulta permite bloquear imediatamente um token ainda não expirado caso o profissional seja desativado no banco.
