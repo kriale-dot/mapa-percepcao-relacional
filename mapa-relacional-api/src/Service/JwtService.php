@@ -71,7 +71,7 @@ final class JwtService
     }
 
     /**
-     * @param array{id:int|string,nome:string,email:string,status:string} $professional
+     * @param array{id:int|string,nome:string,email:string,status:string,senha_hash:string} $professional
      * @return array{access_token:string,token_type:string,expires_in:int,expires_at:string}
      */
     public function issueProfessionalToken(array $professional): array
@@ -87,6 +87,7 @@ final class JwtService
             'exp' => $expiresAt,
             'type' => 'professional',
             'email' => $professional['email'],
+            'pwd' => hash('sha256', $professional['senha_hash']),
         ];
 
         return [
