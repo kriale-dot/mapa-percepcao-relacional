@@ -164,3 +164,19 @@ Todas as rotas profissionais sob `/api/profissional` devem passar pelo middlewar
 O middleware exige `Authorization: Bearer <token>`, valida o JWT HS256, o emissor, a expiração, o tipo `professional` e o `sub` com o ID do profissional. Além da validação criptográfica, o profissional é consultado no banco em cada requisição protegida e precisa continuar com `status = ATIVO`.
 
 Essa consulta permite bloquear imediatamente um token ainda não expirado caso o profissional seja desativado no banco.
+
+## D-015 — Sessão profissional no frontend
+**Data:** 2026-10-03  
+**Status:** vigente
+
+Na V1, o frontend profissional usa o JWT Bearer emitido pela API e mantém o token em `sessionStorage`.
+
+A sessão deve:
+
+- persistir durante recargas da página na mesma sessão do navegador;
+- ser encerrada quando o usuário clicar em sair;
+- ser invalidada localmente quando `GET /api/profissional/me` retornar `401`;
+- não armazenar senha no navegador;
+- reenviar o JWT apenas em chamadas autenticadas da área profissional.
+
+As rotas iniciais do frontend são `/profissional/login` e `/profissional`.
