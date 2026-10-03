@@ -1,4 +1,4 @@
-# Mapa de Percepção Relacional — Contexto permanente do projeto
+# Avaliação de Percepção Relacional — Contexto permanente do projeto
 
 > Documento curto para iniciar novas conversas de desenvolvimento sem depender do histórico completo do chat.
 > Repositório oficial: `kriale-dot/mapa-percepcao-relacional`
@@ -6,10 +6,10 @@
 
 ## 1. Identidade do produto
 
-**Nome:** Mapa de Percepção Relacional  
+**Nome:** Avaliação de Percepção Relacional  
 **Subtítulo:** Instrumento de percepção mútua e conhecimento interpessoal.
 
-O Mapa de Percepção Relacional é uma plataforma digital para comparar, de forma estruturada, como duas pessoas percebem a si mesmas, a outra pessoa e a relação entre elas.
+O Avaliação de Percepção Relacional é uma plataforma digital para comparar, de forma estruturada, como duas pessoas percebem a si mesmas, a outra pessoa e a relação entre elas.
 
 O instrumento não é exclusivo para casais. Deve permitir diferentes tipos de vínculo, por exemplo:
 
@@ -162,7 +162,7 @@ Paleta oficial aprovada:
 - Azul suave: `#A8C8D0`
 - Fundo claro: `#FEFDFB`
 
-Usar o logotipo oficial do **Mapa de Percepção Relacional** já criado para o projeto.
+Usar o logotipo oficial do **Avaliação de Percepção Relacional** já criado para o projeto.
 
 A interface deve ser:
 
