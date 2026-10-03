@@ -44,10 +44,6 @@ final class JwtService
     }
 
     /**
-     * @param array{id:int|string,nome:string,email:string,status:string} $professional
-     * @return array{access_token:string,token_type:string,expires_in:int,expires_at:string}
-     */
-    /**
      * @return array<string, mixed>
      */
     public function decodeProfessionalToken(string $token): array
@@ -67,13 +63,17 @@ final class JwtService
 
         $subject = (string) ($claims['sub'] ?? '');
 
-        if ($subject === '' || !ctype_digit($subject) || (int) $subject <= 0) {
+        if ($subject === '' || preg_match('/^[1-9][0-9]*$/', $subject) !== 1) {
             throw new \UnexpectedValueException('JWT subject invalido.');
         }
 
         return $claims;
     }
 
+    /**
+     * @param array{id:int|string,nome:string,email:string,status:string} $professional
+     * @return array{access_token:string,token_type:string,expires_in:int,expires_at:string}
+     */
     public function issueProfessionalToken(array $professional): array
     {
         $issuedAt = time();
