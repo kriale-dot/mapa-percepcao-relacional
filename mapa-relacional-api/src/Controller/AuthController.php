@@ -102,6 +102,24 @@ final class AuthController
         ]);
     }
 
+    public function me(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    ): ResponseInterface {
+        $professional = $request->getAttribute('auth.professional');
+
+        if (!is_array($professional)) {
+            return $this->json($response, [
+                'error' => 'unauthorized',
+                'message' => 'Autenticacao profissional obrigatoria.',
+            ], 401);
+        }
+
+        return $this->json($response, [
+            'profissional' => $professional,
+        ]);
+    }
+
     private function json(
         ResponseInterface $response,
         array $data,
