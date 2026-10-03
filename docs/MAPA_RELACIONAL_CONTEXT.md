@@ -220,11 +220,12 @@ O banco deve evoluir por migrações SQL sequenciais.
 
 ## 9. Documentos de continuidade
 
-Os dois documentos prioritários são:
+Os documentos prioritários são:
 
 ```text
 docs/MAPA_RELACIONAL_CONTEXT.md
 docs/MAPA_RELACIONAL_STATUS.md
+docs/DECISOES.md
 ```
 
 ### CONTEXT
@@ -250,6 +251,10 @@ Contém somente o estado atual:
 - pendências;
 - próximo passo.
 
+### DECISOES
+
+Registra decisões técnicas e funcionais que precisam permanecer rastreáveis ao longo do projeto, incluindo mudanças de estrutura, convenções e decisões substituídas.
+
 ## 10. Como iniciar uma nova conversa no ChatGPT
 
 Usar um pedido semelhante a:
@@ -260,6 +265,7 @@ Acesse o repositório kriale-dot/mapa-percepcao-relacional no GitHub.
 Leia primeiro:
 - docs/MAPA_RELACIONAL_CONTEXT.md
 - docs/MAPA_RELACIONAL_STATUS.md
+- docs/DECISOES.md
 
 Depois consulte somente os arquivos necessários para a tarefa atual.
 
@@ -270,3 +276,4 @@ Ao terminar uma etapa relevante, atualize o STATUS.
 
 O `CONTEXT` explica como o sistema deve funcionar.
 O `STATUS` informa exatamente onde o desenvolvimento está naquele momento.
+O `DECISOES` registra decisões estruturais e funcionais relevantes.
