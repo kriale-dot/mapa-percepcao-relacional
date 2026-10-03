@@ -104,3 +104,21 @@ E:\\Compartilhar\\Kriale\\Tânia - plataforma digital\\Desenvolvimento
 O repositório `kriale-dot/mapa-percepcao-relacional` é clonado diretamente nessa pasta. Não deve ser criada uma subpasta local adicional `mapa-percepcao-relacional` para conter o projeto.
 
 A branch padrão de desenvolvimento é `main`, acompanhando `origin/main`. Antes de iniciar novas alterações locais após mudanças feitas no GitHub, executar `git pull` e confirmar `git status` limpo ou compreender explicitamente as alterações locais existentes.
+
+## D-011 — Autenticação profissional por e-mail e senha
+**Data:** 2026-10-03  
+**Status:** vigente
+
+A área profissional será autenticada por **e-mail + senha**.
+
+A senha nunca será armazenada em texto puro. O banco guarda somente `senha_hash`, compatível com `password_hash()` e `password_verify()` do PHP.
+
+A migration `002_profissional_autenticacao.sql` acrescenta à tabela `profissionais`:
+
+- `senha_hash VARCHAR(255) NULL`;
+- `senha_alterada_em DATETIME NULL`;
+- `ultimo_login_em DATETIME NULL`.
+
+`senha_hash` é nulo apenas durante a configuração inicial. Um profissional sem hash de senha não poderá autenticar.
+
+Após autenticação válida, a API utilizará JWT. A proteção das rotas será implementada nas próximas subetapas da Etapa 3.
