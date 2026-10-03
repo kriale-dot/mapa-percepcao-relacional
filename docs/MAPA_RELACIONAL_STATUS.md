@@ -1,4 +1,4 @@
-# Mapa de Percepção Relacional — Status atual
+# Avaliação de Percepção Relacional — Status atual
 
 > Documento de checkpoint. Atualizar ao final de cada etapa relevante, correção ou mudança de estado do projeto.
 
@@ -278,3 +278,7 @@ Correção definitiva:
 
 Commit final da correção:
 `dcdcf340b78c58a41ddc90a67c191acc90b35425`.
+
+## Nomenclatura oficial atualizada em 2026-10-03
+
+A denominação de produto/instrumento passou a ser **Avaliação de Percepção Relacional**. Os nomes técnicos do repositório, pastas e componentes internos permanecem inalterados neste momento.
