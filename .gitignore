@@ -4,21 +4,20 @@
 !.env.example
 
 # PHP / Composer
-/vendor/
+**/vendor/
 
 # Node / Vite
-/node_modules/
-/dist/
+**/node_modules/
+**/dist/
 *.local
 
 # Logs and runtime
 *.log
-logs/
-storage/logs/*
-!storage/logs/.gitkeep
-storage/cache/
-tmp/
-temp/
+**/logs/
+!**/logs/.gitkeep
+**/storage/cache/
+**/tmp/
+**/temp/
 
 # IDE / OS
 .vscode/
@@ -27,7 +26,7 @@ temp/
 Thumbs.db
 
 # Backups and secrets
-backups/
+**/backups/
 *.sql.gz
 *.dump
 *.bak
@@ -35,5 +34,5 @@ backups/
 *.pem
 
 # Test / coverage artifacts
-coverage/
-.phpunit.cache/
+**/coverage/
+**/.phpunit.cache/
