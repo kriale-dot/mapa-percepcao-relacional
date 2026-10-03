@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Config\Database;
 use App\Config\LoggerFactory;
+use App\Controller\AuthController;
 use App\Controller\HealthController;
 use App\Middleware\CorsMiddleware;
 use Dotenv\Dotenv;
@@ -35,9 +36,11 @@ $errorMiddleware = $app->addErrorMiddleware(
 );
 
 $healthController = new HealthController();
+$authController = new AuthController();
 
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
+$app->post('/api/auth/login', [$authController, 'login']);
 
 $app->get('/api', function ($request, $response) {
     $payload = json_encode([
