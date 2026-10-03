@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.2 em validação — configuração/cadastro inicial do profissional  
-**Próximo passo:** sincronizar o ambiente local, cadastrar o primeiro profissional e validar o bootstrap
+**Etapa atual:** Etapa 3.2 em validação — profissional inicial já cadastrado no banco  
+**Próximo passo:** validar o profissional já existente com `composer check-professional` e corrigir apenas campos de autenticação, se necessário
 
 ## 1. Situação atual
 
@@ -60,7 +60,7 @@ O documento consolida:
 - decisões ainda abertas;
 - priorização sugerida das próximas etapas.
 
-O próximo passo técnico permanece a Etapa 3, começando pela **Etapa 3.1 — estrutura de autenticação do profissional no banco de dados**.
+A Etapa 3.1 foi concluída. A Etapa 3.2 está em validação com o primeiro profissional já existente no banco de desenvolvimento.
 
 ## 2. Etapa 1 — concluída
 
@@ -358,7 +358,7 @@ Resultado confirmado:
 
 ## 13. Etapa 3.2 — configuração inicial do profissional
 
-Implementação criada no GitHub em 2026-10-03.
+Implementação de suporte criada no GitHub em 2026-10-03.
 
 Arquivos principais:
 
@@ -366,28 +366,40 @@ Arquivos principais:
 - `mapa-relacional-api/bin/check-professional.php`;
 - `mapa-relacional-api/composer.json`.
 
-Comandos adicionados:
+Comandos disponíveis:
 
 ```text
 composer setup-professional
 composer check-professional
 ```
 
-O setup inicial:
+### Estado local atual
 
-- é executado somente via CLI;
-- não cria endpoint público de cadastro;
-- bloqueia a operação se já existir qualquer profissional;
-- recebe a senha inicial por variável temporária de ambiente;
-- armazena somente o hash da senha;
-- cria o profissional com status `ATIVO` e registra `senha_alterada_em`.
+O primeiro profissional **já está cadastrado diretamente na tabela `profissionais` do banco de desenvolvimento**. Portanto:
 
-O validador confirma que existe profissional cadastrado, com hash de senha válido, status ativo e data de definição da senha.
+- não deve ser executado novo cadastro inicial enquanto esse registro existir;
+- o utilitário `setup-professional` permanece como ferramenta auxiliar, mas não é necessário para o estado local atual;
+- não existe endpoint público de cadastro do profissional;
+- a validação deve ser feita sobre o registro existente.
+
+Para estar apto ao login, o registro existente deve possuir:
+
+- e-mail válido;
+- `senha_hash` compatível com `password_verify()`;
+- `status = ATIVO`;
+- `senha_alterada_em` preenchido;
+- `ultimo_login_em` pode permanecer `NULL` até o primeiro login válido.
 
 ### Validação local pendente
 
-Após `git pull`, executar `composer check`, cadastrar o primeiro profissional com `composer setup-professional` e então executar `composer check-professional`.
+Executar:
 
-A Etapa 3.2 só será marcada como concluída após a validação local.
+```powershell
+composer check-professional
+```
+
+Se houver erro, corrigir somente os campos necessários do profissional já cadastrado, inclusive via phpMyAdmin/SQL, sem criar um segundo registro.
+
+A Etapa 3.2 será marcada como concluída quando o profissional existente passar na validação.
 
 **Próxima subetapa prevista:** Etapa 3.3 — login da API e emissão de JWT.
