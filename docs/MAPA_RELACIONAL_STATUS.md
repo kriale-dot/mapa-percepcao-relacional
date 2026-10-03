@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.6 em validação — perfil profissional  
-**Próximo passo:** aplicar a migration 003, validar API e frontend do perfil profissional
+**Etapa atual:** Etapa 3.6 concluída — perfil profissional  
+**Próximo passo:** iniciar a Etapa 3.7 — alteração segura de senha (RF-004)
 
 ## 1. Situação atual
 
@@ -593,34 +593,23 @@ No frontend foi criada a rota:
 
 O formulário permite editar nome, e-mail, telefone, apresentação, atuação, dados de contato, URL da fotografia e URL do logotipo. O status é exibido como somente leitura.
 
-### Validação local pendente
+### Validação local concluída
 
-Após `git pull`:
+Em 2026-10-03 a Etapa 3.6 foi validada com sucesso no ambiente local.
 
-```powershell
-cd mapa-relacional-api
-composer migrate
-composer check-domain
-composer check
-```
+Foram confirmados:
 
-Depois, no frontend:
+- aplicação da migration `003_profissional_perfil.sql`;
+- `composer check-domain` sem erros;
+- `composer check` sem erros;
+- build e execução do frontend;
+- acesso ao botão `Meu perfil`;
+- carregamento dos dados existentes;
+- edição e salvamento do perfil;
+- persistência dos dados após recarregar a página;
+- retorno à área profissional;
+- acesso continuando protegido pela sessão JWT.
 
-```powershell
-cd ..\mapa-relacional-web
-npm run build
-npm run dev
-```
+**Etapa 3.6 concluída.**
 
-Validar:
-
-1. botão `Meu perfil` na área profissional;
-2. carregamento dos dados existentes;
-3. alteração e salvamento dos campos;
-4. recarga da página preservando as alterações;
-5. retorno à área profissional;
-6. acesso continuando protegido por sessão JWT.
-
-A Etapa 3.6 será concluída após essa validação local.
-
-**Próxima subetapa prevista:** Etapa 3.7 — alteração segura de senha (RF-004).
+**Próxima subetapa:** Etapa 3.7 — alteração segura de senha (RF-004).
