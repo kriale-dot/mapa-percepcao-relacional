@@ -249,6 +249,8 @@ Após login válido, a API emite JWT HS256 conforme as variáveis `JWT_SECRET` e
 
 As rotas da área profissional ficam sob o prefixo `/api/profissional` e devem utilizar middleware de autenticação no backend. O cliente envia o token no cabeçalho `Authorization: Bearer <token>`. O middleware valida assinatura, expiração, emissor, tipo do token e ID do profissional, consulta o profissional no banco e só libera a requisição quando o registro continua existente e com `status = ATIVO`.
 
+No frontend da V1, a área profissional usa as rotas `/profissional/login` e `/profissional`. O JWT é mantido em `sessionStorage`, persistindo durante recargas da página, mas sendo descartado ao encerrar a sessão da aba/navegador. Ao abrir a área profissional, o frontend valida o token em `GET /api/profissional/me`; em resposta `401`, remove o token local e retorna ao login.
+
 ### Configuração inicial do primeiro profissional
 
 Não haverá endpoint público para criação do primeiro profissional.
