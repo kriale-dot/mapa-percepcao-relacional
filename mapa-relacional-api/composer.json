@@ -31,7 +31,8 @@
       "php -l bin/setup-professional.php",
       "php -l bin/check-professional.php",
       "php -l src/Controller/AuthController.php",
-      "php -l src/Service/JwtService.php"
+      "php -l src/Service/JwtService.php",
+      "php -l src/Middleware/ProfessionalAuthMiddleware.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
