@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Config\Database;
 use Dotenv\Dotenv;
-use PDO;
-
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $root = dirname(__DIR__);
@@ -43,8 +41,8 @@ $stmt = $pdo->prepare(
 $stmt->execute(['database' => $database]);
 
 $existing = array_map(
-    static fn (array $row): string => (string) $row['table_name'],
-    $stmt->fetchAll(PDO::FETCH_ASSOC)
+    static fn ($table): string => (string) $table,
+    $stmt->fetchAll(\PDO::FETCH_COLUMN)
 );
 
 $missing = array_values(array_diff($requiredTables, $existing));
@@ -56,7 +54,7 @@ $migrationStmt = $pdo->prepare(
       LIMIT 1'
 );
 $migrationStmt->execute(['filename' => '001_base_dominio.sql']);
-$migration = $migrationStmt->fetch(PDO::FETCH_ASSOC);
+$migration = $migrationStmt->fetch(\PDO::FETCH_ASSOC);
 
 echo "Banco: {$database}\n";
 echo "Tabelas esperadas: " . count($requiredTables) . "\n";
