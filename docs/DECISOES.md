@@ -63,3 +63,22 @@ Ao concluir uma etapa relevante:
 3. atualizar CONTEXT ou DECISOES quando houver mudança estrutural;
 4. commit;
 5. push.
+
+
+## D-007 — Fluxo oficial de recriação do banco
+**Data:** 2026-10-03  
+**Status:** vigente
+
+Para recriar o banco de desenvolvimento, o fluxo oficial é:
+
+1. criar o banco `mapa_relacional` vazio;
+2. executar `composer migrate`;
+3. executar `composer check-domain`.
+
+Não importar `001_base_dominio.sql` manualmente quando o objetivo for testar o fluxo normal de instalação. O runner cria `schema_migrations`, aplica as migrations pendentes e registra o checksum.
+
+## D-008 — Validação de tabelas independente de capitalização
+**Data:** 2026-10-03  
+**Status:** vigente
+
+O `bin/check-domain.php` deve ler a lista de tabelas com `PDO::FETCH_COLUMN`. Isso evita diferenças entre drivers/ambientes que retornam `table_name` ou `TABLE_NAME`.
