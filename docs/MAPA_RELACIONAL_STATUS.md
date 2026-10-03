@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.4 implementada — validação completa adiada temporariamente  
-**Próximo passo:** prosseguir para a Etapa 3.5 — autenticação e sessão no frontend profissional; retomar depois a validação completa da Etapa 3.4
+**Etapa atual:** Etapa 3.5 em validação — login e sessão no frontend profissional  
+**Próximo passo:** sincronizar o frontend, executar `npm run build` e testar login, restauração da sessão e logout
 
 ## 1. Situação atual
 
@@ -508,6 +508,50 @@ Ainda precisam ser confirmados posteriormente em `GET /api/profissional/me`:
 2. com token inválido — retorno `401`;
 3. com token válido — retorno `200` com os dados do profissional autenticado.
 
-Também ficou pendente a configuração local de um `JWT_SECRET` válido com pelo menos 32 caracteres antes desses testes.
+O `JWT_SECRET` local já foi configurado com valor válido e o login com emissão de JWT foi confirmado. Permanecem adiados apenas os três testes específicos da rota protegida.
 
 **Próxima subetapa em andamento:** Etapa 3.5 — sessão/autenticação no frontend profissional.
+
+## 16. Etapa 3.5 — login e sessão no frontend profissional
+
+Implementação criada no GitHub em 2026-10-03, consultando somente os arquivos necessários do frontend.
+
+Arquivos principais:
+
+- `mapa-relacional-web/src/App.jsx`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/services/auth.js`.
+
+Implementado:
+
+- tela de login em `/profissional/login`;
+- envio de e-mail e senha para `POST /api/auth/login`;
+- armazenamento do JWT em `sessionStorage`;
+- inclusão automática de `Authorization: Bearer <token>` nas chamadas autenticadas;
+- validação da sessão por `GET /api/profissional/me`;
+- redirecionamento ao login quando não há token ou quando a API retorna `401`;
+- área profissional inicial em `/profissional`;
+- logout local com remoção do JWT;
+- botão da página pública direcionando para a área profissional.
+
+### Validação local pendente
+
+Após `git pull`, executar no frontend:
+
+```powershell
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. acesso a `/profissional/login`;
+2. login com credenciais válidas;
+3. entrada em `/profissional`;
+4. recarregar a página e manter a sessão;
+5. clicar em `Sair` e retornar ao login;
+6. credenciais inválidas exibirem mensagem sem abrir a área profissional.
+
+A Etapa 3.5 será concluída após essa validação local.
+
+**Próximo passo após validação:** fechar a Etapa 3 de autenticação, retomando antes os testes adiados da Etapa 3.4.
