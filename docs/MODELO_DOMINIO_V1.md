@@ -93,7 +93,19 @@ Campos conceituais mínimos:
 - created_at;
 - updated_at.
 
-Autenticação e permissões serão detalhadas em etapa própria.
+Regras de autenticação/provisionamento:
+
+- `email` identifica o profissional para login e deve permanecer único;
+- `senha_hash` deve armazenar somente hash compatível com `password_verify()`, nunca senha em texto puro;
+- `senha_alterada_em` registra quando a senha foi definida ou alterada;
+- `ultimo_login_em` pode ser nulo até a primeira autenticação válida;
+- um profissional apto a autenticar deve estar com `status = ATIVO`;
+- o primeiro profissional pode ser provisionado administrativamente no banco de dados ou por ferramenta de setup, sem necessidade de cadastro público;
+- se já existir um profissional inicial no banco, o sistema deve preservar esse registro e não criar duplicata durante a configuração.
+
+No ambiente de desenvolvimento atual, o primeiro profissional já está cadastrado na tabela `profissionais`; a etapa corrente deve validar e, se necessário, completar os campos de autenticação desse registro existente.
+
+Autorização e emissão de JWT são tratadas em etapa própria.
 
 ### 3.2 pessoas
 
