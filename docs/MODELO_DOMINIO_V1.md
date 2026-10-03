@@ -87,6 +87,11 @@ Campos conceituais mínimos:
 - email;
 - senha_hash, nulo somente enquanto a configuração inicial ainda não foi concluída;
 - telefone opcional;
+- descricao/apresentacao profissional opcional;
+- atuacao opcional;
+- foto_url opcional;
+- logo_url opcional;
+- dados_contato opcional;
 - status;
 - senha_alterada_em;
 - ultimo_login_em;
