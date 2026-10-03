@@ -239,6 +239,14 @@ Quando for necessário recriar o banco de desenvolvimento do zero:
 
 O arquivo de migration não deve ser importado manualmente quando o objetivo for validar o fluxo normal da aplicação. O runner é responsável por criar e manter `schema_migrations`.
 
+### Autenticação profissional
+
+A autenticação da área profissional usa **e-mail + senha**, com a senha armazenada somente como hash no banco. A implementação deve usar as funções nativas do PHP `password_hash()` e `password_verify()`, sem armazenar senha em texto puro.
+
+A tabela `profissionais` possui os campos de autenticação `senha_hash`, `senha_alterada_em` e `ultimo_login_em`. O campo `senha_hash` pode permanecer nulo somente enquanto a configuração inicial do primeiro profissional ainda não tiver sido concluída.
+
+Após login válido, a API emitirá JWT conforme as variáveis `JWT_SECRET` e `JWT_TTL_SECONDS`. A autorização das rotas profissionais deve ser validada no backend.
+
 ## 8. Princípios de desenvolvimento
 
 - Não alterar regras estruturais sem atualizar este documento.
