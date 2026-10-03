@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.4 em validação — middleware JWT e proteção das rotas profissionais  
-**Próximo passo:** sincronizar o ambiente local e validar acesso protegido com token válido, ausente e inválido
+**Etapa atual:** Etapa 3.4 implementada — validação completa adiada temporariamente  
+**Próximo passo:** prosseguir para a Etapa 3.5 — autenticação e sessão no frontend profissional; retomar depois a validação completa da Etapa 3.4
 
 ## 1. Situação atual
 
@@ -498,12 +498,16 @@ O middleware:
 - injeta os dados autenticados no atributo `auth.professional` da requisição;
 - responde `401` quando o token está ausente, inválido ou expirado.
 
-### Validação local pendente
+### Validação local adiada
 
-Após `git pull`, executar `composer check`, iniciar a API, obter um JWT via login e testar `GET /api/profissional/me`:
+A implementação da Etapa 3.4 está concluída no código, mas a validação completa foi adiada temporariamente a pedido do usuário.
 
-1. sem token — deve retornar `401`;
-2. com token inválido — deve retornar `401`;
-3. com token válido — deve retornar `200` com os dados do profissional autenticado.
+Ainda precisam ser confirmados posteriormente em `GET /api/profissional/me`:
 
-**Próxima subetapa prevista:** Etapa 3.5 — sessão/autenticação no frontend profissional.
+1. sem token — retorno `401`;
+2. com token inválido — retorno `401`;
+3. com token válido — retorno `200` com os dados do profissional autenticado.
+
+Também ficou pendente a configuração local de um `JWT_SECRET` válido com pelo menos 32 caracteres antes desses testes.
+
+**Próxima subetapa em andamento:** Etapa 3.5 — sessão/autenticação no frontend profissional.
