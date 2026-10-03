@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.1 concluída — estrutura de autenticação do profissional  
-**Próximo passo:** iniciar a Etapa 3.2 — configuração/cadastro inicial do profissional
+**Etapa atual:** Etapa 3.2 em validação — configuração/cadastro inicial do profissional  
+**Próximo passo:** sincronizar o ambiente local, cadastrar o primeiro profissional e validar o bootstrap
 
 ## 1. Situação atual
 
@@ -355,3 +355,39 @@ Resultado confirmado:
 **Etapa 3.1 concluída.**
 
 **Próxima subetapa:** Etapa 3.2 — configuração/cadastro inicial do profissional.
+
+## 13. Etapa 3.2 — configuração inicial do profissional
+
+Implementação criada no GitHub em 2026-10-03.
+
+Arquivos principais:
+
+- `mapa-relacional-api/bin/setup-professional.php`;
+- `mapa-relacional-api/bin/check-professional.php`;
+- `mapa-relacional-api/composer.json`.
+
+Comandos adicionados:
+
+```text
+composer setup-professional
+composer check-professional
+```
+
+O setup inicial:
+
+- é executado somente via CLI;
+- não cria endpoint público de cadastro;
+- bloqueia a operação se já existir qualquer profissional;
+- recebe a senha inicial por variável temporária de ambiente;
+- armazena somente o hash da senha;
+- cria o profissional com status `ATIVO` e registra `senha_alterada_em`.
+
+O validador confirma que existe profissional cadastrado, com hash de senha válido, status ativo e data de definição da senha.
+
+### Validação local pendente
+
+Após `git pull`, executar `composer check`, cadastrar o primeiro profissional com `composer setup-professional` e então executar `composer check-professional`.
+
+A Etapa 3.2 só será marcada como concluída após a validação local.
+
+**Próxima subetapa prevista:** Etapa 3.3 — login da API e emissão de JWT.
