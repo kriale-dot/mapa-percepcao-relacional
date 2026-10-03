@@ -6,9 +6,9 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** estrutura de autenticação profissional criada no repositório; validação local pendente  
-**Etapa atual:** Etapa 3.1 em validação — estrutura de autenticação do profissional  
-**Próximo passo:** sincronizar o ambiente local, aplicar a migration 002 e executar as validações
+**Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
+**Etapa atual:** Etapa 3.1 concluída — estrutura de autenticação do profissional  
+**Próximo passo:** iniciar a Etapa 3.2 — configuração/cadastro inicial do profissional
 
 ## 1. Situação atual
 
@@ -331,18 +331,27 @@ O `check-domain.php` passou a validar também:
 - registro de `002_profissional_autenticacao.sql`;
 - presença das três colunas de autenticação em `profissionais`.
 
-### Validação local pendente
+### Validação local concluída
 
-Na raiz local do projeto, atualizar o repositório e depois executar na API:
+Em 2026-10-03 a estrutura foi validada com sucesso no ambiente local.
+
+Foram executados sem erros:
 
 ```powershell
-git pull
-cd .\\mapa-relacional-api
 composer migrate
 composer check-domain
 composer check
 ```
 
-A Etapa 3.1 só será marcada como concluída depois que esses comandos forem executados com sucesso no ambiente local.
+Resultado confirmado:
 
-**Próxima subetapa após validação:** Etapa 3.2 — configuração/cadastro inicial do profissional.
+- banco `mapa_relacional` criado;
+- `001_base_dominio.sql` aplicada;
+- `002_profissional_autenticacao.sql` aplicada;
+- estrutura base do domínio validada;
+- colunas de autenticação da tabela `profissionais` validadas;
+- verificação sintática da API concluída sem erros.
+
+**Etapa 3.1 concluída.**
+
+**Próxima subetapa:** Etapa 3.2 — configuração/cadastro inicial do profissional.
