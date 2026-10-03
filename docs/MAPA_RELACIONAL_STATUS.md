@@ -2,13 +2,13 @@
 
 > Documento de checkpoint. Atualizar ao final de cada etapa relevante, correção ou mudança de estado do projeto.
 
-**Data do checkpoint:** 2026-10-02  
+**Data do checkpoint:** 2026-10-03  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** primeira migração funcional validada  
-**Etapa atual:** Etapa 2 — primeira migração validada  
-**Próximo passo:** validar automaticamente a estrutura do domínio e iniciar autenticação profissional
+**Marco atual:** estrutura do repositório padronizada para continuidade rápida  
+**Etapa atual:** Etapa 2 — fundação técnica e estrutura de continuidade organizadas  
+**Próximo passo:** após `git pull`, executar `composer check-domain` e `npm run build`; em seguida iniciar autenticação profissional
 
 ## 1. Situação atual
 
@@ -19,8 +19,24 @@ Documentos principais:
 ```text
 docs/MAPA_RELACIONAL_CONTEXT.md
 docs/MAPA_RELACIONAL_STATUS.md
+docs/DECISOES.md
 docs/MODELO_DOMINIO_V1.md
 ```
+
+## 1.1 Padronização estrutural no GitHub
+
+Em 2026-10-03 a estrutura do repositório foi alinhada ao padrão de continuidade usado no desenvolvimento:
+
+- criada `docs/DECISOES.md`;
+- migrações movidas de `mapa-relacional-api/database/` para `mapa-relacional-api/migrations/`;
+- runner `bin/migrate.php` atualizado para o novo diretório;
+- criado `mapa-relacional-web/public/`;
+- `.gitignore` corrigido para ignorar dependências e artefatos dentro dos subprojetos;
+- README raiz atualizado com a estrutura oficial.
+
+`.env` e `vendor/` continuam intencionalmente fora do GitHub. O primeiro é local e pode conter configuração sensível; o segundo é gerado por `composer install`.
+
+A mudança de pasta da migração mantém o mesmo arquivo `001_base_dominio.sql`, portanto o nome registrado em `schema_migrations` continua válido. A validação local após `git pull` ainda deve ser executada.
 
 ## 2. Etapa 1 — concluída
 
@@ -56,7 +72,7 @@ O modelo agora contempla explicitamente:
 Arquivo:
 
 ```text
-mapa-relacional-api/database/001_base_dominio.sql
+mapa-relacional-api/migrations/001_base_dominio.sql
 ```
 
 Tabelas previstas pela migração:
