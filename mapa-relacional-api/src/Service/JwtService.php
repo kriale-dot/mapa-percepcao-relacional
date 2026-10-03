@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Service;
 
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 final class JwtService
 {
@@ -46,6 +47,33 @@ final class JwtService
      * @param array{id:int|string,nome:string,email:string,status:string} $professional
      * @return array{access_token:string,token_type:string,expires_in:int,expires_at:string}
      */
+    /**
+     * @return array<string, mixed>
+     */
+    public function decodeProfessionalToken(string $token): array
+    {
+        $claims = (array) JWT::decode(
+            $token,
+            new Key($this->secret, 'HS256')
+        );
+
+        if (($claims['iss'] ?? null) !== $this->issuer) {
+            throw new \UnexpectedValueException('JWT issuer invalido.');
+        }
+
+        if (($claims['type'] ?? null) !== 'professional') {
+            throw new \UnexpectedValueException('JWT type invalido.');
+        }
+
+        $subject = (string) ($claims['sub'] ?? '');
+
+        if ($subject === '' || !ctype_digit($subject) || (int) $subject <= 0) {
+            throw new \UnexpectedValueException('JWT subject invalido.');
+        }
+
+        return $claims;
+    }
+
     public function issueProfessionalToken(array $professional): array
     {
         $issuedAt = time();
