@@ -25,7 +25,7 @@ $pdo->exec(
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
 );
 
-$files = glob($root . '/database/*.sql') ?: [];
+$files = glob($root . '/migrations/*.sql') ?: [];
 sort($files, SORT_NATURAL);
 
 $select = $pdo->prepare(
