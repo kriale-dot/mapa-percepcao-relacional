@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.7 em validação — alteração segura de senha  
-**Próximo passo:** sincronizar, validar troca de senha e novo login; depois encerrar a Etapa 3
+**Etapa atual:** Etapa 3 concluída — autenticação profissional  
+**Próximo passo:** iniciar a Etapa 4 — CRUD de instrumentos, versões, seções e itens
 
 ## 1. Situação atual
 
@@ -664,36 +664,43 @@ No frontend foi criada:
 
 A tela também exige confirmação da nova senha antes do envio.
 
-### Validação local pendente
+### Validação local concluída
 
-Após `git pull`:
+Em 2026-10-03 a Etapa 3.7 foi validada com sucesso no ambiente local.
 
-```powershell
-cd mapa-relacional-api
-composer check
-```
+Foram confirmados:
 
-Reiniciar a API. Depois:
+- `composer check` sem erros;
+- build e execução do frontend;
+- novo login após atualização do formato do JWT;
+- acesso a `Meu perfil → Alterar senha`;
+- rejeição de senha atual incorreta;
+- rejeição de nova senha com menos de 8 caracteres;
+- alteração para nova senha válida;
+- encerramento automático da sessão após a troca;
+- rejeição da senha antiga no login;
+- autenticação bem-sucedida com a nova senha.
 
-```powershell
-cd ..\mapa-relacional-web
-npm run build
-npm run dev
-```
+**Etapa 3.7 concluída.**
 
-Observação: tokens JWT emitidos antes desta atualização não possuem a nova impressão digital de senha e serão rejeitados. Portanto, após sincronizar o código, é esperado precisar fazer login novamente.
+## 19. Encerramento da Etapa 3 — autenticação profissional
 
-Validar:
+A Etapa 3 foi concluída em 2026-10-03.
 
-1. entrar novamente na área profissional;
-2. abrir `Meu perfil` → `Alterar senha`;
-3. testar senha atual incorreta — deve rejeitar;
-4. testar nova senha com menos de 8 caracteres — deve rejeitar;
-5. alterar para uma nova senha válida;
-6. confirmar encerramento automático da sessão;
-7. confirmar que a senha antiga não autentica;
-8. confirmar login com a nova senha.
+Entregas concluídas:
 
-A Etapa 3.7 será concluída após essa validação.
+- estrutura de autenticação no banco;
+- profissional inicial provisionado e validado;
+- login da API;
+- emissão de JWT;
+- middleware de proteção das rotas profissionais;
+- sessão autenticada no frontend;
+- perfil profissional;
+- alteração segura de senha;
+- invalidação de tokens antigos após troca de senha.
 
-**Próximo passo previsto:** encerrar oficialmente a Etapa 3 — autenticação profissional.
+A validação manual específica da Etapa 3.4 para token ausente/inválido foi dispensada por decisão do usuário, mas o fluxo autenticado com token válido foi exercitado pelo frontend e permaneceu funcional ao longo das etapas seguintes.
+
+**Etapa 3 concluída.**
+
+**Próxima etapa:** Etapa 4 — CRUD de instrumentos, versões, seções e itens.
