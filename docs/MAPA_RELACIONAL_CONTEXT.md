@@ -245,7 +245,9 @@ A autenticação da área profissional usa **e-mail + senha**, com a senha armaz
 
 A tabela `profissionais` possui os campos de autenticação `senha_hash`, `senha_alterada_em` e `ultimo_login_em`. O campo `senha_hash` pode permanecer nulo somente enquanto a configuração inicial do primeiro profissional ainda não tiver sido concluída.
 
-Após login válido, a API emitirá JWT conforme as variáveis `JWT_SECRET` e `JWT_TTL_SECONDS`. A autorização das rotas profissionais deve ser validada no backend.
+Após login válido, a API emite JWT HS256 conforme as variáveis `JWT_SECRET` e `JWT_TTL_SECONDS`.
+
+As rotas da área profissional ficam sob o prefixo `/api/profissional` e devem utilizar middleware de autenticação no backend. O cliente envia o token no cabeçalho `Authorization: Bearer <token>`. O middleware valida assinatura, expiração, emissor, tipo do token e ID do profissional, consulta o profissional no banco e só libera a requisição quando o registro continua existente e com `status = ATIVO`.
 
 ### Configuração inicial do primeiro profissional
 
