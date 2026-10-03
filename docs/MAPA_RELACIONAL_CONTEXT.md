@@ -251,6 +251,20 @@ As rotas da área profissional ficam sob o prefixo `/api/profissional` e devem u
 
 No frontend da V1, a área profissional usa as rotas `/profissional/login` e `/profissional`. O JWT é mantido em `sessionStorage`, persistindo durante recargas da página, mas sendo descartado ao encerrar a sessão da aba/navegador. Ao abrir a área profissional, o frontend valida o token em `GET /api/profissional/me`; em resposta `401`, remove o token local e retorna ao login.
 
+### Perfil profissional
+
+O perfil profissional da V1 é acessado em `/profissional/perfil` e usa as rotas protegidas `GET /api/profissional/perfil` e `PUT /api/profissional/perfil`.
+
+Campos complementares do perfil:
+
+- descrição/apresentação profissional;
+- informações de atuação;
+- fotografia por URL;
+- logotipo por URL;
+- dados de contato.
+
+Esses campos são adicionados pela migration `003_profissional_perfil.sql`. Nome, e-mail e telefone continuam no registro principal do profissional. O status é exibido no perfil, mas não é alterado pelo formulário do próprio profissional nesta etapa, pois também controla a autorização de acesso.
+
 ### Configuração inicial do primeiro profissional
 
 Não haverá endpoint público para criação do primeiro profissional.
