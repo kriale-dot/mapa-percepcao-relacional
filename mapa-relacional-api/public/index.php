@@ -7,8 +7,10 @@ use App\Config\LoggerFactory;
 use App\Controller\AuthController;
 use App\Controller\HealthController;
 use App\Middleware\CorsMiddleware;
+use App\Middleware\ProfessionalAuthMiddleware;
 use Dotenv\Dotenv;
 use Slim\Factory\AppFactory;
+use Slim\Routing\RouteCollectorProxy;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -41,6 +43,10 @@ $authController = new AuthController();
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
 $app->post('/api/auth/login', [$authController, 'login']);
+
+$app->group('/api/profissional', function (RouteCollectorProxy $group) use ($authController) {
+    $group->get('/me', [$authController, 'me']);
+})->add(new ProfessionalAuthMiddleware());
 
 $app->get('/api', function ($request, $response) {
     $payload = json_encode([
