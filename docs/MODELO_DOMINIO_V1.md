@@ -1,4 +1,4 @@
-# Mapa de Percepção Relacional — Modelo de domínio V1
+# Avaliação de Percepção Relacional — Modelo de domínio V1
 
 > Documento de modelagem conceitual inicial. Este arquivo descreve as entidades e relações antes da criação das primeiras migrações funcionais.
 
@@ -68,7 +68,7 @@ Exemplo:
 
 ```text
 Ana + Carlos
-Instrumento: Mapa de Percepção Relacional
+Instrumento: Avaliação de Percepção Relacional
 Aplicação iniciada em 10/10/2026
 ```
 
@@ -136,7 +136,7 @@ Regras:
 
 Representa o instrumento lógico.
 
-Na V1 haverá inicialmente o próprio **Mapa de Percepção Relacional**, mas a estrutura deve permitir versionamento.
+Na V1 haverá inicialmente o próprio **Avaliação de Percepção Relacional**, mas a estrutura deve permitir versionamento.
 
 Campos:
 
