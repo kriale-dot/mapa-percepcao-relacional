@@ -60,7 +60,7 @@ final class ProfessionalAuthMiddleware implements MiddlewareInterface
         $pdo = Database::connect();
 
         $stmt = $pdo->prepare(
-            'SELECT id, nome, email, telefone, status, ultimo_login_em
+            'SELECT id, nome, email, telefone, senha_hash, status, ultimo_login_em
                FROM profissionais
               WHERE id = :id
               LIMIT 1'
@@ -72,6 +72,25 @@ final class ProfessionalAuthMiddleware implements MiddlewareInterface
         if (
             $professional === false
             || (string) $professional['status'] !== 'ATIVO'
+        ) {
+            return $this->unauthorized(
+                'invalid_token',
+                'Token invalido ou expirado.'
+            );
+        }
+
+        $tokenPasswordFingerprint = (string) ($claims['pwd'] ?? '');
+        $currentPasswordFingerprint = hash(
+            'sha256',
+            (string) ($professional['senha_hash'] ?? '')
+        );
+
+        if (
+            $tokenPasswordFingerprint === ''
+            || !hash_equals(
+                $currentPasswordFingerprint,
+                $tokenPasswordFingerprint
+            )
         ) {
             return $this->unauthorized(
                 'invalid_token',
