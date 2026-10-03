@@ -205,3 +205,10 @@ Ao concluir um marco ou correção, registrar:
 - próximo passo.
 
 O STATUS deve continuar curto o suficiente para ser lido rapidamente no início de uma nova conversa.
+
+
+## Correção do check-domain em 2026-10-03
+
+Foi corrigido `mapa-relacional-api/bin/check-domain.php` para ler a chave retornada pelo MySQL como `table_name` em vez de `TABLE_NAME`. O erro anterior gerava `Undefined array key "TABLE_NAME"` durante `composer check-domain`.
+
+Commit da correção: `31e9566a8b0c5d2589959a309332bba54f135a1f`.
