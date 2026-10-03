@@ -1,4 +1,4 @@
-# Mapa de Percepção Relacional
+# Avaliação de Percepção Relacional
 
 Plataforma digital para percepção mútua e conhecimento interpessoal.
 
