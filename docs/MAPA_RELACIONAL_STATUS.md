@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3.5 em validação — login e sessão no frontend profissional  
-**Próximo passo:** sincronizar o frontend, executar `npm run build` e testar login, restauração da sessão e logout
+**Etapa atual:** Etapa 3.5 concluída — login e sessão no frontend profissional  
+**Próximo passo:** retomar a validação adiada da Etapa 3.4 e, em seguida, encerrar a Etapa 3 de autenticação
 
 ## 1. Situação atual
 
@@ -534,23 +534,22 @@ Implementado:
 - logout local com remoção do JWT;
 - botão da página pública direcionando para a área profissional.
 
-### Validação local em andamento
+### Validação local concluída
 
-Em 2026-10-03 foi confirmado visualmente no ambiente local:
+Em 2026-10-03 a Etapa 3.5 foi validada com sucesso no ambiente local.
+
+Foram confirmados:
 
 - frontend iniciado com sucesso;
 - acesso à tela profissional;
 - login com credenciais válidas;
 - entrada em `/profissional`;
 - sessão autenticada validada pela API;
-- dados do profissional exibidos corretamente na interface.
+- dados do profissional exibidos corretamente;
+- recarga da página mantendo a sessão;
+- logout retornando ao login;
+- credenciais inválidas exibindo erro sem liberar acesso.
 
-Ainda falta confirmar:
+**Etapa 3.5 concluída.**
 
-1. recarregar a página e manter a sessão;
-2. clicar em `Sair` e retornar ao login;
-3. credenciais inválidas exibirem mensagem sem abrir a área profissional.
-
-A Etapa 3.5 será concluída após esses três testes finais.
-
-**Próximo passo após validação:** fechar a Etapa 3 de autenticação, retomando antes os testes adiados da Etapa 3.4.
+**Próximo passo:** retomar os três testes adiados da Etapa 3.4 e, depois, encerrar oficialmente a Etapa 3 de autenticação.
