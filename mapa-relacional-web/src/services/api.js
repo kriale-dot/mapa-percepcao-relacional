@@ -49,4 +49,19 @@ export function getAuthenticatedProfessional() {
   })
 }
 
+export function getProfessionalProfile() {
+  return request('/api/profissional/perfil', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function updateProfessionalProfile(profile) {
+  return request('/api/profissional/perfil', {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify(profile),
+  })
+}
+
 export { API_URL }
