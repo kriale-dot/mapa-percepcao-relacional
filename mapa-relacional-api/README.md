@@ -1,6 +1,6 @@
 # mapa-relacional-api
 
-Backend da plataforma **Mapa de Percepção Relacional**.
+Backend da plataforma **Avaliação de Percepção Relacional**.
 
 ## Stack
 
