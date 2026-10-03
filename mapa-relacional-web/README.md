@@ -1,6 +1,6 @@
 # mapa-relacional-web
 
-Frontend da plataforma **Mapa de Percepção Relacional**.
+Frontend da plataforma **Avaliação de Percepção Relacional**.
 
 ## Stack
 
