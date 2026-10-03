@@ -286,3 +286,23 @@ A denominação oficial do produto e do instrumento passou a ser **Avaliação d
 A atualização foi refletida na documentação principal e nos textos de identificação atualmente existentes no frontend e na API. Os nomes técnicos do repositório, pastas e componentes internos permanecem inalterados neste momento para evitar renomeações sem benefício funcional.
 
 A Etapa 3 ainda não foi iniciada. O próximo trabalho de implementação é a **Etapa 3.1 — estrutura de autenticação do profissional no banco de dados**.
+
+## 11. Ambiente local sincronizado
+
+Em 2026-10-03 o ambiente de desenvolvimento local foi alinhado ao repositório oficial do GitHub.
+
+Raiz local oficial:
+
+```text
+E:\\Compartilhar\\Kriale\\Tânia - plataforma digital\\Desenvolvimento
+```
+
+Estado confirmado antes desta atualização:
+
+- branch local: `main`;
+- remoto: `origin = https://github.com/kriale-dot/mapa-percepcao-relacional.git`;
+- árvore de trabalho: limpa;
+- branch local sincronizada com `origin/main`;
+- o repositório está clonado diretamente na pasta `Desenvolvimento`, sem subpasta intermediária do projeto.
+
+Após qualquer alteração feita diretamente no GitHub durante o desenvolvimento assistido, o ambiente local deve ser atualizado com `git pull` antes de continuar modificações locais.
