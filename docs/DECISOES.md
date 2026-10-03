@@ -180,3 +180,16 @@ A sessão deve:
 - reenviar o JWT apenas em chamadas autenticadas da área profissional.
 
 As rotas iniciais do frontend são `/profissional/login` e `/profissional`.
+
+## D-016 — Perfil profissional da V1
+**Data:** 2026-10-03  
+**Status:** vigente
+
+O perfil profissional é mantido no próprio registro de `profissionais`. A migration `003_profissional_perfil.sql` acrescenta `descricao`, `atuacao`, `foto_url`, `logo_url` e `dados_contato`.
+
+Na V1 desta etapa:
+
+- fotografia e logotipo são referências por URL HTTP/HTTPS; upload de arquivos não é implementado ainda;
+- nome, e-mail, telefone, descrição, atuação e dados de contato podem ser editados pelo profissional autenticado;
+- o status é exibido, porém não pode ser alterado pelo próprio formulário de perfil, pois participa da regra de autorização;
+- as rotas de leitura e atualização do perfil permanecem protegidas pelo middleware JWT.
