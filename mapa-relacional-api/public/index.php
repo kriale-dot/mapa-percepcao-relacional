@@ -6,6 +6,7 @@ use App\Config\Database;
 use App\Config\LoggerFactory;
 use App\Controller\AuthController;
 use App\Controller\HealthController;
+use App\Controller\ProfessionalController;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\ProfessionalAuthMiddleware;
 use Dotenv\Dotenv;
@@ -39,13 +40,19 @@ $errorMiddleware = $app->addErrorMiddleware(
 
 $healthController = new HealthController();
 $authController = new AuthController();
+$professionalController = new ProfessionalController();
 
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
 $app->post('/api/auth/login', [$authController, 'login']);
 
-$app->group('/api/profissional', function (RouteCollectorProxy $group) use ($authController) {
+$app->group('/api/profissional', function (RouteCollectorProxy $group) use (
+    $authController,
+    $professionalController
+) {
     $group->get('/me', [$authController, 'me']);
+    $group->get('/perfil', [$professionalController, 'profile']);
+    $group->put('/perfil', [$professionalController, 'updateProfile']);
 })->add(new ProfessionalAuthMiddleware());
 
 $app->get('/api', function ($request, $response) {
