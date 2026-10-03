@@ -8,15 +8,36 @@ O sistema compara, de forma estruturada, como duas pessoas percebem a si mesmas,
 
 ```text
 mapa-percepcao-relacional/
+│
 ├── mapa-relacional-api/
+│   ├── public/
+│   ├── src/
+│   ├── bin/
+│   ├── migrations/
+│   ├── storage/
+│   ├── vendor/              # gerado localmente; não versionado
+│   ├── .env                 # local; não versionado
+│   ├── .env.example
+│   └── composer.json
+│
 ├── mapa-relacional-web/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.js
+│
 ├── docs/
 │   ├── MAPA_RELACIONAL_CONTEXT.md
-│   └── MAPA_RELACIONAL_STATUS.md
+│   ├── MAPA_RELACIONAL_STATUS.md
+│   ├── DECISOES.md
+│   └── MODELO_DOMINIO_V1.md
+│
 ├── deploy/
 ├── README.md
 └── .gitignore
 ```
+
+> `.env` e `vendor/` fazem parte da estrutura local da API, mas não são versionados. O `.env` deve ser criado a partir de `.env.example`, e `vendor/` é criado por `composer install`.
 
 ## Documentos prioritários
 
@@ -24,6 +45,8 @@ Antes de qualquer nova etapa de desenvolvimento, consultar:
 
 1. `docs/MAPA_RELACIONAL_CONTEXT.md` — decisões permanentes, arquitetura, regras e identidade do produto.
 2. `docs/MAPA_RELACIONAL_STATUS.md` — etapa atual, o que foi concluído, pendências e próximo passo.
+3. `docs/DECISOES.md` — registro das decisões técnicas e funcionais relevantes.
+4. `docs/MODELO_DOMINIO_V1.md` — modelo de domínio da V1 quando a tarefa envolver banco ou regras de entidades.
 
 ## Stack planejada
 
@@ -41,6 +64,7 @@ Acesse o repositório kriale-dot/mapa-percepcao-relacional no GitHub.
 Leia primeiro:
 - docs/MAPA_RELACIONAL_CONTEXT.md
 - docs/MAPA_RELACIONAL_STATUS.md
+- docs/DECISOES.md
 
 Depois consulte somente os arquivos necessários para a tarefa atual.
 Não altere decisões estruturais registradas no CONTEXT sem me avisar.
