@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react'
-import { getApiHealth } from './services/api'
+import {
+  getApiHealth,
+  getAuthenticatedProfessional,
+  loginProfessional,
+} from './services/api'
+import {
+  clearAuthToken,
+  getAuthToken,
+  setAuthToken,
+} from './services/auth'
 
 const audiences = [
   'Casais e cônjuges',
@@ -9,7 +18,33 @@ const audiences = [
   'Outros vínculos interpessoais',
 ]
 
+function navigate(path) {
+  window.history.pushState({}, '', path)
+  window.dispatchEvent(new PopStateEvent('popstate'))
+}
+
 function App() {
+  const [path, setPath] = useState(window.location.pathname)
+
+  useEffect(() => {
+    const handlePopState = () => setPath(window.location.pathname)
+    window.addEventListener('popstate', handlePopState)
+
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  if (path === '/profissional/login') {
+    return <ProfessionalLogin />
+  }
+
+  if (path.startsWith('/profissional')) {
+    return <ProfessionalArea />
+  }
+
+  return <PublicHome />
+}
+
+function PublicHome() {
   const [apiStatus, setApiStatus] = useState('checking')
 
   useEffect(() => {
@@ -86,6 +121,7 @@ function App() {
               </button>
               <button
                 type="button"
+                onClick={() => navigate('/profissional/login')}
                 className="rounded-xl border border-[#385048]/20 bg-white px-5 py-3 text-sm font-semibold transition hover:bg-[#A8C8B8]/10"
               >
                 Área profissional
@@ -147,6 +183,257 @@ function App() {
       <footer className="mx-auto max-w-6xl px-6 py-8 text-sm text-[#385048]/60">
         Avaliação de Percepção Relacional
       </footer>
+    </div>
+  )
+}
+
+function ProfessionalLogin() {
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
+  const [status, setStatus] = useState('idle')
+  const [message, setMessage] = useState('')
+
+  useEffect(() => {
+    if (!getAuthToken()) return
+
+    let active = true
+
+    getAuthenticatedProfessional()
+      .then(() => {
+        if (active) navigate('/profissional')
+      })
+      .catch(() => {
+        clearAuthToken()
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  async function handleSubmit(event) {
+    event.preventDefault()
+    setStatus('loading')
+    setMessage('')
+
+    try {
+      const result = await loginProfessional(email, senha)
+      setAuthToken(result.access_token)
+      setSenha('')
+      navigate('/profissional')
+    } catch (error) {
+      setStatus('error')
+      setMessage(
+        error.status === 401
+          ? 'E-mail ou senha inválidos.'
+          : error.message || 'Não foi possível entrar.',
+      )
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-[#FEFDFB] text-[#385048]">
+      <header className="border-b border-[#A8C8B8]/45">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="text-left"
+          >
+            <p className="text-lg font-semibold tracking-tight">
+              Avaliação de Percepção Relacional
+            </p>
+            <p className="text-xs text-[#385048]/70">Área profissional</p>
+          </button>
+        </div>
+      </header>
+
+      <main className="mx-auto flex min-h-[calc(100vh-90px)] max-w-6xl items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md rounded-3xl border border-[#A8C8B8]/45 bg-white p-8 shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
+            Acesso profissional
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+            Entrar na plataforma
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-[#385048]/70">
+            Use o e-mail e a senha cadastrados para acessar sua área de trabalho.
+          </p>
+
+          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+            <label className="block">
+              <span className="text-sm font-medium">E-mail</span>
+              <input
+                type="email"
+                autoComplete="username"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none transition focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20"
+              />
+            </label>
+
+            <label className="block">
+              <span className="text-sm font-medium">Senha</span>
+              <input
+                type="password"
+                autoComplete="current-password"
+                required
+                value={senha}
+                onChange={(event) => setSenha(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none transition focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20"
+              />
+            </label>
+
+            {message ? (
+              <div
+                role="alert"
+                className="rounded-xl bg-[#D8B078]/18 px-4 py-3 text-sm"
+              >
+                {message}
+              </div>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={status === 'loading'}
+              className="w-full rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {status === 'loading' ? 'Entrando...' : 'Entrar'}
+            </button>
+          </form>
+        </div>
+      </main>
+    </div>
+  )
+}
+
+function ProfessionalArea() {
+  const [status, setStatus] = useState('loading')
+  const [professional, setProfessional] = useState(null)
+
+  useEffect(() => {
+    let active = true
+
+    if (!getAuthToken()) {
+      navigate('/profissional/login')
+      return undefined
+    }
+
+    getAuthenticatedProfessional()
+      .then((result) => {
+        if (!active) return
+        setProfessional(result.profissional)
+        setStatus('ready')
+      })
+      .catch((error) => {
+        if (!active) return
+
+        if (error.status === 401) {
+          clearAuthToken()
+          navigate('/profissional/login')
+          return
+        }
+
+        setStatus('error')
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  function handleLogout() {
+    clearAuthToken()
+    navigate('/profissional/login')
+  }
+
+  if (status === 'loading') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FEFDFB] text-[#385048]">
+        Validando sessão...
+      </div>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FEFDFB] px-6 text-[#385048]">
+        <div className="max-w-md rounded-2xl border border-[#D8B078]/40 bg-white p-6 text-center">
+          Não foi possível validar a sessão. Verifique se a API está disponível e
+          tente novamente.
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-[#FEFDFB] text-[#385048]">
+      <header className="border-b border-[#A8C8B8]/45 bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-5">
+          <div>
+            <p className="text-lg font-semibold">Área profissional</p>
+            <p className="text-xs text-[#385048]/65">
+              Avaliação de Percepção Relacional
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold transition hover:bg-[#A8C8B8]/10"
+          >
+            Sair
+          </button>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <section className="rounded-3xl border border-[#A8C8B8]/45 bg-white p-7 shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
+            Sessão autenticada
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold tracking-tight">
+            Olá, {professional?.nome}.
+          </h1>
+          <p className="mt-3 text-[#385048]/70">
+            Seu acesso profissional está ativo e foi validado pela API.
+          </p>
+
+          <dl className="mt-7 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl bg-[#A8C8B8]/12 p-5">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-[#385048]/55">
+                E-mail
+              </dt>
+              <dd className="mt-2 font-medium">{professional?.email}</dd>
+            </div>
+            <div className="rounded-2xl bg-[#A8C8B8]/12 p-5">
+              <dt className="text-xs font-semibold uppercase tracking-wide text-[#385048]/55">
+                Status
+              </dt>
+              <dd className="mt-2 font-medium">{professional?.status}</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section className="mt-7 grid gap-4 md:grid-cols-3">
+          {[
+            ['Instrumentos', 'Gerencie instrumentos e suas versões.'],
+            ['Avaliações', 'Crie e acompanhe aplicações relacionais.'],
+            ['Resultados', 'Consulte comparações e devolutivas.'],
+          ].map(([title, description]) => (
+            <div
+              key={title}
+              className="rounded-2xl border border-[#A8C8B8]/40 bg-white p-6"
+            >
+              <p className="font-semibold">{title}</p>
+              <p className="mt-2 text-sm leading-6 text-[#385048]/65">
+                {description}
+              </p>
+            </div>
+          ))}
+        </section>
+      </main>
     </div>
   )
 }
