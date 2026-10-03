@@ -43,7 +43,7 @@ $stmt = $pdo->prepare(
 $stmt->execute(['database' => $database]);
 
 $existing = array_map(
-    static fn (array $row): string => (string) $row['TABLE_NAME'],
+    static fn (array $row): string => (string) $row['table_name'],
     $stmt->fetchAll(PDO::FETCH_ASSOC)
 );
 
