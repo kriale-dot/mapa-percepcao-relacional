@@ -1,4 +1,4 @@
-# Mapa de Percepção Relacional — Registro de decisões
+# Avaliação de Percepção Relacional — Registro de decisões
 
 > Registro curto das decisões técnicas e funcionais que afetam a continuidade do projeto.
 > Novas decisões relevantes devem ser acrescentadas ao final; não apagar decisões antigas sem registrar a substituição.
@@ -82,3 +82,11 @@ Não importar `001_base_dominio.sql` manualmente quando o objetivo for testar o 
 **Status:** vigente
 
 O `bin/check-domain.php` deve ler a lista de tabelas com `PDO::FETCH_COLUMN`. Isso evita diferenças entre drivers/ambientes que retornam `table_name` ou `TABLE_NAME`.
+
+## D-009 — Nomenclatura oficial do instrumento
+**Data:** 2026-10-03  
+**Status:** vigente
+
+O nome oficial a ser usado nos textos, interface, documentação e comunicação com usuários é **Avaliação de Percepção Relacional**.
+
+Os nomes técnicos já existentes do repositório, diretórios, namespaces, banco e caminhos internos que usam `mapa-relacional` ou `mapa-percepcao-relacional` permanecem inalterados por enquanto para evitar renomeações sem benefício funcional e preservar a continuidade do desenvolvimento.
