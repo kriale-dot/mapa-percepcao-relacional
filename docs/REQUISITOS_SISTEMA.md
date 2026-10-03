@@ -1,4 +1,4 @@
-# Mapa de Percepção Relacional — Documento de Requisitos do Sistema
+# Avaliação de Percepção Relacional — Documento de Requisitos do Sistema
 
 **Versão do documento:** 1.0  
 **Data:** 2026-10-03  
@@ -9,7 +9,7 @@
 
 ## 1. Objetivo deste documento
 
-Este documento consolida os requisitos funcionais, regras de negócio, requisitos não funcionais, limites da V1 e decisões ainda abertas da plataforma **Mapa de Percepção Relacional**.
+Este documento consolida os requisitos funcionais, regras de negócio, requisitos não funcionais, limites da V1 e decisões ainda abertas da plataforma **Avaliação de Percepção Relacional**.
 
 Ele deve ser usado como referência para:
 
@@ -34,7 +34,7 @@ Este documento não substitui:
 
 ### 2.1 Nome
 
-**Mapa de Percepção Relacional**
+**Avaliação de Percepção Relacional**
 
 ### 2.2 Subtítulo
 
