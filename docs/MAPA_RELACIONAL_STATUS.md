@@ -8,7 +8,7 @@
 **Versão:** `0.2.0-dev`  
 **Marco atual:** banco base recriado e domínio validado com sucesso  
 **Etapa atual:** Etapa 2 concluída — fundação técnica, migração base e validação do domínio  
-**Próximo passo:** iniciar a Etapa 3 — autenticação e configuração inicial do profissional
+**Próximo passo:** iniciar a Etapa 3.1 — estrutura de autenticação do profissional no banco de dados
 
 ## 1. Situação atual
 
@@ -60,7 +60,7 @@ O documento consolida:
 - decisões ainda abertas;
 - priorização sugerida das próximas etapas.
 
-O próximo passo técnico permanece a Etapa 3 — autenticação e configuração inicial do profissional.
+O próximo passo técnico permanece a Etapa 3, começando pela **Etapa 3.1 — estrutura de autenticação do profissional no banco de dados**.
 
 ## 2. Etapa 1 — concluída
 
@@ -279,6 +279,10 @@ Correção definitiva:
 Commit final da correção:
 `dcdcf340b78c58a41ddc90a67c191acc90b35425`.
 
-## Nomenclatura oficial atualizada em 2026-10-03
+## 10. Nomenclatura oficial atualizada em 2026-10-03
 
-A denominação de produto/instrumento passou a ser **Avaliação de Percepção Relacional**. Os nomes técnicos do repositório, pastas e componentes internos permanecem inalterados neste momento.
+A denominação oficial do produto e do instrumento passou a ser **Avaliação de Percepção Relacional**.
+
+A atualização foi refletida na documentação principal e nos textos de identificação atualmente existentes no frontend e na API. Os nomes técnicos do repositório, pastas e componentes internos permanecem inalterados neste momento para evitar renomeações sem benefício funcional.
+
+A Etapa 3 ainda não foi iniciada. O próximo trabalho de implementação é a **Etapa 3.1 — estrutura de autenticação do profissional no banco de dados**.
