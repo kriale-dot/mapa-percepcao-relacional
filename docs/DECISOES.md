@@ -90,3 +90,17 @@ O `bin/check-domain.php` deve ler a lista de tabelas com `PDO::FETCH_COLUMN`. Is
 O nome oficial a ser usado nos textos, interface, documentação e comunicação com usuários é **Avaliação de Percepção Relacional**.
 
 Os nomes técnicos já existentes do repositório, diretórios, namespaces, banco e caminhos internos que usam `mapa-relacional` ou `mapa-percepcao-relacional` permanecem inalterados por enquanto para evitar renomeações sem benefício funcional e preservar a continuidade do desenvolvimento.
+
+## D-010 — Raiz local oficial de desenvolvimento
+**Data:** 2026-10-03  
+**Status:** vigente
+
+No ambiente Windows utilizado para desenvolvimento, a raiz oficial do repositório é:
+
+```text
+E:\\Compartilhar\\Kriale\\Tânia - plataforma digital\\Desenvolvimento
+```
+
+O repositório `kriale-dot/mapa-percepcao-relacional` é clonado diretamente nessa pasta. Não deve ser criada uma subpasta local adicional `mapa-percepcao-relacional` para conter o projeto.
+
+A branch padrão de desenvolvimento é `main`, acompanhando `origin/main`. Antes de iniciar novas alterações locais após mudanças feitas no GitHub, executar `git pull` e confirmar `git status` limpo ou compreender explicitamente as alterações locais existentes.
