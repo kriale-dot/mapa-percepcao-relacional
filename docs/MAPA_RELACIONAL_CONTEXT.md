@@ -215,6 +215,18 @@ O banco deve evoluir por migrações SQL sequenciais armazenadas em:
 mapa-relacional-api/migrations/
 ```
 
+### Ambiente de desenvolvimento local
+
+A raiz oficial do projeto no ambiente Windows de desenvolvimento é:
+
+```text
+E:\\Compartilhar\\Kriale\\Tânia - plataforma digital\\Desenvolvimento
+```
+
+O repositório Git foi clonado diretamente nessa pasta. Portanto, **não existe uma pasta intermediária `mapa-percepcao-relacional` no caminho local**. A própria pasta `Desenvolvimento` contém `.git`, `mapa-relacional-api`, `mapa-relacional-web`, `docs`, `deploy` e os arquivos da raiz do repositório.
+
+A branch de trabalho padrão é `main`, sincronizada com `origin/main` do repositório `kriale-dot/mapa-percepcao-relacional`.
+
 ### Fluxo padrão para recriar/validar o banco
 
 Quando for necessário recriar o banco de desenvolvimento do zero:
