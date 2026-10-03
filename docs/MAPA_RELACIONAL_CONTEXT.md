@@ -9,7 +9,13 @@
 **Nome:** Avaliação de Percepção Relacional  
 **Subtítulo:** Instrumento de percepção mútua e conhecimento interpessoal.
 
-O Avaliação de Percepção Relacional é uma plataforma digital para comparar, de forma estruturada, como duas pessoas percebem a si mesmas, a outra pessoa e a relação entre elas.
+A Avaliação de Percepção Relacional é uma plataforma digital para comparar, de forma estruturada, como duas pessoas percebem a si mesmas, a outra pessoa e a relação entre elas.
+
+### Regra de nomenclatura
+
+A denominação oficial do produto e do instrumento, em toda comunicação com usuários, documentação funcional e interface, é **Avaliação de Percepção Relacional**.
+
+Os nomes técnicos já existentes do repositório, diretórios e componentes internos — como `mapa-percepcao-relacional`, `mapa-relacional-api` e `mapa-relacional-web` — permanecem inalterados por enquanto para preservar a continuidade técnica do projeto.
 
 O instrumento não é exclusivo para casais. Deve permitir diferentes tipos de vínculo, por exemplo:
 
@@ -162,7 +168,7 @@ Paleta oficial aprovada:
 - Azul suave: `#A8C8D0`
 - Fundo claro: `#FEFDFB`
 
-Usar o logotipo oficial do **Avaliação de Percepção Relacional** já criado para o projeto.
+Usar o logotipo oficial da **Avaliação de Percepção Relacional** já criado para o projeto.
 
 A interface deve ser:
 
