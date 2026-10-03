@@ -30,6 +30,7 @@ mapa-percepcao-relacional/
 │   ├── MAPA_RELACIONAL_CONTEXT.md
 │   ├── MAPA_RELACIONAL_STATUS.md
 │   ├── DECISOES.md
+│   ├── REQUISITOS_SISTEMA.md
 │   └── MODELO_DOMINIO_V1.md
 │
 ├── deploy/
@@ -46,7 +47,8 @@ Antes de qualquer nova etapa de desenvolvimento, consultar:
 1. `docs/MAPA_RELACIONAL_CONTEXT.md` — decisões permanentes, arquitetura, regras e identidade do produto.
 2. `docs/MAPA_RELACIONAL_STATUS.md` — etapa atual, o que foi concluído, pendências e próximo passo.
 3. `docs/DECISOES.md` — registro das decisões técnicas e funcionais relevantes.
-4. `docs/MODELO_DOMINIO_V1.md` — modelo de domínio da V1 quando a tarefa envolver banco ou regras de entidades.
+4. `docs/REQUISITOS_SISTEMA.md` — requisitos funcionais, regras de negócio, requisitos não funcionais e critérios de aceitação.
+5. `docs/MODELO_DOMINIO_V1.md` — modelo de domínio da V1 quando a tarefa envolver banco ou regras de entidades.
 
 ## Stack planejada
 
