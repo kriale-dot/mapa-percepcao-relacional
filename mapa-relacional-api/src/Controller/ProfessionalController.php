@@ -152,7 +152,7 @@ final class ProfessionalController
             'id' => $id,
         ]);
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             $id,
             'PERFIL_ATUALIZADO',
