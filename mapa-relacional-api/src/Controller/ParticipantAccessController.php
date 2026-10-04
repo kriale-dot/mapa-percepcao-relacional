@@ -796,7 +796,7 @@ final class ParticipantAccessController
                     'aplicacao_concluida' => $applicationCompleted,
                 ],
                 $request,
-                null,
+                (int) $access['profissional_id'],
                 $pdo
             );
 
