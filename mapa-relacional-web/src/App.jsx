@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import ProfessionalProfile from './pages/ProfessionalProfile'
 import ProfessionalPassword from './pages/ProfessionalPassword'
+import ProfessionalInstruments from './pages/ProfessionalInstruments'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -45,6 +46,10 @@ function App() {
 
   if (path === '/profissional/senha') {
     return <ProfessionalPassword />
+  }
+
+  if (path === '/profissional/instrumentos') {
+    return <ProfessionalInstruments />
   }
 
   if (path.startsWith('/profissional')) {
@@ -437,19 +442,41 @@ function ProfessionalArea() {
 
         <section className="mt-7 grid gap-4 md:grid-cols-3">
           {[
-            ['Instrumentos', 'Gerencie instrumentos e suas versões.'],
-            ['Avaliações', 'Crie e acompanhe aplicações relacionais.'],
-            ['Resultados', 'Consulte comparações e devolutivas.'],
-          ].map(([title, description]) => (
-            <div
+            {
+              title: 'Instrumentos',
+              description: 'Gerencie instrumentos e suas versões.',
+              path: '/profissional/instrumentos',
+            },
+            {
+              title: 'Avaliações',
+              description: 'Crie e acompanhe aplicações relacionais.',
+              path: null,
+            },
+            {
+              title: 'Resultados',
+              description: 'Consulte comparações e devolutivas.',
+              path: null,
+            },
+          ].map(({ title, description, path: targetPath }) => (
+            <button
               key={title}
-              className="rounded-2xl border border-[#A8C8B8]/40 bg-white p-6"
+              type="button"
+              disabled={!targetPath}
+              onClick={() => {
+                if (targetPath) navigate(targetPath)
+              }}
+              className={[
+                'rounded-2xl border border-[#A8C8B8]/40 bg-white p-6 text-left',
+                targetPath
+                  ? 'transition hover:-translate-y-0.5 hover:shadow-sm'
+                  : 'cursor-default',
+              ].join(' ')}
             >
               <p className="font-semibold">{title}</p>
               <p className="mt-2 text-sm leading-6 text-[#385048]/65">
                 {description}
               </p>
-            </div>
+            </button>
           ))}
         </section>
       </main>
