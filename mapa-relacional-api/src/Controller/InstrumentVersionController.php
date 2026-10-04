@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Config\Database;
+use App\Service\AuditService;
 use PDO;
 use PDOException;
 use Psr\Http\Message\ResponseInterface;
@@ -12,6 +13,11 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class InstrumentVersionController
 {
+    public function __construct(
+        private readonly AuditService $auditService
+    ) {
+    }
+
     public function index(
         ServerRequestInterface $request,
         ResponseInterface $response,
@@ -166,6 +172,21 @@ final class InstrumentVersionController
             throw $error;
         }
 
+        $this->auditService->record(
+            'PROFISSIONAL',
+            $professionalId,
+            'VERSAO_CRIADA',
+            'INSTRUMENTO_VERSAO',
+            $versionId,
+            [
+                'instrumento_id' => $instrumentId,
+                'numero_versao' => $numeroVersao,
+            ],
+            $request,
+            $professionalId,
+            $pdo
+        );
+
         return $this->json(
             $response,
             [
@@ -310,6 +331,18 @@ final class InstrumentVersionController
             'draft_status' => 'RASCUNHO',
         ]);
 
+        $this->auditService->record(
+            'PROFISSIONAL',
+            $professionalId,
+            'VERSAO_PUBLICADA',
+            'INSTRUMENTO_VERSAO',
+            $versionId,
+            ['instrumento_id' => $instrumentId],
+            $request,
+            $professionalId,
+            $pdo
+        );
+
         return $this->json($response, [
             'message' => 'Versao publicada com sucesso.',
             'versao' => $this->findVersion(
@@ -369,6 +402,18 @@ final class InstrumentVersionController
             'instrumento_id' => $instrumentId,
             'published_status' => 'PUBLICADA',
         ]);
+
+        $this->auditService->record(
+            'PROFISSIONAL',
+            $professionalId,
+            'VERSAO_ARQUIVADA',
+            'INSTRUMENTO_VERSAO',
+            $versionId,
+            ['instrumento_id' => $instrumentId],
+            $request,
+            $professionalId,
+            $pdo
+        );
 
         return $this->json($response, [
             'message' => 'Versao arquivada com sucesso.',
