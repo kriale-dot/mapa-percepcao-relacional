@@ -9,6 +9,7 @@ import ProfessionalAlternatives from './pages/ProfessionalAlternatives'
 import ProfessionalPeople from './pages/ProfessionalPeople'
 import ProfessionalRelationships from './pages/ProfessionalRelationships'
 import ProfessionalApplications from './pages/ProfessionalApplications'
+import ProfessionalApplicationResults from './pages/ProfessionalApplicationResults'
 import PublicEvaluations from './pages/PublicEvaluations'
 import PublicEvaluationStart from './pages/PublicEvaluationStart'
 import PublicParticipantAccess from './pages/PublicParticipantAccess'
@@ -96,6 +97,18 @@ function App() {
 
   if (path === '/profissional/avaliacoes') {
     return <ProfessionalApplications />
+  }
+
+  const applicationResultsMatch = path.match(
+    /^\/profissional\/avaliacoes\/([1-9][0-9]*)\/resultados$/,
+  )
+
+  if (applicationResultsMatch) {
+    return (
+      <ProfessionalApplicationResults
+        applicationId={Number(applicationResultsMatch[1])}
+      />
+    )
   }
 
   const versionsMatch = path.match(
