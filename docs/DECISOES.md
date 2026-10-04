@@ -444,3 +444,28 @@ Regras:
 - itens excluídos globalmente da aplicação por “Não se aplica” não são retornados.
 
 A persistência das respostas A→A/A→B ou B→B/B→A fica para a subetapa seguinte.
+
+## D-032 — Backend deriva respondente e alvo das respostas
+**Data:** 2026-10-04  
+**Status:** vigente
+
+No preenchimento individual, o cliente não pode escolher IDs de respondente ou de alvo.
+
+A API deriva o contexto exclusivamente a partir do token individual:
+
+- `SOBRE_MIM` gera resposta com `alvo_id = respondente_id`;
+- `SOBRE_OUTRO` gera resposta com `alvo_id` igual ao outro participante da mesma aplicação.
+
+Regras complementares:
+
+- uma resposta é persistida individualmente a cada perspectiva;
+- a chave única `aplicacao_id + respondente_id + alvo_id + item_id` garante uma única resposta vigente por contexto;
+- nova gravação do mesmo contexto atualiza a resposta anterior;
+- alternativas precisam estar ativas e pertencer ao item;
+- itens com alternativas ativas exigem alternativa;
+- itens sem alternativas aceitam exatamente um valor textual ou numérico;
+- a retomada carrega somente respostas do próprio participante;
+- respostas do outro participante nunca são devolvidas pelo endpoint individual;
+- progresso = perspectivas válidas respondidas / (itens válidos × 2).
+
+A regra “Não se aplica” e a conclusão individual serão tratadas separadamente para manter a validação incremental.
