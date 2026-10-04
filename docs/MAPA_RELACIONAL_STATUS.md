@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 6 em desenvolvimento — autoatendimento público de avaliações  
-**Etapa atual:** Etapa 6.1 em validação — autoatendimento público  
-**Próximo passo:** validar catálogo público e criação autônoma de aplicação pelo visitante
+**Etapa atual:** Etapa 6.2 em validação — acessos individuais e envio SMTP Brevo  
+**Próximo passo:** configurar SMTP Brevo no .env e validar geração, envio e abertura dos dois links individuais
 
 ## 1. Situação atual
 
@@ -1452,3 +1452,95 @@ Não há migration nova nesta correção.
 **Próximo passo após a validação:** concluir a Etapa 6.1 e implementar a geração dos dois acessos individuais seguros.
 
 Na Etapa 6.2, além de gerar os dois acessos individuais, o backend deverá enviar os links ao e-mail cadastrado. A tela de confirmação pública só poderá mostrar a mensagem de que os links foram enviados depois de receber confirmação de sucesso desse envio.
+
+## 30. Etapa 6.2 — acessos individuais e SMTP Brevo
+
+Implementação criada no GitHub em 2026-10-04.
+
+A Etapa 6.1 pública foi aceita como base funcional e a Etapa 6.2 passou a implementar o envio real dos acessos.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Service/AccessTokenService.php`;
+- `mapa-relacional-api/src/Service/MailService.php`;
+- `mapa-relacional-api/src/Controller/ParticipantAccessController.php`;
+- `mapa-relacional-api/src/Controller/PublicEvaluationController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-api/.env.example`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/PublicEvaluationStart.jsx`;
+- `mapa-relacional-web/src/pages/PublicParticipantAccess.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Dependência adicionada:
+
+```text
+phpmailer/phpmailer
+```
+
+Configuração SMTP esperada no `.env`:
+
+```text
+SMTP_HOST=smtp-relay.brevo.com
+SMTP_PORT=587
+SMTP_USERNAME=...
+SMTP_PASSWORD=...
+SMTP_ENCRYPTION=tls
+SMTP_TIMEOUT_SECONDS=15
+MAIL_FROM_EMAIL=...
+MAIL_FROM_NAME="Avaliação de Percepção Relacional"
+```
+
+Regras implementadas:
+
+- geração de um token aleatório independente para A e outro para B;
+- token bruto não é persistido;
+- somente SHA-256 é armazenado em `acessos_aplicacao.token_hash`;
+- dois registros de acesso são criados com status `ATIVO`;
+- um único e-mail Brevo contém os dois links individuais, identificados como A e B;
+- links usam `FRONTEND_URL/avaliacao/acesso/{token}`;
+- envio bem-sucedido registra `enviado_em` nos dois acessos e na aplicação;
+- após o envio, a aplicação passa para `PRONTA`;
+- falha de SMTP reverte a transação e retorna erro sem afirmar que o e-mail foi enviado;
+- a tela pública de sucesso agora confirma explicitamente o envio dos links;
+- o endpoint público de acesso valida o token pelo hash;
+- abertura válida registra primeiro e último acesso;
+- tokens inválidos ou acessos indisponíveis não revelam dados da aplicação.
+
+Nova rota pública da API:
+
+```text
+GET /api/public/acessos/{token}
+```
+
+Nova rota pública do frontend:
+
+```text
+/avaliacao/acesso/{token}
+```
+
+### Validação local pendente
+
+Após `git pull`, executar `composer install` porque foi adicionada a dependência PHPMailer.
+
+Preencher no arquivo local `.env` as credenciais SMTP do Brevo. Não versionar nem enviar as credenciais ao GitHub.
+
+Validar:
+
+1. `composer check`;
+2. iniciar uma nova avaliação pelo fluxo público;
+3. confirmar recebimento de um e-mail no endereço cadastrado;
+4. confirmar que o e-mail contém dois links diferentes, um para A e outro para B;
+5. confirmar que a tela pública informa que os links foram enviados;
+6. abrir o link de A e confirmar o nome e lado A;
+7. abrir o link de B e confirmar o nome e lado B;
+8. confirmar que os dois links são diferentes;
+9. confirmar na área profissional que a aplicação aparece como `PRONTA`;
+10. confirmar no banco que `acessos_aplicacao.token_hash` contém hashes e não os tokens brutos;
+11. confirmar que `enviado_em` foi preenchido na aplicação e nos dois acessos;
+12. testar temporariamente uma senha SMTP inválida e confirmar que a interface mostra erro de envio sem criar uma nova aplicação.
+
+Não há migration nova; `acessos_aplicacao` e os campos `enviado_em` já existem na migration base.
+
+**Próxima subetapa prevista:** Etapa 6.3 — identificação inicial e início do preenchimento individual.
