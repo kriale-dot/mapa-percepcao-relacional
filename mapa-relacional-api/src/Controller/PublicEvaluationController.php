@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Config\Database;
 use App\Service\AccessTokenService;
+use App\Service\AuditService;
 use App\Service\MailService;
 use App\Service\RateLimitService;
 use PDO;
@@ -21,7 +22,8 @@ final class PublicEvaluationController
         private readonly AccessTokenService $tokenService,
         private readonly MailService $mailService,
         private readonly LoggerInterface $logger,
-        private readonly RateLimitService $rateLimitService
+        private readonly RateLimitService $rateLimitService,
+        private readonly AuditService $auditService
     ) {
     }
 
@@ -374,6 +376,31 @@ final class PublicEvaluationController
             }
 
             throw $error;
+        }
+
+        try {
+            $this->auditService->record(
+                'PUBLICO',
+                null,
+                'APLICACAO_PUBLICA_CRIADA',
+                'APLICACAO',
+                $applicationId,
+                [
+                    'instrumento_versao_id' => $versionId,
+                    'tipo_vinculo' => $relationshipType,
+                ],
+                $request,
+                (int) $evaluation['profissional_id']
+            );
+        } catch (Throwable $auditError) {
+            $this->logger->warning(
+                'Falha ao registrar auditoria da aplicacao publica.',
+                [
+                    'exception' => $auditError::class,
+                    'message' => $auditError->getMessage(),
+                    'aplicacao_id' => $applicationId,
+                ]
+            );
         }
 
         return $this->json(
