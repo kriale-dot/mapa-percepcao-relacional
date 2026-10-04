@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 10 em desenvolvimento — segurança, auditoria e preparação da V1  
-**Etapa atual:** Etapa 10 implementada — validação local e fechamento da V1 pendentes  
-**Próximo passo:** aplicar migrations 006–008, executar check-v1, backup/restore e fluxo funcional completo antes do deploy
+**Etapa atual:** Etapa 10 validada localmente — fechamento formal da V1 pendente  
+**Próximo passo:** fechar formalmente a V1 e preparar o deploy, mantendo pendente apenas a validação funcional completa em ambiente de produção/homologação
 
 ## 1. Situação atual
 
@@ -2644,3 +2644,26 @@ Validar especialmente:
 14. fluxo completo público → participantes → resultado → devolutiva.
 
 **Próximo marco após validação:** fechamento formal da V1 e preparação do deploy.
+
+### Validação confirmada — Etapa 10
+
+Em 2026-10-04, o usuário confirmou que os comandos e verificações da Etapa 10 ficaram corretos após os ajustes de backup no Windows.
+
+Confirmado no ambiente local:
+
+- `mysqldump` localizado automaticamente;
+- backup SQL criado com sucesso;
+- backup recente reconhecido pelo `check-v1`;
+- migrations `007_auditoria.sql` e `008_rate_limites.sql` aplicadas;
+- tabelas `auditoria_eventos` e `rate_limites` presentes;
+- `composer check-domain` sem pendências estruturais;
+- `composer check-v1` sem erros críticos.
+
+Os avisos de `APP_ENV` / `APP_DEBUG`, quando presentes no ambiente local, permanecem esperados até a configuração do deploy de produção.
+
+A Etapa 10 pode ser considerada **validada localmente**.
+
+O fechamento formal da V1 ainda deve distinguir:
+- validação técnica local concluída;
+- validações funcionais completas das Etapas 7.2, 8 e 9 que foram puladas ou não confirmadas explicitamente;
+- validação final em ambiente de produção/homologação ainda pendente.
