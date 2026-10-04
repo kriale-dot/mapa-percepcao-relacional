@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 em desenvolvimento — instrumentos e versionamento  
-**Etapa atual:** Etapa 4.4 em validação — itens/perguntas das seções  
-**Próximo passo:** validar localmente criação, edição, ordenação, Não se aplica, ativação e exclusão de itens
+**Etapa atual:** Etapa 4.4 concluída — itens/perguntas das seções  
+**Próximo passo:** iniciar a Etapa 4.5 — alternativas dos itens
 
 ## 1. Situação atual
 
@@ -947,38 +947,24 @@ No frontend foi criada a rota:
 
 Cada seção agora possui o botão `Itens`.
 
-### Validação local pendente
+### Validação local concluída
 
-Após `git pull`, executar na API:
+Em 2026-10-04 a Etapa 4.4 foi validada com sucesso no ambiente local.
 
-```powershell
-cd mapa-relacional-api
-composer check
-composer serve
-```
+Foram confirmados:
 
-No frontend:
+- acesso ao módulo de itens pela seção;
+- criação de múltiplos itens;
+- posicionamento automático quando a ordem é omitida;
+- edição de código, texto/pergunta, tipo de resposta, ordem, opção “Não se aplica” e estado ativo/inativo;
+- rejeição de código duplicado dentro da mesma seção;
+- ordenação da listagem conforme o campo `ordem`;
+- exclusão de item sem alternativas ou respostas vinculadas;
+- persistência dos dados após recarregar a página;
+- modo somente leitura em versões publicadas ou arquivadas.
 
-```powershell
-cd ..\mapa-relacional-web
-npm run build
-npm run dev
-```
+Não houve necessidade de migration nova nesta etapa, pois a tabela `itens` já existe na estrutura base.
 
-Na versão `1.0` em `RASCUNHO`, validar:
+**Etapa 4.4 concluída.**
 
-1. abrir uma seção e clicar em `Itens`;
-2. criar pelo menos dois itens;
-3. deixar a ordem vazia em uma criação e confirmar posicionamento automático;
-4. editar código, texto, tipo de resposta, ordem, “Não se aplica” e status ativo;
-5. tentar repetir o mesmo código dentro da seção e confirmar rejeição;
-6. confirmar que a lista acompanha a ordem configurada;
-7. criar um item de teste e excluí-lo enquanto não possui alternativas/respostas;
-8. recarregar a página e confirmar persistência;
-9. abrir itens de uma versão publicada/arquivada e confirmar modo somente leitura.
-
-Para este teste, o campo `tipo_resposta` pode receber um identificador textual simples definido pelo profissional; a plataforma ainda não limita esse campo a uma lista fixa.
-
-Não há migration nova nesta etapa; a tabela `itens` já existe na estrutura base.
-
-**Próxima subetapa prevista:** Etapa 4.5 — alternativas dos itens.
+**Próxima subetapa:** Etapa 4.5 — alternativas dos itens.
