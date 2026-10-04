@@ -9,6 +9,8 @@ import ProfessionalAlternatives from './pages/ProfessionalAlternatives'
 import ProfessionalPeople from './pages/ProfessionalPeople'
 import ProfessionalRelationships from './pages/ProfessionalRelationships'
 import ProfessionalApplications from './pages/ProfessionalApplications'
+import PublicEvaluations from './pages/PublicEvaluations'
+import PublicEvaluationStart from './pages/PublicEvaluationStart'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -42,6 +44,22 @@ function App() {
 
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
+
+  if (path === '/avaliacoes') {
+    return <PublicEvaluations />
+  }
+
+  const publicEvaluationMatch = path.match(
+    /^\/avaliacao\/([1-9][0-9]*)\/iniciar$/,
+  )
+
+  if (publicEvaluationMatch) {
+    return (
+      <PublicEvaluationStart
+        versionId={Number(publicEvaluationMatch[1])}
+      />
+    )
+  }
 
   if (path === '/profissional/login') {
     return <ProfessionalLogin />
@@ -203,9 +221,10 @@ function PublicHome() {
             <div className="mt-8 flex flex-wrap gap-3">
               <button
                 type="button"
+                onClick={() => navigate('/avaliacoes')}
                 className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
               >
-                Conhecer o instrumento
+                Fazer uma avaliação
               </button>
               <button
                 type="button"
