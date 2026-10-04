@@ -318,6 +318,12 @@ A criação da aplicação e dos dois participantes deve permanecer atômica. A 
 
 Após a geração dos dois acessos e o envio efetivo do e-mail, a tela pública de confirmação deverá informar claramente que **os links de acesso dos dois participantes foram enviados para o e-mail cadastrado**. Essa mensagem só deve ser exibida depois que o backend confirmar o envio com sucesso; enquanto o envio ainda não existir ou falhar, a interface não deve afirmar que os links foram enviados.
 
+Na V1, o envio de e-mail usa **SMTP Brevo**. Cada aplicação pública gera dois tokens criptograficamente aleatórios, um para A e outro para B. O token bruto existe apenas durante a geração do link; no banco fica somente `SHA-256` em `acessos_aplicacao.token_hash`.
+
+O e-mail cadastrado recebe uma única mensagem contendo os dois links, claramente identificados por participante A e participante B. Depois do envio confirmado, `acessos_aplicacao.enviado_em` e `aplicacoes.enviado_em` são registrados e a aplicação passa de `RASCUNHO` para `PRONTA`.
+
+Se o SMTP falhar durante a criação pública, a transação é revertida e a interface recebe erro de envio, evitando criar uma aplicação sem que os links tenham sido entregues.
+
 O profissional visualiza automaticamente essas aplicações em sua área autenticada, acompanha o preenchimento, consulta os resultados e pode usar os dados de contato para abordagem posterior.
 
 A criação manual pela área profissional continua disponível apenas como modo assistido/administrativo, não como requisito para que uma avaliação pública exista.
