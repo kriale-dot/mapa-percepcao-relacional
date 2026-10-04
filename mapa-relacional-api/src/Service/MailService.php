@@ -158,6 +158,134 @@ HTML;
         }
     }
 
+    public function sendSingleParticipantAccessLink(
+        string $email,
+        string $evaluationName,
+        string $side,
+        string $participantName,
+        string $link
+    ): void {
+        $host = trim((string) ($_ENV['SMTP_HOST'] ?? ''));
+        $port = (int) ($_ENV['SMTP_PORT'] ?? 587);
+        $username = trim((string) ($_ENV['SMTP_USERNAME'] ?? ''));
+        $password = (string) ($_ENV['SMTP_PASSWORD'] ?? '');
+        $encryption = strtolower(trim(
+            (string) ($_ENV['SMTP_ENCRYPTION'] ?? '')
+        ));
+        $fromEmail = trim((string) ($_ENV['MAIL_FROM_EMAIL'] ?? ''));
+        $fromName = trim((string) (
+            $_ENV['MAIL_FROM_NAME']
+                ?? 'Avaliação de Percepção Relacional'
+        ));
+        $timeout = max(
+            5,
+            (int) ($_ENV['SMTP_TIMEOUT_SECONDS'] ?? 15)
+        );
+
+        if (
+            $host === ''
+            || $port <= 0
+            || $username === ''
+            || $password === ''
+            || $fromEmail === ''
+        ) {
+            throw new RuntimeException(
+                'Configuracao SMTP incompleta.'
+            );
+        }
+
+        if (filter_var($fromEmail, FILTER_VALIDATE_EMAIL) === false) {
+            throw new RuntimeException(
+                'MAIL_FROM_EMAIL invalido.'
+            );
+        }
+
+        $mail = new PHPMailer(true);
+        $mail->CharSet = 'UTF-8';
+        $mail->isSMTP();
+        $mail->Host = $host;
+        $mail->Port = $port;
+        $mail->SMTPAuth = true;
+        $mail->Username = $username;
+        $mail->Password = $password;
+        $mail->Timeout = $timeout;
+
+        if ($encryption === 'ssl' || $encryption === 'smtps') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($encryption === 'tls' || $encryption === 'starttls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } elseif ($encryption === '' || $encryption === 'auto') {
+            $mail->SMTPSecure = '';
+        } elseif ($encryption === 'none') {
+            $mail->SMTPAutoTLS = false;
+            $mail->SMTPSecure = '';
+        } else {
+            throw new RuntimeException(
+                'SMTP_ENCRYPTION invalido.'
+            );
+        }
+
+        $safeEvaluation = htmlspecialchars(
+            $evaluationName,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeSide = htmlspecialchars(
+            $side,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeName = htmlspecialchars(
+            $participantName,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeLink = htmlspecialchars(
+            $link,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+
+        $mail->setFrom($fromEmail, $fromName);
+        $mail->addAddress($email);
+        $mail->isHTML(true);
+        $mail->Subject = 'Novo acesso - ' . $evaluationName;
+
+        $mail->Body = <<<HTML
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Novo acesso</title>
+</head>
+<body style="font-family:Arial,sans-serif;color:#385048;line-height:1.6">
+  <h2 style="margin-bottom:8px">{$safeEvaluation}</h2>
+  <p>
+    Foi gerado um novo link de acesso para o participante {$safeSide}.
+    O link anterior desse participante deixou de ser válido.
+  </p>
+
+  <div style="margin:24px 0;padding:18px;border:1px solid #A8C8B8;border-radius:12px">
+    <strong>Participante {$safeSide} — {$safeName}</strong><br>
+    <a href="{$safeLink}">Acessar avaliação</a>
+  </div>
+</body>
+</html>
+HTML;
+
+        $mail->AltBody =
+            $evaluationName . PHP_EOL . PHP_EOL
+            . 'Participante ' . $side . ' - ' . $participantName . PHP_EOL
+            . 'Novo acesso: ' . $link . PHP_EOL . PHP_EOL
+            . 'O link anterior deste participante deixou de ser valido.';
+
+        if (!$mail->send()) {
+            throw new RuntimeException(
+                'Falha ao reenviar acesso do participante.'
+            );
+        }
+    }
+
     public function sendResultRelease(
         string $email,
         string $evaluationName,
