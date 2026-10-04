@@ -678,7 +678,9 @@ O sistema deverá permitir disponibilizar o resultado aos participantes conforme
 
 O resultado deverá poder ser encaminhado ou disponibilizado a partir do e-mail de contato associado à aplicação.
 
-A forma final — link seguro, mensagem, anexo ou portal — permanece uma decisão aberta.
+Na V1, a disponibilização será feita por **link seguro enviado por e-mail via SMTP Brevo**. O link somente ficará ativo depois que o profissional liberar a devolutiva. O token bruto não será armazenado no banco; será persistido apenas seu hash SHA-256.
+
+O link público deverá apresentar o resultado comparativo liberado, a síntese, as observações e o comentário profissional, sem expor as respostas individuais brutas de cada participante.
 
 ### RF-114 — Relatório/devolutiva
 
