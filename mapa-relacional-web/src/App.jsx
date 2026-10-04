@@ -6,6 +6,7 @@ import ProfessionalInstrumentVersions from './pages/ProfessionalInstrumentVersio
 import ProfessionalSections from './pages/ProfessionalSections'
 import ProfessionalItems from './pages/ProfessionalItems'
 import ProfessionalAlternatives from './pages/ProfessionalAlternatives'
+import ProfessionalPeople from './pages/ProfessionalPeople'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -54,6 +55,10 @@ function App() {
 
   if (path === '/profissional/instrumentos') {
     return <ProfessionalInstruments />
+  }
+
+  if (path === '/profissional/pessoas') {
+    return <ProfessionalPeople />
   }
 
   const versionsMatch = path.match(
@@ -504,6 +509,11 @@ function ProfessionalArea() {
               title: 'Instrumentos',
               description: 'Gerencie instrumentos e suas versões.',
               path: '/profissional/instrumentos',
+            },
+            {
+              title: 'Pessoas',
+              description: 'Cadastre participantes e mantenha seus dados administrativos.',
+              path: '/profissional/pessoas',
             },
             {
               title: 'Avaliações',
