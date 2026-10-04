@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 concluída — estrutura completa e versionada de instrumentos  
-**Etapa atual:** Etapa 5.1 em validação — CRUD de pessoas  
-**Próximo passo:** validar localmente o cadastro, edição, inativação e exclusão de pessoas sem histórico
+**Etapa atual:** Etapa 5.1 concluída — CRUD de pessoas  
+**Próximo passo:** iniciar a Etapa 5.2 — vínculos entre pessoas
 
 ## 1. Situação atual
 
@@ -1126,34 +1126,23 @@ No frontend foi criada:
 
 A área profissional agora possui o card `Pessoas`.
 
-### Validação local pendente
+### Validação local concluída
 
-Após `git pull`, executar na API:
+Em 2026-10-04 a Etapa 5.1 foi validada com sucesso no ambiente local.
 
-```powershell
-cd mapa-relacional-api
-composer check
-composer serve
-```
+Foram confirmados:
 
-No frontend:
+- acesso ao módulo `Pessoas` pela área profissional;
+- cadastro de pessoa apenas com nome;
+- cadastro de pessoa com os campos opcionais preenchidos;
+- edição de nome, e-mail, telefone, data de nascimento e observação administrativa;
+- alteração do status para `INATIVO`;
+- persistência dos dados após recarregar a página;
+- exclusão de pessoa sem histórico;
+- manutenção do escopo por profissional autenticado.
 
-```powershell
-cd ..\mapa-relacional-web
-npm run build
-npm run dev
-```
+Não houve necessidade de migration nova nesta etapa, pois a tabela `pessoas` já existe na migration base.
 
-Validar:
+**Etapa 5.1 concluída.**
 
-1. abrir `Pessoas` pela área profissional;
-2. cadastrar uma pessoa apenas com nome;
-3. cadastrar outra pessoa com todos os campos;
-4. editar nome, e-mail, telefone, data de nascimento e observação;
-5. marcar uma pessoa como `INATIVO` e confirmar persistência após recarregar a página;
-6. criar uma pessoa de teste sem histórico e excluí-la;
-7. confirmar que a listagem permanece filtrada ao profissional autenticado.
-
-Não há migration nova nesta etapa; a tabela `pessoas` já existe na migration base.
-
-**Próxima subetapa prevista:** Etapa 5.2 — vínculos entre pessoas.
+**Próxima subetapa:** Etapa 5.2 — vínculos entre pessoas.
