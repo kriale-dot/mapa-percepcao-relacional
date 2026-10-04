@@ -72,6 +72,7 @@ $requiredMigrations = [
     '002_profissional_autenticacao.sql',
     '003_profissional_perfil.sql',
     '004_resultados_comparacoes.sql',
+    '005_ajustar_faixas_percentuais.sql',
 ];
 
 $migrationStmt = $pdo->query(
