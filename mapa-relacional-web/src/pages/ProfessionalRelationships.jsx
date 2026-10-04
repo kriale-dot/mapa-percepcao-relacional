@@ -338,7 +338,7 @@ export default function ProfessionalRelationships() {
 
             <label className="block">
               <span className="text-sm font-medium">
-                Duração do vínculo
+                Tempo de união
               </span>
               <input
                 type="text"
@@ -465,7 +465,7 @@ export default function ProfessionalRelationships() {
 
                     {relationship.duracao_texto ? (
                       <p className="mt-2 text-sm text-[#385048]/65">
-                        Duração: {relationship.duracao_texto}
+                        Tempo de união: {relationship.duracao_texto}
                       </p>
                     ) : null}
 
