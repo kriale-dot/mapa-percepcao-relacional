@@ -278,4 +278,70 @@ export function deleteItem(
   )
 }
 
+export function listAlternatives(
+  instrumentId,
+  versionId,
+  sectionId,
+  itemId,
+) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}/itens/${itemId}/alternativas`,
+    {
+      method: 'GET',
+      auth: true,
+    },
+  )
+}
+
+export function createAlternative(
+  instrumentId,
+  versionId,
+  sectionId,
+  itemId,
+  alternative,
+) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}/itens/${itemId}/alternativas`,
+    {
+      method: 'POST',
+      auth: true,
+      body: JSON.stringify(alternative),
+    },
+  )
+}
+
+export function updateAlternative(
+  instrumentId,
+  versionId,
+  sectionId,
+  itemId,
+  alternativeId,
+  alternative,
+) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}/itens/${itemId}/alternativas/${alternativeId}`,
+    {
+      method: 'PUT',
+      auth: true,
+      body: JSON.stringify(alternative),
+    },
+  )
+}
+
+export function deleteAlternative(
+  instrumentId,
+  versionId,
+  sectionId,
+  itemId,
+  alternativeId,
+) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}/itens/${itemId}/alternativas/${alternativeId}`,
+    {
+      method: 'DELETE',
+      auth: true,
+    },
+  )
+}
+
 export { API_URL }
