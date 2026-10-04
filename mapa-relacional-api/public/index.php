@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Config\Database;
 use App\Config\LoggerFactory;
 use App\Controller\AlternativeController;
+use App\Controller\AuditController;
 use App\Controller\ApplicationController;
 use App\Controller\AuthController;
 use App\Controller\HealthController;
@@ -73,14 +74,20 @@ $mailService = new MailService();
 $resultService = new ResultService();
 $auditService = new AuditService();
 $alternativeController = new AlternativeController();
+$auditController = new AuditController();
 $applicationController = new ApplicationController($resultService);
-$authController = new AuthController();
-$professionalController = new ProfessionalController();
+$authController = new AuthController($auditService);
+$professionalController = new ProfessionalController($auditService);
 $publicEvaluationController = new PublicEvaluationController($accessTokenService, $mailService, $logger);
 $participantAccessController = new ParticipantAccessController($accessTokenService, $resultService);
-$feedbackController = new FeedbackController($accessTokenService, $mailService, $resultService);
+$feedbackController = new FeedbackController(
+    $accessTokenService,
+    $mailService,
+    $resultService,
+    $auditService
+);
 $instrumentController = new InstrumentController();
-$instrumentVersionController = new InstrumentVersionController();
+$instrumentVersionController = new InstrumentVersionController($auditService);
 $sectionController = new SectionController();
 $itemController = new ItemController();
 $personController = new PersonController();
@@ -136,6 +143,7 @@ $app->get(
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $alternativeController,
+    $auditController,
     $applicationController,
     $authController,
     $professionalController,
@@ -150,6 +158,7 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $notificationController
 ) {
     $group->get('/me', [$authController, 'me']);
+    $group->get('/auditoria', [$auditController, 'index']);
     $group->put('/senha', [$authController, 'changePassword']);
     $group->get('/perfil', [$professionalController, 'profile']);
     $group->put('/perfil', [$professionalController, 'updateProfile']);
