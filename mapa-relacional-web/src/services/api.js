@@ -24,8 +24,11 @@ async function request(path, options = {}) {
     try {
       data = JSON.parse(raw)
     } catch {
+      const detail = import.meta.env.DEV
+        ? ` Conteúdo recebido: ${raw.slice(0, 500)}`
+        : ''
       const error = new Error(
-        `Resposta inválida da API (HTTP ${response.status}).`,
+        `Resposta inválida da API (HTTP ${response.status}).${detail}`,
       )
       error.status = response.status
       error.raw = raw
