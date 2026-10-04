@@ -247,6 +247,24 @@ export function createApplication(application) {
   })
 }
 
+export function getApplicationResults(id) {
+  return request(`/api/profissional/aplicacoes/${id}/resultados`, {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function calculateApplicationResults(id) {
+  return request(
+    `/api/profissional/aplicacoes/${id}/resultados/calcular`,
+    {
+      method: 'POST',
+      auth: true,
+      body: JSON.stringify({}),
+    },
+  )
+}
+
 export function listInstruments() {
   return request('/api/profissional/instrumentos', {
     method: 'GET',
