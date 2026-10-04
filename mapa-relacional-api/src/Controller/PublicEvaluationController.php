@@ -158,9 +158,17 @@ final class PublicEvaluationController
             );
         }
 
-        $rate = $this->rateLimitService->hit(
-            'public_evaluation_start',
-            $this->rateLimitService->requestKey($request, $email),
+        $rateWindow = max(
+            60,
+            (int) (
+                $_ENV['PUBLIC_START_RATE_LIMIT_WINDOW_SECONDS']
+                    ?? 900
+            )
+        );
+
+        $rateIp = $this->rateLimitService->hit(
+            'public_evaluation_start_ip',
+            $this->rateLimitService->requestKey($request),
             max(
                 1,
                 (int) (
@@ -168,22 +176,34 @@ final class PublicEvaluationController
                         ?? 10
                 )
             ),
-            max(
-                60,
-                (int) (
-                    $_ENV['PUBLIC_START_RATE_LIMIT_WINDOW_SECONDS']
-                        ?? 900
-                )
-            )
+            $rateWindow
         );
 
-        if (!$rate['allowed']) {
+        $rateEmail = $this->rateLimitService->hit(
+            'public_evaluation_start_email',
+            strtolower($email),
+            max(
+                1,
+                (int) (
+                    $_ENV['PUBLIC_START_EMAIL_RATE_LIMIT_MAX']
+                        ?? 5
+                )
+            ),
+            $rateWindow
+        );
+
+        if (!$rateIp['allowed'] || !$rateEmail['allowed']) {
+            $retryAfter = max(
+                $rateIp['retry_after'],
+                $rateEmail['retry_after']
+            );
+
             return $this->json($response, [
                 'error' => 'rate_limit_exceeded',
                 'message' => 'Muitas avaliacoes foram iniciadas recentemente. Aguarde antes de tentar novamente.',
             ], 429)->withHeader(
                 'Retry-After',
-                (string) $rate['retry_after']
+                (string) $retryAfter
             );
         }
 
