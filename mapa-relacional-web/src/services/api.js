@@ -225,8 +225,35 @@ export function deleteRelationship(id) {
   })
 }
 
-export function listApplications() {
-  return request('/api/profissional/aplicacoes', {
+export function getProfessionalDashboard() {
+  return request('/api/profissional/dashboard', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function listApplications(filters = {}) {
+  const params = new URLSearchParams()
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      params.set(key, String(value))
+    }
+  })
+
+  const query = params.toString()
+
+  return request(
+    `/api/profissional/aplicacoes${query ? `?${query}` : ''}`,
+    {
+      method: 'GET',
+      auth: true,
+    },
+  )
+}
+
+export function getApplication(id) {
+  return request(`/api/profissional/aplicacoes/${id}`, {
     method: 'GET',
     auth: true,
   })
