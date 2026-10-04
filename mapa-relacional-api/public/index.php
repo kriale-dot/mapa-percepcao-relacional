@@ -10,6 +10,7 @@ use App\Controller\HealthController;
 use App\Controller\InstrumentController;
 use App\Controller\InstrumentVersionController;
 use App\Controller\ItemController;
+use App\Controller\PersonController;
 use App\Controller\ProfessionalController;
 use App\Controller\SectionController;
 use App\Middleware\CorsMiddleware;
@@ -51,6 +52,7 @@ $instrumentController = new InstrumentController();
 $instrumentVersionController = new InstrumentVersionController();
 $sectionController = new SectionController();
 $itemController = new ItemController();
+$personController = new PersonController();
 
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
@@ -63,12 +65,19 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $instrumentController,
     $instrumentVersionController,
     $sectionController,
-    $itemController
+    $itemController,
+    $personController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->put('/senha', [$authController, 'changePassword']);
     $group->get('/perfil', [$professionalController, 'profile']);
     $group->put('/perfil', [$professionalController, 'updateProfile']);
+
+    $group->get('/pessoas', [$personController, 'index']);
+    $group->post('/pessoas', [$personController, 'create']);
+    $group->get('/pessoas/{id:[0-9]+}', [$personController, 'show']);
+    $group->put('/pessoas/{id:[0-9]+}', [$personController, 'update']);
+    $group->delete('/pessoas/{id:[0-9]+}', [$personController, 'delete']);
 
     $group->get('/instrumentos', [$instrumentController, 'index']);
     $group->post('/instrumentos', [$instrumentController, 'create']);
