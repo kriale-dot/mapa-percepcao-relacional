@@ -1450,3 +1450,5 @@ Validar:
 Não há migration nova nesta correção.
 
 **Próximo passo após a validação:** concluir a Etapa 6.1 e implementar a geração dos dois acessos individuais seguros.
+
+Na Etapa 6.2, além de gerar os dois acessos individuais, o backend deverá enviar os links ao e-mail cadastrado. A tela de confirmação pública só poderá mostrar a mensagem de que os links foram enviados depois de receber confirmação de sucesso desse envio.
