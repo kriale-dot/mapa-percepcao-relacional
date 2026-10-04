@@ -11,6 +11,7 @@ import ProfessionalRelationships from './pages/ProfessionalRelationships'
 import ProfessionalApplications from './pages/ProfessionalApplications'
 import PublicEvaluations from './pages/PublicEvaluations'
 import PublicEvaluationStart from './pages/PublicEvaluationStart'
+import PublicParticipantAccess from './pages/PublicParticipantAccess'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -59,6 +60,14 @@ function App() {
         versionId={Number(publicEvaluationMatch[1])}
       />
     )
+  }
+
+  const participantAccessMatch = path.match(
+    /^\/avaliacao\/acesso\/([a-fA-F0-9]{64})$/,
+  )
+
+  if (participantAccessMatch) {
+    return <PublicParticipantAccess token={participantAccessMatch[1]} />
   }
 
   if (path === '/profissional/login') {
