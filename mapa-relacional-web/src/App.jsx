@@ -8,6 +8,7 @@ import ProfessionalItems from './pages/ProfessionalItems'
 import ProfessionalAlternatives from './pages/ProfessionalAlternatives'
 import ProfessionalPeople from './pages/ProfessionalPeople'
 import ProfessionalRelationships from './pages/ProfessionalRelationships'
+import ProfessionalApplications from './pages/ProfessionalApplications'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -64,6 +65,10 @@ function App() {
 
   if (path === '/profissional/vinculos') {
     return <ProfessionalRelationships />
+  }
+
+  if (path === '/profissional/avaliacoes') {
+    return <ProfessionalApplications />
   }
 
   const versionsMatch = path.match(
@@ -528,7 +533,7 @@ function ProfessionalArea() {
             {
               title: 'Avaliações',
               description: 'Crie e acompanhe aplicações relacionais.',
-              path: null,
+              path: '/profissional/avaliacoes',
             },
             {
               title: 'Resultados',
