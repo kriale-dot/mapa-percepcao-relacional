@@ -237,7 +237,7 @@ export default function ProfessionalApplications() {
                   {selectedRelationship.pessoa_b_nome}
                 </p>
                 <p className="mt-3 text-xs text-[#385048]/60">
-                  O tipo e a duração atuais do vínculo serão copiados para a
+                  O tipo e o tempo de união atuais serão copiados para a
                   aplicação como snapshot.
                 </p>
               </div>
@@ -281,7 +281,7 @@ export default function ProfessionalApplications() {
 
                 <label className="block">
                   <span className="text-sm font-medium">
-                    Duração do vínculo
+                    Tempo de união
                   </span>
                   <input
                     type="text"
@@ -375,7 +375,7 @@ export default function ProfessionalApplications() {
 
                 {application.duracao_vinculo_texto ? (
                   <p className="mt-1 text-sm text-[#385048]/65">
-                    Duração: {application.duracao_vinculo_texto}
+                    Tempo de união: {application.duracao_vinculo_texto}
                   </p>
                 ) : null}
 
