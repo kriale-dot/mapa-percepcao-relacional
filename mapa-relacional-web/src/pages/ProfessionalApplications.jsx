@@ -407,6 +407,20 @@ export default function ProfessionalApplications() {
                   </div>
                 </div>
 
+                {application.status === 'CONCLUIDA' ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      navigate(
+                        `/profissional/avaliacoes/${application.id}/resultados`,
+                      )
+                    }
+                    className="mt-5 rounded-xl bg-[#385048] px-4 py-2 text-sm font-semibold text-white"
+                  >
+                    Ver resultados
+                  </button>
+                ) : null}
+
                 <p className="mt-4 text-xs text-[#385048]/50">
                   Aplicação #{application.id}
                   {application.vinculo_id
