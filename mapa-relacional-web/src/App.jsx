@@ -7,6 +7,7 @@ import ProfessionalSections from './pages/ProfessionalSections'
 import ProfessionalItems from './pages/ProfessionalItems'
 import ProfessionalAlternatives from './pages/ProfessionalAlternatives'
 import ProfessionalPeople from './pages/ProfessionalPeople'
+import ProfessionalRelationships from './pages/ProfessionalRelationships'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -59,6 +60,10 @@ function App() {
 
   if (path === '/profissional/pessoas') {
     return <ProfessionalPeople />
+  }
+
+  if (path === '/profissional/vinculos') {
+    return <ProfessionalRelationships />
   }
 
   const versionsMatch = path.match(
@@ -514,6 +519,11 @@ function ProfessionalArea() {
               title: 'Pessoas',
               description: 'Cadastre participantes e mantenha seus dados administrativos.',
               path: '/profissional/pessoas',
+            },
+            {
+              title: 'Vínculos',
+              description: 'Relacione duas pessoas e preserve os lados A e B.',
+              path: '/profissional/vinculos',
             },
             {
               title: 'Avaliações',
