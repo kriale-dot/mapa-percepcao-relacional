@@ -570,6 +570,207 @@ final class ParticipantAccessController
         ]);
     }
 
+    public function excludeItem(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface {
+        $token = trim((string) ($args['token'] ?? ''));
+        $access = $this->resolveAccess($token, $response);
+
+        if ($access instanceof ResponseInterface) {
+            return $access;
+        }
+
+        if (
+            (string) $access['participante_status'] === 'PENDENTE'
+            || $access['idade_snapshot'] === null
+            || trim((string) ($access['genero_snapshot'] ?? '')) === ''
+        ) {
+            return $this->json($response, [
+                'error' => 'identification_required',
+                'message' => 'Conclua sua identificacao antes de marcar Nao se aplica.',
+            ], 409);
+        }
+
+        $itemId = $this->positiveId($args['itemId'] ?? null);
+
+        if ($itemId === null) {
+            return $this->json($response, [
+                'error' => 'item_not_found',
+                'message' => 'Item nao encontrado nesta avaliacao.',
+            ], 404);
+        }
+
+        $item = $this->findExcludableItem(
+            (int) $access['instrumento_versao_id'],
+            $itemId
+        );
+
+        if ($item === null) {
+            return $this->json($response, [
+                'error' => 'not_applicable_not_allowed',
+                'message' => 'Este item nao permite a opcao Nao se aplica.',
+            ], 409);
+        }
+
+        $data = $request->getParsedBody();
+        $data = is_array($data) ? $data : [];
+        $reason = $this->optional($data['motivo'] ?? null);
+
+        if ($reason !== null && strlen($reason) > 255) {
+            return $this->validation(
+                $response,
+                'O motivo deve ter no maximo 255 caracteres.'
+            );
+        }
+
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            'INSERT IGNORE INTO aplicacao_itens_excluidos (
+                aplicacao_id,
+                item_id,
+                marcado_por_participante_id,
+                motivo
+             ) VALUES (
+                :aplicacao_id,
+                :item_id,
+                :participante_id,
+                :motivo
+             )'
+        );
+        $stmt->execute([
+            'aplicacao_id' => (int) $access['aplicacao_id'],
+            'item_id' => $itemId,
+            'participante_id' => (int) $access['participante_id'],
+            'motivo' => $reason,
+        ]);
+
+        $touch = $pdo->prepare(
+            'UPDATE acessos_aplicacao
+                SET ultimo_acesso_em = NOW()
+              WHERE id = :id'
+        );
+        $touch->execute([
+            'id' => (int) $access['acesso_id'],
+        ]);
+
+        return $this->json($response, [
+            'message' => 'Item marcado como Nao se aplica para esta avaliacao.',
+            'item_id' => $itemId,
+            'progresso' => $this->calculateProgress($access),
+        ]);
+    }
+
+    public function complete(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface {
+        $token = trim((string) ($args['token'] ?? ''));
+        $access = $this->resolveAccess($token, $response);
+
+        if ($access instanceof ResponseInterface) {
+            return $access;
+        }
+
+        if (
+            (string) $access['participante_status'] === 'PENDENTE'
+            || $access['idade_snapshot'] === null
+            || trim((string) ($access['genero_snapshot'] ?? '')) === ''
+        ) {
+            return $this->json($response, [
+                'error' => 'identification_required',
+                'message' => 'Conclua sua identificacao antes de finalizar.',
+            ], 409);
+        }
+
+        $progress = $this->calculateProgress($access);
+
+        if ((int) $progress['respondidas'] !== (int) $progress['total']) {
+            return $this->json($response, [
+                'error' => 'incomplete_questionnaire',
+                'message' => 'Responda todas as perspectivas dos itens validos antes de concluir.',
+                'progresso' => $progress,
+            ], 409);
+        }
+
+        $pdo = Database::connect();
+        $pdo->beginTransaction();
+
+        try {
+            $participantStmt = $pdo->prepare(
+                'UPDATE aplicacao_participantes
+                    SET status = :status,
+                        concluiu_em = COALESCE(concluiu_em, NOW())
+                  WHERE id = :id'
+            );
+            $participantStmt->execute([
+                'status' => 'CONCLUIDO',
+                'id' => (int) $access['participante_id'],
+            ]);
+
+            $accessStmt = $pdo->prepare(
+                'UPDATE acessos_aplicacao
+                    SET status = :status,
+                        ultimo_acesso_em = NOW(),
+                        concluido_em = COALESCE(concluido_em, NOW())
+                  WHERE id = :id'
+            );
+            $accessStmt->execute([
+                'status' => 'CONCLUIDO',
+                'id' => (int) $access['acesso_id'],
+            ]);
+
+            $countStmt = $pdo->prepare(
+                'SELECT COUNT(*)
+                   FROM aplicacao_participantes
+                  WHERE aplicacao_id = :aplicacao_id
+                    AND status = :status'
+            );
+            $countStmt->execute([
+                'aplicacao_id' => (int) $access['aplicacao_id'],
+                'status' => 'CONCLUIDO',
+            ]);
+            $completedParticipants = (int) $countStmt->fetchColumn();
+
+            $applicationCompleted = $completedParticipants === 2;
+
+            if ($applicationCompleted) {
+                $applicationStmt = $pdo->prepare(
+                    'UPDATE aplicacoes
+                        SET status = :status,
+                            concluida_em = COALESCE(concluida_em, NOW())
+                      WHERE id = :id'
+                );
+                $applicationStmt->execute([
+                    'status' => 'CONCLUIDA',
+                    'id' => (int) $access['aplicacao_id'],
+                ]);
+            }
+
+            $pdo->commit();
+        } catch (\Throwable $error) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $error;
+        }
+
+        return $this->json($response, [
+            'message' => $applicationCompleted
+                ? 'Avaliacao concluida pelos dois participantes.'
+                : 'Sua participacao foi concluida com sucesso.',
+            'participante_status' => 'CONCLUIDO',
+            'aplicacao_status' => $applicationCompleted
+                ? 'CONCLUIDA'
+                : 'EM_ANDAMENTO',
+            'ambos_concluidos' => $applicationCompleted,
+        ]);
+    }
+
     /**
      * @return array<string,mixed>|ResponseInterface
      */
@@ -687,6 +888,37 @@ final class ParticipantAccessController
                 'concluiu_em' => $access['concluiu_em'],
             ],
         ];
+    }
+
+    private function findExcludableItem(
+        int $versionId,
+        int $itemId
+    ): ?array {
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            'SELECT
+                i.id,
+                i.codigo,
+                i.texto
+             FROM itens i
+             INNER JOIN secoes s
+               ON s.id = i.secao_id
+             WHERE i.id = :item_id
+               AND i.ativo = 1
+               AND i.permite_nao_se_aplica = 1
+               AND s.instrumento_versao_id = :versao_id
+               AND s.ativo = 1
+             LIMIT 1'
+        );
+        $stmt->execute([
+            'item_id' => $itemId,
+            'versao_id' => $versionId,
+        ]);
+
+        $item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $item === false ? null : $item;
     }
 
     private function findAnswerableItem(
