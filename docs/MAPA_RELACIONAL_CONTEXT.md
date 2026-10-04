@@ -253,6 +253,18 @@ No frontend da V1, a área profissional usa as rotas `/profissional/login` e `/p
 
 A alteração de senha autenticada usa `PUT /api/profissional/senha`. O backend exige a senha atual, valida a nova senha, grava somente um novo `password_hash()` e atualiza `senha_alterada_em`. O JWT profissional inclui uma impressão digital derivada do hash atual da senha; o middleware compara essa impressão com o hash vigente no banco. Assim, quando a senha muda, tokens emitidos antes da alteração deixam de ser aceitos. O frontend encerra a sessão local e exige novo login após a troca de senha.
 
+### Pessoas
+
+O cadastro administrativo de pessoas da V1 é acessado em `/profissional/pessoas` e utiliza rotas protegidas sob `/api/profissional/pessoas`.
+
+Cada pessoa pertence ao profissional autenticado e possui nome, e-mail opcional, telefone opcional, data de nascimento opcional, observação administrativa opcional e status.
+
+Os estados adotados nesta etapa são `ATIVO` e `INATIVO`.
+
+A edição do cadastro da pessoa altera apenas os dados administrativos atuais. Snapshots de avaliações são estruturas separadas e não devem ser retroativamente modificados por alterações posteriores no cadastro.
+
+A exclusão física só é permitida enquanto a pessoa não possui vínculos nem aplicações associadas. Quando já houver histórico, a pessoa deve ser preservada e pode ser marcada como `INATIVO`.
+
 ### Instrumentos
 
 O gerenciamento inicial de instrumentos da V1 é acessado em `/profissional/instrumentos` e utiliza rotas protegidas sob `/api/profissional/instrumentos`.
