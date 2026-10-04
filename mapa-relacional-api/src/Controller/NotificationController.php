@@ -56,7 +56,8 @@ final class NotificationController
                 ap.status AS participante_status,
                 aa.id AS acesso_id,
                 aa.token_hash,
-                aa.status AS acesso_status
+                aa.status AS acesso_status,
+                aa.revogado_em
              FROM aplicacoes a
              INNER JOIN instrumento_versoes v
                ON v.id = a.instrumento_versao_id
@@ -85,7 +86,8 @@ final class NotificationController
 
         if (
             (string) $context['participante_status'] === 'CONCLUIDO'
-            || (string) $context['acesso_status'] === 'CONCLUIDO'
+            || (string) $context['acesso_status'] !== 'ATIVO'
+            || $context['revogado_em'] !== null
             || (string) $context['aplicacao_status'] === 'CONCLUIDA'
             || (string) $context['aplicacao_status'] === 'CANCELADA'
         ) {
@@ -101,17 +103,23 @@ final class NotificationController
 
         $update = $pdo->prepare(
             'UPDATE acessos_aplicacao
-                SET token_hash = :token_hash,
-                    status = :status,
-                    revogado_em = NULL,
-                    enviado_em = NULL
-              WHERE id = :id'
+                SET token_hash = :token_hash
+              WHERE id = :id
+                AND status = :status
+                AND revogado_em IS NULL'
         );
         $update->execute([
             'token_hash' => $tokenData['hash'],
-            'status' => 'ATIVO',
             'id' => (int) $context['acesso_id'],
+            'status' => 'ATIVO',
         ]);
+
+        if ($update->rowCount() !== 1) {
+            return $this->json($response, [
+                'error' => 'access_cannot_be_resent',
+                'message' => 'Este acesso nao pode mais ser reenviado.',
+            ], 409);
+        }
 
         try {
             $this->mailService->sendSingleParticipantAccessLink(
