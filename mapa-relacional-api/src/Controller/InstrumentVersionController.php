@@ -96,6 +96,8 @@ final class InstrumentVersionController
         $pdo = Database::connect();
 
         try {
+            $pdo->beginTransaction();
+
             $stmt = $pdo->prepare(
                 'INSERT INTO instrumento_versoes (
                     instrumento_id,
@@ -112,7 +114,48 @@ final class InstrumentVersionController
                 'numero_versao' => $numeroVersao,
                 'status' => 'RASCUNHO',
             ]);
+
+            $versionId = (int) $pdo->lastInsertId();
+
+            $bandStmt = $pdo->prepare(
+                'INSERT INTO resultado_faixas (
+                    instrumento_versao_id,
+                    codigo,
+                    rotulo,
+                    minimo,
+                    maximo,
+                    ordem
+                 ) VALUES (
+                    :versao_id,
+                    :codigo,
+                    :rotulo,
+                    :minimo,
+                    :maximo,
+                    :ordem
+                 )'
+            );
+
+            foreach ([
+                ['RUIM', 'Ruim', 0.00, 33.00, 1],
+                ['REGULAR', 'Regular', 34.00, 66.00, 2],
+                ['BOM', 'Bom', 67.00, 100.00, 3],
+            ] as [$codigo, $rotulo, $minimo, $maximo, $ordem]) {
+                $bandStmt->execute([
+                    'versao_id' => $versionId,
+                    'codigo' => $codigo,
+                    'rotulo' => $rotulo,
+                    'minimo' => $minimo,
+                    'maximo' => $maximo,
+                    'ordem' => $ordem,
+                ]);
+            }
+
+            $pdo->commit();
         } catch (PDOException $error) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
             if ((string) $error->getCode() === '23000') {
                 return $this->json($response, [
                     'error' => 'version_number_in_use',
@@ -122,8 +165,6 @@ final class InstrumentVersionController
 
             throw $error;
         }
-
-        $versionId = (int) $pdo->lastInsertId();
 
         return $this->json(
             $response,
