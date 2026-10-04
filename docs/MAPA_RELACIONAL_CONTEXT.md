@@ -573,3 +573,54 @@ A conclusão individual só é permitida quando todas as duas perspectivas dos i
 - quando A e B concluem, a aplicação passa para `CONCLUIDA` e recebe `concluida_em`.
 
 Depois da conclusão dos dois participantes, a aplicação fica pronta para a etapa de comparação e resultados.
+
+### Comparação e resultados técnicos
+
+A Etapa 7 introduz o cálculo técnico das percepções depois que os dois participantes concluem.
+
+Os dois sentidos oficiais são:
+
+```text
+A_SOBRE_B = A → B × B → B
+B_SOBRE_A = B → A × A → A
+```
+
+Para cada item válido, o backend busca exatamente as duas respostas necessárias ao sentido. Itens presentes em `aplicacao_itens_excluidos` ficam totalmente fora das comparações e do denominador.
+
+Uma comparação é considerada coincidente quando:
+
+- respostas por alternativa apontam para a mesma alternativa;
+- respostas numéricas possuem o mesmo valor numérico;
+- respostas textuais, quando usadas, são iguais após remoção de espaços nas extremidades.
+
+Se uma das duas respostas necessárias estiver ausente ou os formatos forem incompatíveis, a comparação é persistida como não comparável e não entra no denominador.
+
+O percentual por sentido é:
+
+```text
+coincidências / comparações válidas × 100
+```
+
+Os resultados são persistidos separadamente para `A_SOBRE_B` e `B_SOBRE_A`. Não existe resultado global automático nesta etapa, porque a regra de consolidação global permanece aberta nos requisitos.
+
+As faixas de interpretação passam a ser registros versionados por `instrumento_versao_id` em `resultado_faixas`. As faixas-base continuam significando:
+
+- Ruim: de 0 até antes de 34%;
+- Regular: de 34 até antes de 67%;
+- Bom: de 67 até 100%.
+
+Como o percentual pode possuir casas decimais, os limites técnicos armazenados são 0–33,99; 34–66,99; 67–100, preservando o significado dos intervalos inteiros do material-base sem deixar lacunas decimais.
+
+Ao concluir o segundo participante, o backend calcula e persiste automaticamente `comparacoes` e `resultados` dentro da mesma transação de conclusão. A área profissional também possui uma ação de recálculo para aplicações concluídas anteriormente.
+
+A área profissional pode consultar:
+
+- percentual e faixa por sentido;
+- coincidências e comparações válidas;
+- consolidação derivada por seção;
+- comparação item a item;
+- respostas percebida e autorreferida envolvidas;
+- coincidências, divergências e casos não comparáveis;
+- itens removidos por “Não se aplica”.
+
+O cálculo é técnico e não produz diagnóstico clínico automático.
