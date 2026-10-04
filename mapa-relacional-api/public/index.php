@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Config\Database;
 use App\Config\LoggerFactory;
+use App\Controller\AlternativeController;
 use App\Controller\AuthController;
 use App\Controller\HealthController;
 use App\Controller\InstrumentController;
@@ -43,6 +44,7 @@ $errorMiddleware = $app->addErrorMiddleware(
 );
 
 $healthController = new HealthController();
+$alternativeController = new AlternativeController();
 $authController = new AuthController();
 $professionalController = new ProfessionalController();
 $instrumentController = new InstrumentController();
@@ -55,6 +57,7 @@ $app->get('/api/health/database', [$healthController, 'database']);
 $app->post('/api/auth/login', [$authController, 'login']);
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
+    $alternativeController,
     $authController,
     $professionalController,
     $instrumentController,
@@ -130,6 +133,23 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->delete(
         '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/secoes/{sectionId:[0-9]+}/itens/{itemId:[0-9]+}',
         [$itemController, 'delete']
+    );
+
+    $group->get(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/secoes/{sectionId:[0-9]+}/itens/{itemId:[0-9]+}/alternativas',
+        [$alternativeController, 'index']
+    );
+    $group->post(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/secoes/{sectionId:[0-9]+}/itens/{itemId:[0-9]+}/alternativas',
+        [$alternativeController, 'create']
+    );
+    $group->put(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/secoes/{sectionId:[0-9]+}/itens/{itemId:[0-9]+}/alternativas/{alternativeId:[0-9]+}',
+        [$alternativeController, 'update']
+    );
+    $group->delete(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/secoes/{sectionId:[0-9]+}/itens/{itemId:[0-9]+}/alternativas/{alternativeId:[0-9]+}',
+        [$alternativeController, 'delete']
     );
 })->add(new ProfessionalAuthMiddleware());
 
