@@ -156,6 +156,7 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->delete('/vinculos/{id:[0-9]+}', [$relationshipController, 'delete']);
 
     $group->get('/aplicacoes/opcoes', [$applicationController, 'options']);
+    $group->get('/dashboard', [$applicationController, 'dashboard']);
     $group->get('/aplicacoes', [$applicationController, 'index']);
     $group->post('/aplicacoes', [$applicationController, 'create']);
     $group->get('/aplicacoes/{id:[0-9]+}', [$applicationController, 'show']);
