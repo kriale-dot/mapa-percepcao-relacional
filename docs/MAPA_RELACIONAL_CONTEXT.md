@@ -695,3 +695,46 @@ A página pública da devolutiva mostra:
 Por privacidade, a página pública **não mostra as respostas individuais brutas nem a comparação item a item**. Essas informações continuam disponíveis somente na área profissional.
 
 A devolutiva técnica não constitui diagnóstico clínico automático.
+
+### Dashboard e acompanhamento profissional
+
+Na Etapa 9, a rota `/profissional` passa a ser um dashboard operacional real.
+
+O dashboard apresenta contagens derivadas do estado atual do banco:
+
+- total de avaliações;
+- prontas;
+- em andamento;
+- concluídas;
+- resultados disponíveis;
+- devolutivas em rascunho;
+- devolutivas liberadas;
+- avaliações recentes.
+
+Esses indicadores não são armazenados em tabela própria; são calculados a partir de `aplicacoes`, `resultados` e `devolutivas`.
+
+A lista profissional de avaliações passa a suportar filtros por:
+
+- participante ou e-mail;
+- status;
+- instrumento;
+- vínculo administrativo, quando existir;
+- tipo de vínculo;
+- período de criação.
+
+Os filtros são executados no backend e sempre restritos ao profissional autenticado.
+
+A página de detalhe de uma aplicação mostra:
+
+- identificação da aplicação;
+- instrumento e versão;
+- e-mail;
+- tipo de vínculo e tempo de união;
+- status e datas principais;
+- dados e status de A e B;
+- resumo dos resultados quando disponíveis;
+- itens marcados como “Não se aplica”;
+- status da devolutiva;
+- atalhos para o painel completo de resultados.
+
+O autoatendimento público continua independente dos cadastros permanentes de `pessoas` e `vinculos`, por isso o detalhe profissional deve funcionar também quando `vinculo_id` e `pessoa_id` forem nulos.
