@@ -297,6 +297,18 @@ A opção `permite_nao_se_aplica` é configurável por item. O comportamento glo
 
 Um item só pode ser excluído fisicamente enquanto não possui alternativas nem respostas vinculadas.
 
+### Alternativas dos itens
+
+Itens de resposta fechada podem possuir alternativas. Cada alternativa pertence a um item e possui `valor`, `rotulo`, `ordem` e indicador ativo.
+
+O `valor` é o identificador persistido da opção e deve ser único dentro do próprio item. O `rotulo` é o texto apresentado ao participante.
+
+Somente versões em `RASCUNHO` permitem criar, editar ou excluir alternativas. Em versões `PUBLICADA` ou `ARQUIVADA`, as alternativas permanecem somente para leitura.
+
+A ordem pode ser omitida na criação; nesse caso, a alternativa é posicionada automaticamente ao final.
+
+Uma alternativa com respostas vinculadas não pode ser excluída fisicamente, mesmo que a chave estrangeira permita `ON DELETE SET NULL`; a aplicação adota essa proteção para preservar rastreabilidade histórica.
+
 ### Perfil profissional
 
 O perfil profissional da V1 é acessado em `/profissional/perfil` e usa as rotas protegidas `GET /api/profissional/perfil` e `PUT /api/profissional/perfil`.
