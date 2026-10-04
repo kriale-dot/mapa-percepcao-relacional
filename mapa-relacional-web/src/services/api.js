@@ -135,6 +135,28 @@ export function deleteRelationship(id) {
   })
 }
 
+export function listApplications() {
+  return request('/api/profissional/aplicacoes', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function getApplicationOptions() {
+  return request('/api/profissional/aplicacoes/opcoes', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function createApplication(application) {
+  return request('/api/profissional/aplicacoes', {
+    method: 'POST',
+    auth: true,
+    body: JSON.stringify(application),
+  })
+}
+
 export function listInstruments() {
   return request('/api/profissional/instrumentos', {
     method: 'GET',
