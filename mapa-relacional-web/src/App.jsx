@@ -4,6 +4,7 @@ import ProfessionalPassword from './pages/ProfessionalPassword'
 import ProfessionalInstruments from './pages/ProfessionalInstruments'
 import ProfessionalInstrumentVersions from './pages/ProfessionalInstrumentVersions'
 import ProfessionalSections from './pages/ProfessionalSections'
+import ProfessionalItems from './pages/ProfessionalItems'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -75,6 +76,20 @@ function App() {
       <ProfessionalSections
         instrumentId={Number(sectionsMatch[1])}
         versionId={Number(sectionsMatch[2])}
+      />
+    )
+  }
+
+  const itemsMatch = path.match(
+    /^\/profissional\/instrumentos\/([1-9][0-9]*)\/versoes\/([1-9][0-9]*)\/secoes\/([1-9][0-9]*)\/itens$/,
+  )
+
+  if (itemsMatch) {
+    return (
+      <ProfessionalItems
+        instrumentId={Number(itemsMatch[1])}
+        versionId={Number(itemsMatch[2])}
+        sectionId={Number(itemsMatch[3])}
       />
     )
   }
