@@ -29,6 +29,16 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 $root = dirname(__DIR__);
 
+$phpLogDir = $root . '/storage/logs';
+
+if (!is_dir($phpLogDir)) {
+    @mkdir($phpLogDir, 0775, true);
+}
+
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+ini_set('error_log', $phpLogDir . '/php-error.log');
+
 if (is_file($root . '/.env')) {
     Dotenv::createImmutable($root)->safeLoad();
 }
