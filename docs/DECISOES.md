@@ -364,3 +364,13 @@ Regras:
 - a criação manual pela área profissional permanece como modo assistido secundário.
 
 D-025 continua vigente quanto à versão publicada, criação atômica da aplicação e existência obrigatória dos lados A/B; D-026 redefine **quem inicia normalmente a aplicação**.
+
+## D-027 — Termo oficial “Tempo de união”
+**Data:** 2026-10-04  
+**Status:** vigente
+
+Na interface, documentação funcional e comunicação com usuários, o termo oficial é **“Tempo de união”**.
+
+Não utilizar “duração do vínculo” como rótulo ou texto apresentado ao usuário.
+
+Para preservar a continuidade técnica e evitar migration desnecessária, nomes internos já existentes, como `duracao_texto` e `duracao_vinculo_texto`, podem permanecer no banco e na API enquanto não houver necessidade técnica de renomeação. Essa nomenclatura interna não deve aparecer na interface.
