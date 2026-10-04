@@ -590,3 +590,67 @@ A lista de avaliações recebe filtros server-side e todos os filtros continuam 
 A página de detalhe é a visão operacional principal de uma aplicação e deve funcionar tanto para aplicações vinculadas a cadastros administrativos quanto para aplicações criadas pelo autoatendimento público sem `pessoas` ou `vinculos` permanentes.
 
 Essa decisão evita duplicação de estado e mantém o dashboard consistente com os dados transacionais reais.
+
+## D-038 — Reenvio invalida o link anterior
+**Data:** 2026-10-04  
+**Status:** vigente
+
+Tokens brutos de participante e devolutiva não são armazenados.
+
+Quando o profissional solicita reenvio:
+
+- um novo token criptograficamente aleatório é gerado;
+- somente seu SHA-256 substitui o hash anterior;
+- o link anterior deixa de funcionar imediatamente;
+- o novo link só é considerado reenviado depois da confirmação do SMTP;
+- em falha de SMTP, o hash anterior é restaurado;
+- participante concluído não pode receber novo acesso de preenchimento.
+
+Essa regra permite reenvio sem manter segredos recuperáveis no banco.
+
+## D-039 — Auditoria não armazena segredos
+**Data:** 2026-10-04  
+**Status:** vigente
+
+A trilha de auditoria é persistida em `auditoria_eventos`.
+
+Ela registra ator, ação, entidade, contexto não sensível, IP e user agent, mas deve eliminar campos que indiquem senha, token, JWT, autorização ou credencial SMTP.
+
+Eventos de participantes são associados ao `profissional_id` proprietário da aplicação para aparecerem na trilha profissional correspondente.
+
+## D-040 — Rate limit persistido protege login e autoatendimento
+**Data:** 2026-10-04  
+**Status:** vigente
+
+A V1 usa rate limit persistido em MySQL.
+
+No login profissional:
+
+- limite por IP;
+- limite por conta/e-mail;
+- depois de atingido o limite, novas tentativas são bloqueadas antes da verificação da senha até o fim da janela.
+
+Na criação pública de avaliação:
+
+- limite por IP;
+- limite por e-mail informado.
+
+Os parâmetros ficam no `.env` para ajuste operacional sem alterar código.
+
+## D-041 — Checklist e backup são requisitos de liberação da V1
+**Data:** 2026-10-04  
+**Status:** vigente
+
+O deploy da V1 não deve ser considerado pronto apenas porque a aplicação inicia.
+
+Antes da liberação:
+
+- executar `composer migrate`;
+- executar `composer check-domain`;
+- executar `composer check`;
+- executar `composer check-v1`;
+- gerar backup com `composer backup-db`;
+- validar restauração em banco separado;
+- executar ao menos um fluxo funcional completo em ambiente de produção/homologação.
+
+O documento operacional oficial é `docs/PRODUCAO_V1.md`.
