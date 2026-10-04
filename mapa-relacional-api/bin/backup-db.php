@@ -25,15 +25,36 @@ $username = trim((string) ($_ENV['DB_USERNAME'] ?? ''));
 $password = (string) ($_ENV['DB_PASSWORD'] ?? '');
 $host = trim((string) ($_ENV['DB_HOST'] ?? '127.0.0.1'));
 $port = trim((string) ($_ENV['DB_PORT'] ?? '3306'));
-$binary = trim((string) ($_ENV['MYSQLDUMP_BIN'] ?? 'mysqldump'));
+$configuredBinary = trim(
+    (string) ($_ENV['MYSQLDUMP_BIN'] ?? 'mysqldump')
+);
+$binary = resolveMysqldumpBinary($configuredBinary);
 
-if ($database === '' || $username === '' || $binary === '') {
+if ($database === '' || $username === '') {
     fwrite(
         STDERR,
-        "[ERRO] DB_DATABASE, DB_USERNAME e MYSQLDUMP_BIN sao obrigatorios.\n"
+        "[ERRO] DB_DATABASE e DB_USERNAME sao obrigatorios.\n"
     );
     exit(1);
 }
+
+if ($binary === null) {
+    fwrite(
+        STDERR,
+        "[ERRO] mysqldump nao foi encontrado.\n"
+    );
+    fwrite(
+        STDERR,
+        "No Windows, localize o arquivo mysqldump.exe e configure no .env, por exemplo:\n"
+    );
+    fwrite(
+        STDERR,
+        "MYSQLDUMP_BIN=\"C:\\\\Program Files\\\\MySQL\\\\MySQL Server 8.0\\\\bin\\\\mysqldump.exe\"\n"
+    );
+    exit(1);
+}
+
+echo "[OK] mysqldump localizado: {$binary}\n";
 
 $backupDir = $root . '/storage/backups';
 
@@ -146,3 +167,93 @@ echo "[OK] Backup criado.\n";
 echo "Arquivo: {$path}\n";
 echo "Tamanho: {$size} bytes\n";
 echo "SHA-256: {$hash}\n";
+
+
+/**
+ * Localiza o executavel mysqldump no PATH, no valor configurado
+ * ou em instalacoes comuns do Windows.
+ */
+function resolveMysqldumpBinary(string $configured): ?string
+{
+    $configured = trim($configured, " \t\n\r\0\x0B\"'");
+
+    if ($configured === '') {
+        return null;
+    }
+
+    $hasDirectory = str_contains($configured, '/')
+        || str_contains($configured, '\\');
+
+    if ($hasDirectory) {
+        return is_file($configured) ? $configured : null;
+    }
+
+    $isWindows = PHP_OS_FAMILY === 'Windows';
+    $executableName = $configured;
+
+    if ($isWindows && !str_ends_with(strtolower($executableName), '.exe')) {
+        $executableName .= '.exe';
+    }
+
+    $pathValue = (string) (
+        getenv('PATH')
+        ?: ($_SERVER['PATH'] ?? '')
+    );
+
+    foreach (explode(PATH_SEPARATOR, $pathValue) as $directory) {
+        $directory = trim($directory, " \t\n\r\0\x0B\"");
+
+        if ($directory === '') {
+            continue;
+        }
+
+        $candidate = rtrim($directory, '/\\')
+            . DIRECTORY_SEPARATOR
+            . $executableName;
+
+        if (is_file($candidate)) {
+            return $candidate;
+        }
+    }
+
+    if (!$isWindows) {
+        foreach ([
+            '/usr/bin/mysqldump',
+            '/usr/local/bin/mysqldump',
+            '/opt/homebrew/bin/mysqldump',
+        ] as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    $patterns = [
+        'C:/Program Files/MySQL/MySQL Server */bin/mysqldump.exe',
+        'C:/Program Files (x86)/MySQL/MySQL Server */bin/mysqldump.exe',
+        'C:/Program Files/MariaDB */bin/mysqldump.exe',
+        'C:/xampp/mysql/bin/mysqldump.exe',
+        'C:/laragon/bin/mysql/*/bin/mysqldump.exe',
+        'C:/wamp64/bin/mysql/*/bin/mysqldump.exe',
+    ];
+
+    foreach ($patterns as $pattern) {
+        $matches = glob($pattern) ?: [];
+
+        if ($matches === []) {
+            continue;
+        }
+
+        rsort($matches, SORT_NATURAL);
+
+        foreach ($matches as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+    }
+
+    return null;
+}
