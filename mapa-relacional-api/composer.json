@@ -38,7 +38,8 @@
       "php -l src/Controller/InstrumentVersionController.php",
       "php -l src/Controller/SectionController.php",
       "php -l src/Controller/ItemController.php",
-      "php -l src/Controller/AlternativeController.php"
+      "php -l src/Controller/AlternativeController.php",
+      "php -l src/Controller/PersonController.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
