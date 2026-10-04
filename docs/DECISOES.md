@@ -322,3 +322,22 @@ Regras:
 - estados adotados: `ATIVO` e `INATIVO`;
 - um mesmo vínculo pode ser utilizado em múltiplas aplicações;
 - vínculo com aplicações associadas não pode ser excluído fisicamente e deve ser preservado por inativação.
+
+## D-025 — Aplicações usam versão publicada e criam A/B atomicamente
+**Data:** 2026-10-04  
+**Status:** vigente
+
+Novas aplicações somente podem apontar para versões `PUBLICADA` do instrumento.
+
+A criação de uma aplicação e de seus dois participantes operacionais é atômica:
+
+- aplicação criada com status `RASCUNHO`;
+- participante lado `A` criado com status `PENDENTE`;
+- participante lado `B` criado com status `PENDENTE`;
+- se qualquer inserção falhar, toda a transação é revertida.
+
+O vínculo é opcional na criação. Quando informado, deve estar ativo e pertencer ao profissional autenticado; seus lados A/B, tipo e duração são copiados para a aplicação como base do snapshot.
+
+Sem vínculo prévio, são criados dois slots A/B sem `pessoa_id`, permitindo que a identificação seja completada posteriormente pelo fluxo do participante.
+
+O nome atual da pessoa vinculada pode preencher `nome_snapshot` no momento da criação. `idade_snapshot` e `genero_snapshot` permanecem nulos até o fluxo de identificação do participante.
