@@ -97,11 +97,14 @@ A API deverá permanecer separada do frontend.
 - sua identificação;
 - sua apresentação;
 - sua atuação;
-- informações sobre o instrumento;
+- informações sobre os instrumentos/avaliações disponíveis;
 - conteúdos institucionais;
 - meios de contato;
 - chamadas para ação;
-- entrada para cadastro/início de avaliação quando habilitada.
+- catálogo público de avaliações disponíveis;
+- início autônomo de uma avaliação pelo próprio visitante, sem intervenção prévia do profissional.
+
+O fluxo público de autoatendimento é parte central do produto: o visitante poderá escolher uma avaliação disponibilizada publicamente, informar os participantes, o tipo e a duração do vínculo e iniciar o processo. A aplicação criada deverá aparecer automaticamente na área profissional para acompanhamento e posterior contato.
 
 ### 3.2 Área do participante
 
@@ -384,14 +387,36 @@ No instrumento atual, essa opção deve estar disponível quando aplicável à p
 
 ### RF-050 — Nova aplicação
 
-O profissional deverá poder criar uma aplicação vinculada a:
+A plataforma deverá permitir dois modos de criação de aplicação:
+
+**1. Autoatendimento público — fluxo principal**
+
+Um visitante do site poderá, sem autenticação profissional e sem intervenção prévia do profissional:
+
+- escolher uma avaliação disponibilizada publicamente;
+- informar o nome do participante A;
+- informar o nome do participante B;
+- informar um e-mail de contato;
+- informar o tipo de vínculo;
+- informar a duração do vínculo, quando aplicável;
+- iniciar a avaliação.
+
+A aplicação pública deverá ser associada automaticamente ao profissional responsável pela avaliação escolhida e deverá aparecer na área profissional para acompanhamento.
+
+O autoatendimento público não deverá exigir cadastro prévio em `pessoas` nem criação prévia em `vinculos`.
+
+**2. Criação assistida pelo profissional — fluxo secundário**
+
+O profissional autenticado poderá continuar criando uma aplicação manualmente quando necessário, vinculando-a a:
 
 - profissional;
 - instrumento/versão;
-- vínculo, quando já conhecido;
+- vínculo existente, quando conhecido;
 - e-mail de contato;
 - tipo de vínculo;
 - duração do vínculo, quando aplicável.
+
+Nos dois modos, a aplicação deve preservar a versão específica do instrumento e os snapshots necessários para manter o histórico independente de alterações posteriores.
 
 ### RF-051 — Dois participantes
 
