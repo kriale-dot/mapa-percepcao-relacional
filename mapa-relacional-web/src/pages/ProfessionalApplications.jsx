@@ -33,6 +33,8 @@ export default function ProfessionalApplications() {
   const [applications, setApplications] = useState([])
   const [versions, setVersions] = useState([])
   const [relationships, setRelationships] = useState([])
+  const [instruments, setInstruments] = useState([])
+  const [filterRelationships, setFilterRelationships] = useState([])
   const [form, setForm] = useState(emptyForm)
   const [filters, setFilters] = useState(emptyFilters)
   const [status, setStatus] = useState('loading')
@@ -60,6 +62,8 @@ export default function ProfessionalApplications() {
       setApplications(applicationsResult.aplicacoes || [])
       setVersions(optionsResult.versoes || [])
       setRelationships(optionsResult.vinculos || [])
+      setInstruments(optionsResult.instrumentos || [])
+      setFilterRelationships(optionsResult.vinculos_filtro || [])
       setStatus('ready')
     } catch (error) {
       if (error.status === 401) {
@@ -397,16 +401,9 @@ export default function ProfessionalApplications() {
                 className="rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 text-sm outline-none"
               >
                 <option value="">Todos os instrumentos</option>
-                {Array.from(
-                  new Map(
-                    versions.map((version) => [
-                      version.instrumento_id,
-                      version.instrumento_nome,
-                    ]),
-                  ),
-                ).map(([id, name]) => (
-                  <option key={id} value={id}>
-                    {name}
+                {instruments.map((instrument) => (
+                  <option key={instrument.id} value={instrument.id}>
+                    {instrument.nome}
                   </option>
                 ))}
               </select>
@@ -419,9 +416,10 @@ export default function ProfessionalApplications() {
                 className="rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 text-sm outline-none"
               >
                 <option value="">Todos os vínculos cadastrados</option>
-                {relationships.map((relationship) => (
+                {filterRelationships.map((relationship) => (
                   <option key={relationship.id} value={relationship.id}>
                     {relationship.pessoa_a_nome} ↔ {relationship.pessoa_b_nome}
+                    {relationship.status === 'INATIVO' ? ' — inativo' : ''}
                   </option>
                 ))}
               </select>
