@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Config\Database;
 use App\Service\AccessTokenService;
+use App\Service\ResultService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -13,7 +14,8 @@ use Psr\Http\Message\ServerRequestInterface;
 final class ParticipantAccessController
 {
     public function __construct(
-        private readonly AccessTokenService $tokenService
+        private readonly AccessTokenService $tokenService,
+        private readonly ResultService $resultService
     ) {
     }
 
@@ -748,6 +750,11 @@ final class ParticipantAccessController
                     'status' => 'CONCLUIDA',
                     'id' => (int) $access['aplicacao_id'],
                 ]);
+
+                $this->resultService->calculate(
+                    (int) $access['aplicacao_id'],
+                    $pdo
+                );
             }
 
             $pdo->commit();
