@@ -341,6 +341,18 @@ export default function ProfessionalInstrumentVersions({ instrumentId }) {
                       Seções
                     </button>
 
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/profissional/instrumentos/${instrumentId}/versoes/${version.id}/faixas-resultados`,
+                        )
+                      }
+                      className="rounded-xl border border-[#D8B078]/65 px-4 py-2 text-sm font-semibold"
+                    >
+                      Faixas de resultado
+                    </button>
+
                     {version.status === 'RASCUNHO' ? (
                       <>
                         <button
