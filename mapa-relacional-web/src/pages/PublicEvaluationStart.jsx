@@ -99,9 +99,9 @@ export default function PublicEvaluationStart({ versionId }) {
             Sua avaliação foi iniciada
           </h1>
           <p className="mt-4 leading-7 text-[#385048]/70">
-            Registramos os dois participantes e o e-mail de contato. Cada
-            participante terá um acesso individual para responder sua parte da
-            avaliação.
+            Os links de acesso dos dois participantes foram enviados para o
+            e-mail cadastrado. Cada participante deve usar o seu próprio link
+            para responder sua parte da avaliação.
           </p>
 
           <div className="mt-7 grid gap-4 sm:grid-cols-2">
@@ -136,10 +136,13 @@ export default function PublicEvaluationStart({ versionId }) {
             ) : null}
           </div>
 
-          <p className="mt-6 text-sm text-[#385048]/60">
-            Os dois acessos individuais serão preparados para que cada
-            participante responda separadamente.
-          </p>
+          <div className="mt-6 rounded-2xl bg-[#A8C8D0]/18 p-5 text-sm leading-6">
+            <p className="font-semibold">Verifique o e-mail cadastrado</p>
+            <p className="mt-2 text-[#385048]/70">
+              Enviamos dois links diferentes: um para o participante A e outro
+              para o participante B. Não troque os links entre os participantes.
+            </p>
+          </div>
 
           <button
             type="button"
