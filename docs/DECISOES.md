@@ -255,3 +255,20 @@ Regras:
 - uma seção com itens vinculados não pode ser excluída fisicamente;
 - se já possuir itens, a seção pode ser desativada para preservação da estrutura;
 - toda operação valida a relação profissional → instrumento → versão → seção.
+
+## D-021 — Itens e tipos de resposta extensíveis
+**Data:** 2026-10-04  
+**Status:** vigente
+
+Os itens fazem parte da estrutura versionada e só podem ser alterados enquanto a versão está em `RASCUNHO`.
+
+Regras:
+
+- cada item possui código, texto, tipo de resposta, ordem, permissão de “Não se aplica” e status ativo;
+- o código é único dentro da seção;
+- a ordem pode ser calculada automaticamente na criação;
+- `tipo_resposta` é um identificador textual obrigatório de até 40 caracteres, sem enumeração rígida nesta etapa;
+- a ausência de enumeração fechada preserva a possibilidade de novos tipos de resposta no futuro, conforme RF-043;
+- a opção “Não se aplica” é configurada individualmente por item;
+- versões publicadas e arquivadas exibem itens somente para leitura;
+- um item com alternativas ou respostas vinculadas não pode ser excluído fisicamente.
