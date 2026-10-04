@@ -44,6 +44,59 @@ final class AuthController
             ], 422);
         }
 
+        $window = max(
+            60,
+            (int) (
+                $_ENV['LOGIN_RATE_LIMIT_WINDOW_SECONDS']
+                    ?? 900
+            )
+        );
+        $ipLimit = max(
+            1,
+            (int) (
+                $_ENV['LOGIN_IP_RATE_LIMIT_MAX']
+                    ?? 30
+            )
+        );
+        $accountLimit = max(
+            1,
+            (int) (
+                $_ENV['LOGIN_RATE_LIMIT_MAX']
+                    ?? 10
+            )
+        );
+
+        $ipKey = $this->rateLimitService->requestKey($request);
+
+        $rateIpCheck = $this->rateLimitService->check(
+            'professional_login_ip',
+            $ipKey,
+            $ipLimit
+        );
+        $rateAccountCheck = $this->rateLimitService->check(
+            'professional_login_account',
+            $email,
+            $accountLimit
+        );
+
+        if (
+            !$rateIpCheck['allowed']
+            || !$rateAccountCheck['allowed']
+        ) {
+            $retryAfter = max(
+                $rateIpCheck['retry_after'],
+                $rateAccountCheck['retry_after']
+            );
+
+            return $this->json($response, [
+                'error' => 'rate_limit_exceeded',
+                'message' => 'Muitas tentativas de acesso. Aguarde antes de tentar novamente.',
+            ], 429)->withHeader(
+                'Retry-After',
+                (string) $retryAfter
+            );
+        }
+
         $pdo = Database::connect();
 
         $stmt = $pdo->prepare(
@@ -62,37 +115,17 @@ final class AuthController
             || empty($professional['senha_hash'])
             || !password_verify($password, (string) $professional['senha_hash'])
         ) {
-            $window = max(
-                60,
-                (int) (
-                    $_ENV['LOGIN_RATE_LIMIT_WINDOW_SECONDS']
-                        ?? 900
-                )
-            );
-
             $rateIp = $this->rateLimitService->hit(
                 'professional_login_ip',
-                $this->rateLimitService->requestKey($request),
-                max(
-                    1,
-                    (int) (
-                        $_ENV['LOGIN_IP_RATE_LIMIT_MAX']
-                            ?? 30
-                    )
-                ),
+                $ipKey,
+                $ipLimit,
                 $window
             );
 
             $rateAccount = $this->rateLimitService->hit(
                 'professional_login_account',
                 $email,
-                max(
-                    1,
-                    (int) (
-                        $_ENV['LOGIN_RATE_LIMIT_MAX']
-                            ?? 10
-                    )
-                ),
+                $accountLimit,
                 $window
             );
 
