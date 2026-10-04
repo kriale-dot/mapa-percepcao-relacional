@@ -105,6 +105,36 @@ export function deletePerson(id) {
   })
 }
 
+export function listRelationships() {
+  return request('/api/profissional/vinculos', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function createRelationship(relationship) {
+  return request('/api/profissional/vinculos', {
+    method: 'POST',
+    auth: true,
+    body: JSON.stringify(relationship),
+  })
+}
+
+export function updateRelationship(id, relationship) {
+  return request(`/api/profissional/vinculos/${id}`, {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify(relationship),
+  })
+}
+
+export function deleteRelationship(id) {
+  return request(`/api/profissional/vinculos/${id}`, {
+    method: 'DELETE',
+    auth: true,
+  })
+}
+
 export function listInstruments() {
   return request('/api/profissional/instrumentos', {
     method: 'GET',
