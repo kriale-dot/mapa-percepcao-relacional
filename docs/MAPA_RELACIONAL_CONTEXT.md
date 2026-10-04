@@ -283,6 +283,20 @@ Somente versões em `RASCUNHO` podem receber criação, edição ou exclusão de
 
 A ordem pode ser informada pelo profissional; na criação, se omitida, a API coloca a seção automaticamente ao final. A exclusão física de uma seção é permitida somente enquanto ela não possui itens vinculados. Depois que possuir itens, a seção deve ser preservada, podendo ser marcada como inativa.
 
+### Itens/perguntas
+
+Cada item pertence a uma seção e possui código, texto/pergunta, tipo de resposta, ordem, indicador `permite_nao_se_aplica` e indicador ativo.
+
+Somente versões em `RASCUNHO` permitem criar, editar ou excluir itens. Em versões `PUBLICADA` ou `ARQUIVADA`, os itens permanecem somente para leitura.
+
+O código do item deve ser único dentro da própria seção. A ordem pode ser omitida na criação; nesse caso, a API coloca o item automaticamente ao final.
+
+O campo `tipo_resposta` permanece como identificador textual obrigatório, sem lista fechada nesta etapa, para atender à exigência de expansão futura dos tipos de resposta sem alterar a estrutura do banco ou quebrar aplicações históricas.
+
+A opção `permite_nao_se_aplica` é configurável por item. O comportamento global de exclusão do item marcado como “Não se aplica” da aplicação e dos denominadores permanece uma regra funcional da plataforma e será aplicado no fluxo de respostas/cálculo.
+
+Um item só pode ser excluído fisicamente enquanto não possui alternativas nem respostas vinculadas.
+
 ### Perfil profissional
 
 O perfil profissional da V1 é acessado em `/profissional/perfil` e usa as rotas protegidas `GET /api/profissional/perfil` e `PUT /api/profissional/perfil`.
