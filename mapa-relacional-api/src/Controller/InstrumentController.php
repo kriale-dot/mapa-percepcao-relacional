@@ -250,14 +250,14 @@ final class InstrumentController
         $descricao = $this->optional($data['descricao'] ?? null);
         $status = strtoupper(trim((string) ($data['status'] ?? 'RASCUNHO')));
 
-        if ($nome === '' || mb_strlen($nome) > 180) {
+        if ($nome === '' || strlen($nome) > 180) {
             return $this->validation(
                 $response,
                 'Nome e obrigatorio e deve ter no maximo 180 caracteres.'
             );
         }
 
-        if ($descricao !== null && mb_strlen($descricao) > 10000) {
+        if ($descricao !== null && strlen($descricao) > 10000) {
             return $this->validation(
                 $response,
                 'Descricao deve ter no maximo 10000 caracteres.'
