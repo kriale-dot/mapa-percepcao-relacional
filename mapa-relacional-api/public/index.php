@@ -85,9 +85,14 @@ $publicEvaluationController = new PublicEvaluationController(
     $accessTokenService,
     $mailService,
     $logger,
-    $rateLimitService
+    $rateLimitService,
+    $auditService
 );
-$participantAccessController = new ParticipantAccessController($accessTokenService, $resultService);
+$participantAccessController = new ParticipantAccessController(
+    $accessTokenService,
+    $resultService,
+    $auditService
+);
 $feedbackController = new FeedbackController(
     $accessTokenService,
     $mailService,
