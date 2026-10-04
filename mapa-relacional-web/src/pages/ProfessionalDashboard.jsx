@@ -211,6 +211,12 @@ export default function ProfessionalDashboard() {
                 'Altere com segurança sua senha de acesso profissional.',
               path: '/profissional/senha',
             },
+            {
+              title: 'Auditoria',
+              description:
+                'Consulte ações relevantes registradas para rastreabilidade.',
+              path: '/profissional/auditoria',
+            },
           ].map((item) => (
             <button
               key={item.title}
