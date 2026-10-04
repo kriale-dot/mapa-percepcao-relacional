@@ -10,6 +10,7 @@ use App\Service\MailService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Throwable;
 
@@ -17,7 +18,8 @@ final class PublicEvaluationController
 {
     public function __construct(
         private readonly AccessTokenService $tokenService,
-        private readonly MailService $mailService
+        private readonly MailService $mailService,
+        private readonly LoggerInterface $logger
     ) {
     }
 
@@ -273,10 +275,24 @@ final class PublicEvaluationController
             } catch (Throwable $mailError) {
                 $pdo->rollBack();
 
-                return $this->json($response, [
+                $this->logger->error('Falha ao enviar acessos por SMTP.', [
+                    'exception' => $mailError::class,
+                    'message' => $mailError->getMessage(),
+                ]);
+
+                $payload = [
                     'error' => 'email_delivery_failed',
                     'message' => 'Nao foi possivel enviar os links de acesso para o e-mail informado. Tente novamente.',
-                ], 502);
+                ];
+
+                if (filter_var(
+                    $_ENV['APP_DEBUG'] ?? false,
+                    FILTER_VALIDATE_BOOL
+                )) {
+                    $payload['details'] = $mailError->getMessage();
+                }
+
+                return $this->json($response, $payload, 502);
             }
 
             $markAccessSent = $pdo->prepare(
