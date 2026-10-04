@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 6 em desenvolvimento — autoatendimento público de avaliações  
-**Etapa atual:** Etapa 6.3 em validação — identificação inicial e carregamento do questionário  
-**Próximo passo:** validar identificação do participante, transição para EM_ANDAMENTO e carregamento da estrutura individual
+**Etapa atual:** Etapa 6.3 concluída — identificação inicial e carregamento do questionário  
+**Próximo passo:** iniciar a Etapa 6.4 — respostas individuais e persistência progressiva
 
 ## 1. Situação atual
 
@@ -1697,3 +1697,24 @@ mapa-relacional-api/storage/logs/php-error.log
 ```
 
 Em desenvolvimento, caso a API ainda retorne conteúdo não-JSON, o frontend mostra até os primeiros 500 caracteres do corpo recebido para permitir diagnóstico imediato sem depender apenas do erro genérico.
+
+### Validação completa da Etapa 6.3 concluída
+
+Em 2026-10-04 a Etapa 6.3 foi validada com sucesso no fluxo local.
+
+Foram confirmados:
+
+- abertura válida do link individual do participante;
+- carregamento correto dos dados do acesso;
+- identificação inicial com nome, idade e gênero;
+- preservação do tempo de união como dado da aplicação;
+- atualização do participante de `PENDENTE` para `EM_ANDAMENTO`;
+- atualização da aplicação de `PRONTA` para `EM_ANDAMENTO` no primeiro início;
+- carregamento da estrutura do questionário da versão congelada da aplicação;
+- exibição de seções, itens, alternativas e das duas perspectivas por item;
+- correção do problema de resposta HTTP 200 com corpo não-JSON;
+- frontend protegido contra respostas nulas ou inválidas da API.
+
+**Etapa 6.3 concluída.**
+
+**Próxima subetapa:** Etapa 6.4 — respostas individuais e persistência progressiva das duas perspectivas.
