@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 em desenvolvimento — instrumentos e versionamento  
-**Etapa atual:** Etapa 4.3 concluída — seções da versão  
-**Próximo passo:** iniciar a Etapa 4.4 — itens/perguntas das seções
+**Etapa atual:** Etapa 4.4 em validação — itens/perguntas das seções  
+**Próximo passo:** validar localmente criação, edição, ordenação, Não se aplica, ativação e exclusão de itens
 
 ## 1. Situação atual
 
@@ -900,3 +900,85 @@ Não houve necessidade de migration nova nesta etapa, pois a tabela `secoes` já
 **Etapa 4.3 concluída.**
 
 **Próxima subetapa:** Etapa 4.4 — itens/perguntas das seções.
+
+## 23. Etapa 4.4 — itens/perguntas das seções
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/ItemController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalItems.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalSections.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Rotas protegidas adicionadas:
+
+```text
+GET    /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens
+POST   /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens
+PUT    /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens/{itemId}
+DELETE /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens/{itemId}
+```
+
+Regras implementadas:
+
+- somente versões em `RASCUNHO` permitem alteração dos itens;
+- código obrigatório e único dentro da seção;
+- texto/pergunta obrigatório;
+- tipo de resposta obrigatório, mantido como identificador textual extensível;
+- ordem inteira igual ou maior que zero;
+- ordem omitida na criação posiciona o item automaticamente ao final;
+- configuração individual para permitir ou não “Não se aplica”;
+- item pode ser ativo ou inativo;
+- listagem ordenada por `ordem` e depois por ID;
+- exclusão bloqueada se o item já possuir alternativas ou respostas;
+- versões publicadas/arquivadas exibem itens somente para leitura;
+- toda operação valida profissional → instrumento → versão → seção.
+
+No frontend foi criada a rota:
+
+```text
+/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens
+```
+
+Cada seção agora possui o botão `Itens`.
+
+### Validação local pendente
+
+Após `git pull`, executar na API:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+No frontend:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Na versão `1.0` em `RASCUNHO`, validar:
+
+1. abrir uma seção e clicar em `Itens`;
+2. criar pelo menos dois itens;
+3. deixar a ordem vazia em uma criação e confirmar posicionamento automático;
+4. editar código, texto, tipo de resposta, ordem, “Não se aplica” e status ativo;
+5. tentar repetir o mesmo código dentro da seção e confirmar rejeição;
+6. confirmar que a lista acompanha a ordem configurada;
+7. criar um item de teste e excluí-lo enquanto não possui alternativas/respostas;
+8. recarregar a página e confirmar persistência;
+9. abrir itens de uma versão publicada/arquivada e confirmar modo somente leitura.
+
+Para este teste, o campo `tipo_resposta` pode receber um identificador textual simples definido pelo profissional; a plataforma ainda não limita esse campo a uma lista fixa.
+
+Não há migration nova nesta etapa; a tabela `itens` já existe na estrutura base.
+
+**Próxima subetapa prevista:** Etapa 4.5 — alternativas dos itens.
