@@ -13,6 +13,29 @@ if (is_file($root . '/.env')) {
     Dotenv::createImmutable($root)->safeLoad();
 }
 
+function canWriteDirectory(string $directory): bool
+{
+    if (!is_dir($directory)) {
+        return false;
+    }
+
+    $probe = rtrim($directory, '/\\')
+        . DIRECTORY_SEPARATOR
+        . '.write-test-'
+        . bin2hex(random_bytes(8))
+        . '.tmp';
+
+    $written = @file_put_contents($probe, 'ok');
+
+    if ($written === false) {
+        return false;
+    }
+
+    @unlink($probe);
+
+    return true;
+}
+
 $errors = [];
 $warnings = [];
 $ok = [];
@@ -117,8 +140,13 @@ $check(
 );
 
 $logDir = $root . '/storage/logs';
+
+if (!is_dir($logDir)) {
+    @mkdir($logDir, 0775, true);
+}
+
 $check(
-    is_dir($logDir) && is_writable($logDir),
+    canWriteDirectory($logDir),
     'storage/logs gravavel'
 );
 
@@ -129,7 +157,7 @@ if (!is_dir($backupDir)) {
 }
 
 $check(
-    is_dir($backupDir) && is_writable($backupDir),
+    canWriteDirectory($backupDir),
     'storage/backups gravavel'
 );
 
