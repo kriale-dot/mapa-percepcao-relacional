@@ -28,20 +28,213 @@ final class ApplicationController
             return $this->unauthorized($response);
         }
 
+        $query = $request->getQueryParams();
+
+        $participant = trim((string) ($query['participante'] ?? ''));
+        $relationshipType = trim((string) ($query['tipo_vinculo'] ?? ''));
+        $status = strtoupper(trim((string) ($query['status'] ?? '')));
+        $instrumentId = $this->nullablePositiveId(
+            $query['instrumento_id'] ?? null
+        );
+        $relationshipId = $this->nullablePositiveId(
+            $query['vinculo_id'] ?? null
+        );
+        $dateFrom = $this->dateValue($query['data_de'] ?? null);
+        $dateTo = $this->dateValue($query['data_ate'] ?? null);
+
+        $allowedStatuses = [
+            'RASCUNHO',
+            'PRONTA',
+            'EM_ANDAMENTO',
+            'CONCLUIDA',
+            'CANCELADA',
+        ];
+
+        if ($status !== '' && !in_array($status, $allowedStatuses, true)) {
+            return $this->validation(
+                $response,
+                'Status de avaliacao invalido.'
+            );
+        }
+
+        if (
+            isset($query['data_de'])
+            && trim((string) $query['data_de']) !== ''
+            && $dateFrom === null
+        ) {
+            return $this->validation(
+                $response,
+                'Data inicial invalida. Use AAAA-MM-DD.'
+            );
+        }
+
+        if (
+            isset($query['data_ate'])
+            && trim((string) $query['data_ate']) !== ''
+            && $dateTo === null
+        ) {
+            return $this->validation(
+                $response,
+                'Data final invalida. Use AAAA-MM-DD.'
+            );
+        }
+
+        $where = ['a.profissional_id = :profissional_id'];
+        $params = ['profissional_id' => $professionalId];
+
+        if ($participant !== '') {
+            $where[] = '(
+                pa.nome_snapshot LIKE :participante
+                OR pb.nome_snapshot LIKE :participante
+                OR a.email_contato LIKE :participante
+            )';
+            $params['participante'] = '%' . $participant . '%';
+        }
+
+        if ($relationshipType !== '') {
+            $where[] = 'a.tipo_vinculo_snapshot LIKE :tipo_vinculo';
+            $params['tipo_vinculo'] = '%' . $relationshipType . '%';
+        }
+
+        if ($status !== '') {
+            $where[] = 'a.status = :status';
+            $params['status'] = $status;
+        }
+
+        if ($instrumentId !== null) {
+            $where[] = 'i.id = :instrumento_id';
+            $params['instrumento_id'] = $instrumentId;
+        }
+
+        if ($relationshipId !== null) {
+            $where[] = 'a.vinculo_id = :vinculo_id';
+            $params['vinculo_id'] = $relationshipId;
+        }
+
+        if ($dateFrom !== null) {
+            $where[] = 'a.created_at >= :data_de';
+            $params['data_de'] = $dateFrom . ' 00:00:00';
+        }
+
+        if ($dateTo !== null) {
+            $where[] = 'a.created_at < DATE_ADD(:data_ate, INTERVAL 1 DAY)';
+            $params['data_ate'] = $dateTo;
+        }
+
         $pdo = Database::connect();
 
-        $stmt = $pdo->prepare($this->applicationSelect() . '
-             WHERE a.profissional_id = :profissional_id
-             ORDER BY a.created_at DESC, a.id DESC'
+        $stmt = $pdo->prepare(
+            $this->applicationSelect()
+            . ' WHERE ' . implode(' AND ', $where)
+            . ' ORDER BY a.created_at DESC, a.id DESC'
         );
-        $stmt->execute(['profissional_id' => $professionalId]);
+        $stmt->execute($params);
 
         $applications = array_map(
             [$this, 'normalizeApplication'],
             $stmt->fetchAll(PDO::FETCH_ASSOC)
         );
 
-        return $this->json($response, ['aplicacoes' => $applications]);
+        return $this->json($response, [
+            'aplicacoes' => $applications,
+            'filtros' => [
+                'participante' => $participant,
+                'tipo_vinculo' => $relationshipType,
+                'status' => $status,
+                'instrumento_id' => $instrumentId,
+                'vinculo_id' => $relationshipId,
+                'data_de' => $dateFrom,
+                'data_ate' => $dateTo,
+            ],
+        ]);
+    }
+
+    public function dashboard(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    ): ResponseInterface {
+        $professionalId = $this->professionalId($request);
+
+        if ($professionalId === null) {
+            return $this->unauthorized($response);
+        }
+
+        $pdo = Database::connect();
+
+        $summaryStmt = $pdo->prepare(
+            'SELECT
+                COUNT(*) AS total,
+                SUM(a.status = \'RASCUNHO\') AS rascunho,
+                SUM(a.status = \'PRONTA\') AS pronta,
+                SUM(a.status = \'EM_ANDAMENTO\') AS em_andamento,
+                SUM(a.status = \'CONCLUIDA\') AS concluida,
+                SUM(a.status = \'CANCELADA\') AS cancelada,
+                SUM(
+                    a.status = \'CONCLUIDA\'
+                    AND EXISTS (
+                        SELECT 1
+                        FROM resultados r
+                        WHERE r.aplicacao_id = a.id
+                    )
+                ) AS resultados_disponiveis,
+                SUM(
+                    EXISTS (
+                        SELECT 1
+                        FROM devolutivas d
+                        WHERE d.aplicacao_id = a.id
+                          AND d.status = \'RASCUNHO\'
+                    )
+                ) AS devolutivas_rascunho,
+                SUM(
+                    EXISTS (
+                        SELECT 1
+                        FROM devolutivas d
+                        WHERE d.aplicacao_id = a.id
+                          AND d.status = \'LIBERADA\'
+                    )
+                ) AS devolutivas_liberadas
+             FROM aplicacoes a
+             WHERE a.profissional_id = :profissional_id'
+        );
+        $summaryStmt->execute([
+            'profissional_id' => $professionalId,
+        ]);
+
+        $summary = $summaryStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        foreach ([
+            'total',
+            'rascunho',
+            'pronta',
+            'em_andamento',
+            'concluida',
+            'cancelada',
+            'resultados_disponiveis',
+            'devolutivas_rascunho',
+            'devolutivas_liberadas',
+        ] as $key) {
+            $summary[$key] = (int) ($summary[$key] ?? 0);
+        }
+
+        $recentStmt = $pdo->prepare(
+            $this->applicationSelect()
+            . ' WHERE a.profissional_id = :profissional_id
+                ORDER BY a.created_at DESC, a.id DESC
+                LIMIT 6'
+        );
+        $recentStmt->execute([
+            'profissional_id' => $professionalId,
+        ]);
+
+        $recent = array_map(
+            [$this, 'normalizeApplication'],
+            $recentStmt->fetchAll(PDO::FETCH_ASSOC)
+        );
+
+        return $this->json($response, [
+            'resumo' => $summary,
+            'recentes' => $recent,
+        ]);
     }
 
     public function show(
@@ -67,7 +260,68 @@ final class ApplicationController
             return $this->notFound($response);
         }
 
-        return $this->json($response, ['aplicacao' => $application]);
+        $pdo = Database::connect();
+
+        $excludedStmt = $pdo->prepare(
+            'SELECT
+                ex.item_id,
+                ex.motivo,
+                ex.created_at,
+                i.codigo AS item_codigo,
+                i.texto AS item_texto,
+                s.titulo AS secao_titulo,
+                ap.lado AS marcado_por_lado,
+                ap.nome_snapshot AS marcado_por_nome
+             FROM aplicacao_itens_excluidos ex
+             INNER JOIN itens i
+               ON i.id = ex.item_id
+             INNER JOIN secoes s
+               ON s.id = i.secao_id
+             INNER JOIN aplicacao_participantes ap
+               ON ap.id = ex.marcado_por_participante_id
+             WHERE ex.aplicacao_id = :aplicacao_id
+             ORDER BY s.ordem ASC, i.ordem ASC, i.id ASC'
+        );
+        $excludedStmt->execute([
+            'aplicacao_id' => $id,
+        ]);
+
+        $resultsStmt = $pdo->prepare(
+            'SELECT
+                sentido,
+                comparacoes_validas,
+                coincidencias,
+                percentual,
+                faixa,
+                algoritmo_versao,
+                calculado_em
+             FROM resultados
+             WHERE aplicacao_id = :aplicacao_id
+             ORDER BY FIELD(sentido, \'A_SOBRE_B\', \'B_SOBRE_A\')'
+        );
+        $resultsStmt->execute([
+            'aplicacao_id' => $id,
+        ]);
+
+        $results = array_map(
+            static function (array $item): array {
+                $item['comparacoes_validas'] =
+                    (int) $item['comparacoes_validas'];
+                $item['coincidencias'] = (int) $item['coincidencias'];
+                $item['percentual'] = $item['percentual'] === null
+                    ? null
+                    : (float) $item['percentual'];
+
+                return $item;
+            },
+            $resultsStmt->fetchAll(PDO::FETCH_ASSOC)
+        );
+
+        return $this->json($response, [
+            'aplicacao' => $application,
+            'itens_excluidos' => $excludedStmt->fetchAll(PDO::FETCH_ASSOC),
+            'resultados' => $results,
+        ]);
     }
 
     public function results(
@@ -562,7 +816,18 @@ final class ApplicationController
                 pb.genero_snapshot AS pessoa_b_genero_snapshot,
                 pb.status AS participante_b_status,
                 pb.iniciou_em AS participante_b_iniciou_em,
-                pb.concluiu_em AS participante_b_concluiu_em
+                pb.concluiu_em AS participante_b_concluiu_em,
+                (
+                    SELECT COUNT(*)
+                    FROM resultados r
+                    WHERE r.aplicacao_id = a.id
+                ) AS resultados_count,
+                (
+                    SELECT d.status
+                    FROM devolutivas d
+                    WHERE d.aplicacao_id = a.id
+                    LIMIT 1
+                ) AS devolutiva_status
              FROM aplicacoes a
              INNER JOIN instrumento_versoes v
                ON v.id = a.instrumento_versao_id
@@ -585,6 +850,10 @@ final class ApplicationController
         $application['instrumento_versao_id'] =
             (int) $application['instrumento_versao_id'];
         $application['instrumento_id'] = (int) $application['instrumento_id'];
+        $application['resultados_count'] =
+            (int) ($application['resultados_count'] ?? 0);
+        $application['devolutiva_status'] =
+            $application['devolutiva_status'] ?? null;
 
         $participantA = [
             'id' => $application['participante_a_id'] === null
@@ -681,6 +950,27 @@ final class ApplicationController
         }
 
         return $this->positiveId($value);
+    }
+
+    private function dateValue(mixed $value): ?string
+    {
+        if ($value === null || trim((string) $value) === '') {
+            return null;
+        }
+
+        $date = \DateTimeImmutable::createFromFormat(
+            '!Y-m-d',
+            trim((string) $value)
+        );
+
+        if (
+            $date === false
+            || $date->format('Y-m-d') !== trim((string) $value)
+        ) {
+            return null;
+        }
+
+        return $date->format('Y-m-d');
     }
 
     private function optional(mixed $value): ?string
