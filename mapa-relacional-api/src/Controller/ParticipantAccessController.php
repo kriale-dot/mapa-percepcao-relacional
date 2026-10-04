@@ -673,7 +673,7 @@ final class ParticipantAccessController
                     'lado' => (string) $access['lado'],
                 ],
                 $request,
-                null,
+                (int) $access['profissional_id'],
                 $pdo
             );
 
@@ -893,6 +893,7 @@ final class ParticipantAccessController
                 ap.iniciou_em,
                 ap.concluiu_em,
                 a.id AS aplicacao_id,
+                a.profissional_id,
                 a.instrumento_versao_id,
                 a.status AS aplicacao_status,
                 a.tipo_vinculo_snapshot,
