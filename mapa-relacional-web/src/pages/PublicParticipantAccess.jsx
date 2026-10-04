@@ -3,6 +3,7 @@ import {
   getParticipantAccess,
   getParticipantQuestionnaire,
   identifyParticipant,
+  saveParticipantResponse,
 } from '../services/api'
 
 function navigate(path) {
@@ -18,9 +19,78 @@ function needsIdentification(access) {
   )
 }
 
+function answerKey(itemId, perspective) {
+  return `${itemId}:${perspective}`
+}
+
+function perspectiveApiName(perspective) {
+  return perspective === 'sobre_mim' ? 'SOBRE_MIM' : 'SOBRE_OUTRO'
+}
+
+function buildDrafts(questionnaire) {
+  const drafts = {}
+
+  questionnaire.secoes.forEach((section) => {
+    section.itens.forEach((item) => {
+      ;['sobre_mim', 'sobre_outro'].forEach((perspective) => {
+        const response = item.respostas?.[perspective]
+        const key = answerKey(item.id, perspective)
+
+        if (response?.alternativa_id != null) {
+          drafts[key] = String(response.alternativa_id)
+        } else if (response?.valor_numero != null) {
+          drafts[key] = String(response.valor_numero)
+        } else {
+          drafts[key] = response?.valor_texto || ''
+        }
+      })
+    })
+  })
+
+  return drafts
+}
+
+function isNumericItem(item) {
+  if (item.alternativas.length > 0) return false
+
+  return /NUM|NUMBER|NOTA|ESCALA|PONT/i.test(item.tipo_resposta)
+}
+
+function SaveState({ state }) {
+  if (!state) return null
+
+  if (state.status === 'saving') {
+    return (
+      <span className="text-xs font-medium text-[#385048]/55">
+        Salvando...
+      </span>
+    )
+  }
+
+  if (state.status === 'saved') {
+    return (
+      <span className="text-xs font-medium text-[#385048]/65">
+        Salvo
+      </span>
+    )
+  }
+
+  if (state.status === 'error') {
+    return (
+      <span className="text-xs font-medium text-[#C97C5D]">
+        {state.message || 'Não foi possível salvar.'}
+      </span>
+    )
+  }
+
+  return null
+}
+
 export default function PublicParticipantAccess({ token }) {
   const [access, setAccess] = useState(null)
   const [questionnaire, setQuestionnaire] = useState(null)
+  const [drafts, setDrafts] = useState({})
+  const [saveStates, setSaveStates] = useState({})
   const [form, setForm] = useState({
     nome: '',
     idade: '',
@@ -32,6 +102,11 @@ export default function PublicParticipantAccess({ token }) {
   useEffect(() => {
     load()
   }, [token])
+
+  function setQuestionnaireData(nextQuestionnaire) {
+    setQuestionnaire(nextQuestionnaire)
+    setDrafts(buildDrafts(nextQuestionnaire))
+  }
 
   async function load() {
     setStatus('loading')
@@ -71,7 +146,7 @@ export default function PublicParticipantAccess({ token }) {
         )
       }
 
-      setQuestionnaire(questionnaireResult.questionario)
+      setQuestionnaireData(questionnaireResult.questionario)
       setStatus('ready')
     } catch (error) {
       setStatus('error')
@@ -85,6 +160,15 @@ export default function PublicParticipantAccess({ token }) {
     setForm((current) => ({
       ...current,
       [field]: value,
+    }))
+  }
+
+  function updateDraft(itemId, perspective, value) {
+    const key = answerKey(itemId, perspective)
+
+    setDrafts((current) => ({
+      ...current,
+      [key]: value,
     }))
   }
 
@@ -116,7 +200,7 @@ export default function PublicParticipantAccess({ token }) {
         )
       }
 
-      setQuestionnaire(questionnaireResult.questionario)
+      setQuestionnaireData(questionnaireResult.questionario)
       setStatus('ready')
     } catch (error) {
       setStatus('ready')
@@ -124,6 +208,170 @@ export default function PublicParticipantAccess({ token }) {
         error.message || 'Não foi possível registrar sua identificação.',
       )
     }
+  }
+
+  function applySavedResponse(itemId, perspective, result) {
+    if (!result?.resposta) return
+
+    setQuestionnaire((current) => {
+      if (!current) return current
+
+      return {
+        ...current,
+        progresso: result.progresso || current.progresso,
+        secoes: current.secoes.map((section) => ({
+          ...section,
+          itens: section.itens.map((item) =>
+            item.id === itemId
+              ? {
+                  ...item,
+                  respostas: {
+                    ...item.respostas,
+                    [perspective]: result.resposta,
+                  },
+                }
+              : item,
+          ),
+        })),
+      }
+    })
+  }
+
+  async function persistResponse(item, perspective, payload) {
+    const key = answerKey(item.id, perspective)
+
+    setSaveStates((current) => ({
+      ...current,
+      [key]: { status: 'saving', message: '' },
+    }))
+
+    try {
+      const result = await saveParticipantResponse(token, item.id, {
+        perspectiva: perspectiveApiName(perspective),
+        ...payload,
+      })
+
+      applySavedResponse(item.id, perspective, result)
+
+      setSaveStates((current) => ({
+        ...current,
+        [key]: { status: 'saved', message: '' },
+      }))
+    } catch (error) {
+      setSaveStates((current) => ({
+        ...current,
+        [key]: {
+          status: 'error',
+          message: error.message || 'Não foi possível salvar.',
+        },
+      }))
+    }
+  }
+
+  function handleAlternative(item, perspective, alternativeId) {
+    updateDraft(item.id, perspective, String(alternativeId))
+
+    persistResponse(item, perspective, {
+      alternativa_id: alternativeId,
+    })
+  }
+
+  function handleOpenSave(item, perspective) {
+    const key = answerKey(item.id, perspective)
+    const value = String(drafts[key] ?? '').trim()
+
+    if (value === '') return
+
+    if (isNumericItem(item)) {
+      persistResponse(item, perspective, {
+        valor_numero: value,
+      })
+      return
+    }
+
+    persistResponse(item, perspective, {
+      valor_texto: value,
+    })
+  }
+
+  function renderAnswerControl(item, perspective, label) {
+    const key = answerKey(item.id, perspective)
+    const state = saveStates[key]
+    const draft = drafts[key] ?? ''
+
+    return (
+      <div
+        className={[
+          'rounded-2xl p-5',
+          perspective === 'sobre_mim'
+            ? 'bg-[#A8C8B8]/12'
+            : 'bg-[#A8C8D0]/14',
+        ].join(' ')}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <p className="font-semibold">{label}</p>
+          <SaveState state={state} />
+        </div>
+
+        {item.alternativas.length > 0 ? (
+          <div className="mt-4 space-y-2">
+            {item.alternativas.map((alternative) => (
+              <label
+                key={alternative.id}
+                className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#385048]/12 bg-white px-4 py-3 text-sm"
+              >
+                <input
+                  type="radio"
+                  name={key}
+                  value={alternative.id}
+                  checked={draft === String(alternative.id)}
+                  disabled={state?.status === 'saving'}
+                  onChange={() =>
+                    handleAlternative(
+                      item,
+                      perspective,
+                      alternative.id,
+                    )
+                  }
+                  className="mt-1"
+                />
+                <span>{alternative.rotulo}</span>
+              </label>
+            ))}
+          </div>
+        ) : isNumericItem(item) ? (
+          <div className="mt-4">
+            <input
+              type="number"
+              value={draft}
+              onChange={(event) =>
+                updateDraft(item.id, perspective, event.target.value)
+              }
+              onBlur={() => handleOpenSave(item, perspective)}
+              className="w-full rounded-xl border border-[#385048]/20 bg-white px-4 py-3 outline-none focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20"
+            />
+            <p className="mt-2 text-xs text-[#385048]/55">
+              A resposta é salva ao sair do campo.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-4">
+            <textarea
+              rows="4"
+              value={draft}
+              onChange={(event) =>
+                updateDraft(item.id, perspective, event.target.value)
+              }
+              onBlur={() => handleOpenSave(item, perspective)}
+              className="w-full resize-y rounded-xl border border-[#385048]/20 bg-white px-4 py-3 outline-none focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20"
+            />
+            <p className="mt-2 text-xs text-[#385048]/55">
+              A resposta é salva ao sair do campo.
+            </p>
+          </div>
+        )}
+      </div>
+    )
   }
 
   if (status === 'loading') {
@@ -162,6 +410,12 @@ export default function PublicParticipantAccess({ token }) {
   }
 
   if (questionnaire) {
+    const progress = questionnaire.progresso || {
+      respondidas: 0,
+      total: questionnaire.total_itens * 2,
+      percentual: 0,
+    }
+
     return (
       <div className="min-h-screen bg-[#FEFDFB] text-[#385048]">
         <header className="border-b border-[#A8C8B8]/45 bg-white">
@@ -179,15 +433,36 @@ export default function PublicParticipantAccess({ token }) {
         <main className="mx-auto max-w-5xl px-6 py-10">
           <div className="rounded-3xl border border-[#A8C8B8]/45 bg-white p-7 shadow-sm">
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
-              Identificação concluída
+              Preenchimento individual
             </p>
             <h1 className="mt-3 text-3xl font-semibold">
-              Seu questionário está pronto
+              Responda nas duas perspectivas
             </h1>
             <p className="mt-4 leading-7 text-[#385048]/70">
-              Você responderá cada item em duas perspectivas: o que pensa
-              sobre si e o que pensa sobre a outra pessoa.
+              Em cada item, responda primeiro sobre você e depois sobre a outra
+              pessoa. Suas respostas são salvas progressivamente e podem ser
+              retomadas por este mesmo link.
             </p>
+
+            <div className="mt-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                <span className="font-semibold">
+                  Progresso: {progress.respondidas} de {progress.total}{' '}
+                  respostas
+                </span>
+                <span className="text-[#385048]/65">
+                  {progress.percentual}%
+                </span>
+              </div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#A8C8B8]/20">
+                <div
+                  className="h-full rounded-full bg-[#385048]"
+                  style={{
+                    width: `${Math.min(100, progress.percentual)}%`,
+                  }}
+                />
+              </div>
+            </div>
 
             <div className="mt-6 flex flex-wrap gap-3 text-sm">
               <span className="rounded-full bg-[#A8C8B8]/20 px-4 py-2 font-semibold">
@@ -212,7 +487,7 @@ export default function PublicParticipantAccess({ token }) {
                   </p>
                 ) : null}
 
-                <div className="mt-6 space-y-4">
+                <div className="mt-6 space-y-5">
                   {section.itens.map((item) => (
                     <article
                       key={item.id}
@@ -225,37 +500,23 @@ export default function PublicParticipantAccess({ token }) {
                         <span className="rounded-full bg-[#A8C8B8]/20 px-3 py-1 text-xs font-semibold">
                           {item.tipo_resposta}
                         </span>
-                        {item.permite_nao_se_aplica ? (
-                          <span className="rounded-full bg-[#D8B078]/18 px-3 py-1 text-xs font-semibold">
-                            Permite Não se aplica
-                          </span>
-                        ) : null}
                       </div>
 
                       <p className="mt-3 font-medium leading-7">
                         {item.texto}
                       </p>
 
-                      {item.alternativas.length > 0 ? (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {item.alternativas.map((alternative) => (
-                            <span
-                              key={alternative.id}
-                              className="rounded-xl border border-[#385048]/15 bg-white px-3 py-2 text-sm"
-                            >
-                              {alternative.rotulo}
-                            </span>
-                          ))}
-                        </div>
-                      ) : null}
-
-                      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-xl bg-[#A8C8B8]/12 p-4 text-sm">
-                          <strong>Perspectiva 1:</strong> sobre mim
-                        </div>
-                        <div className="rounded-xl bg-[#A8C8D0]/14 p-4 text-sm">
-                          <strong>Perspectiva 2:</strong> sobre a outra pessoa
-                        </div>
+                      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                        {renderAnswerControl(
+                          item,
+                          'sobre_mim',
+                          'Sobre mim',
+                        )}
+                        {renderAnswerControl(
+                          item,
+                          'sobre_outro',
+                          'Sobre a outra pessoa',
+                        )}
                       </div>
                     </article>
                   ))}
@@ -264,10 +525,9 @@ export default function PublicParticipantAccess({ token }) {
             ))}
           </div>
 
-          <div className="mt-7 rounded-2xl border border-[#D8B078]/45 bg-[#D8B078]/12 p-5 text-sm leading-6">
-            A estrutura do questionário já foi carregada pelo seu acesso
-            individual. Na próxima subetapa serão habilitadas as respostas e o
-            salvamento progressivo de cada item.
+          <div className="mt-7 rounded-2xl border border-[#A8C8D0]/45 bg-[#A8C8D0]/12 p-5 text-sm leading-6">
+            Você pode interromper o preenchimento e retornar depois pelo mesmo
+            link. As respostas já salvas serão carregadas novamente.
           </div>
         </main>
       </div>
