@@ -6,9 +6,9 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** Etapa 9 em desenvolvimento — dashboard e acompanhamento profissional  
-**Etapa atual:** Etapa 9 implementada — dashboard, filtros e detalhe de avaliações  
-**Próximo passo:** aplicar migrations pendentes e validar dashboard, filtros e detalhe das avaliações
+**Marco atual:** Etapa 10 em desenvolvimento — segurança, auditoria e preparação da V1  
+**Etapa atual:** Etapa 10 implementada — validação local e fechamento da V1 pendentes  
+**Próximo passo:** aplicar migrations 006–008, executar check-v1, backup/restore e fluxo funcional completo antes do deploy
 
 ## 1. Situação atual
 
@@ -2424,3 +2424,223 @@ Validar:
 17. usar o atalho `Ver resultados`.
 
 **Próximo passo sugerido:** Etapa 10 — notificações complementares, auditoria e preparação de produção/V1.
+
+## 38. Etapa 10 — segurança, auditoria e preparação da V1
+
+Implementação criada no GitHub em 2026-10-04.
+
+A Etapa 9 foi implementada no turno anterior, mas não houve confirmação explícita de validação local. Portanto, não registrar Etapa 9 como testada.
+
+### Banco
+
+Novas migrations:
+
+```text
+007_auditoria.sql
+008_rate_limites.sql
+```
+
+Novas tabelas:
+
+- `auditoria_eventos`;
+- `rate_limites`.
+
+O `check-domain` agora exige migrations 001–008 e as tabelas de auditoria e rate limit.
+
+### Auditoria
+
+Novo serviço:
+
+```text
+src/Service/AuditService.php
+```
+
+Novo controlador:
+
+```text
+src/Controller/AuditController.php
+```
+
+Nova rota:
+
+```text
+GET /api/profissional/auditoria
+```
+
+Nova página:
+
+```text
+/profissional/auditoria
+```
+
+Eventos inicialmente auditados:
+
+- login profissional bem-sucedido;
+- alteração de senha;
+- atualização de perfil;
+- criação, publicação e arquivamento de versão;
+- criação pública de aplicação;
+- “Não se aplica”;
+- conclusão de participante;
+- salvamento de devolutiva;
+- liberação de devolutiva;
+- reenvio de acesso;
+- reenvio de devolutiva.
+
+O serviço remove contexto cujo nome de chave indique senha, password, token, JWT, authorization ou credencial SMTP.
+
+### Notificações complementares
+
+Novo controlador:
+
+```text
+src/Controller/NotificationController.php
+```
+
+Novas rotas profissionais:
+
+```text
+POST /api/profissional/aplicacoes/{id}/acessos/{lado}/reenviar
+POST /api/profissional/aplicacoes/{id}/devolutiva/reenviar
+```
+
+Regras:
+
+- reenvio de participante permitido apenas antes da conclusão;
+- novo token invalida o link anterior;
+- falha SMTP restaura o hash anterior;
+- devolutiva só pode ser reenviada quando estiver `LIBERADA`;
+- reenvio da devolutiva também rotaciona o token;
+- a tela de detalhe da aplicação oferece os botões correspondentes.
+
+O `MailService` recebeu envio individual de novo acesso.
+
+### Rate limit
+
+Novo serviço:
+
+```text
+src/Service/RateLimitService.php
+```
+
+Proteções:
+
+- login profissional por IP;
+- login profissional por conta/e-mail;
+- criação pública por IP;
+- criação pública por e-mail.
+
+Variáveis adicionadas ao `.env.example`:
+
+```text
+LOGIN_RATE_LIMIT_MAX=10
+LOGIN_IP_RATE_LIMIT_MAX=30
+LOGIN_RATE_LIMIT_WINDOW_SECONDS=900
+PUBLIC_START_RATE_LIMIT_MAX=10
+PUBLIC_START_EMAIL_RATE_LIMIT_MAX=5
+PUBLIC_START_RATE_LIMIT_WINDOW_SECONDS=900
+```
+
+### Hardening HTTP
+
+Novo middleware:
+
+```text
+src/Middleware/SecurityHeadersMiddleware.php
+```
+
+Cabeçalhos:
+
+- `X-Content-Type-Options: nosniff`;
+- `X-Frame-Options: DENY`;
+- `Referrer-Policy: no-referrer`;
+- `Cache-Control: no-store`.
+
+CORS e headers de segurança foram posicionados externamente ao middleware de erro para também proteger respostas de erro da API.
+
+### Checklist V1
+
+Novo comando:
+
+```powershell
+composer check-v1
+```
+
+Estados:
+
+- `PRONTO`;
+- `PRONTO_COM_AVISOS`;
+- `NAO_PRONTO`.
+
+O comando verifica ambiente, debug, URLs, HTTPS em produção, JWT secret, extensões PHP, SMTP, logs, backups, conexão MySQL, tabelas e migrations.
+
+### Backup
+
+Novo comando:
+
+```powershell
+composer backup-db
+```
+
+O backup usa `mysqldump`, grava em `storage/backups`, não versionado, e informa tamanho e SHA-256.
+
+Configuração opcional:
+
+```text
+MYSQLDUMP_BIN=mysqldump
+```
+
+### Documentação operacional
+
+Criado:
+
+```text
+docs/PRODUCAO_V1.md
+```
+
+### Validação pendente
+
+Como o usuário optou anteriormente por avançar etapas sem executar todos os testes, **não considerar a V1 encerrada ainda**.
+
+Executar localmente:
+
+```powershell
+cd "E:\Compartilhar\Kriale\Tânia - plataforma digital\Desenvolvimento"
+git pull
+
+cd ".\mapa-relacional-api"
+composer install
+composer migrate
+composer check-domain
+composer check
+composer check-v1
+composer backup-db
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd "E:\Compartilhar\Kriale\Tânia - plataforma digital\Desenvolvimento\mapa-relacional-web"
+npm run build
+npm run dev
+```
+
+Validar especialmente:
+
+1. login normal;
+2. bloqueio após repetidas credenciais inválidas;
+3. criação pública normal;
+4. reenvio do acesso de A ou B e invalidação do link anterior;
+5. impossibilidade de reenviar acesso já concluído;
+6. reenvio da devolutiva e invalidação do link anterior;
+7. página `/profissional/auditoria`;
+8. presença dos eventos esperados;
+9. ausência de tokens e senhas no contexto da auditoria;
+10. cabeçalhos de segurança nas respostas da API;
+11. `composer check-v1`;
+12. criação do backup;
+13. restauração do backup em banco separado;
+14. fluxo completo público → participantes → resultado → devolutiva.
+
+**Próximo marco após validação:** fechamento formal da V1 e preparação do deploy.
