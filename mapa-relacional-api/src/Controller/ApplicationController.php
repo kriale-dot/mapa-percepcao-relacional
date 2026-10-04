@@ -490,9 +490,58 @@ final class ApplicationController
             $relationshipsStmt->fetchAll(PDO::FETCH_ASSOC)
         );
 
+        $instrumentsStmt = $pdo->prepare(
+            'SELECT id, nome, status
+             FROM instrumentos
+             WHERE profissional_id = :profissional_id
+             ORDER BY nome ASC, id ASC'
+        );
+        $instrumentsStmt->execute([
+            'profissional_id' => $professionalId,
+        ]);
+
+        $instruments = array_map(
+            static function (array $instrument): array {
+                $instrument['id'] = (int) $instrument['id'];
+
+                return $instrument;
+            },
+            $instrumentsStmt->fetchAll(PDO::FETCH_ASSOC)
+        );
+
+        $filterRelationshipsStmt = $pdo->prepare(
+            'SELECT
+                v.id,
+                pa.nome AS pessoa_a_nome,
+                pb.nome AS pessoa_b_nome,
+                v.tipo,
+                v.status
+             FROM vinculos v
+             INNER JOIN pessoas pa
+               ON pa.id = v.pessoa_a_id
+             INNER JOIN pessoas pb
+               ON pb.id = v.pessoa_b_id
+             WHERE v.profissional_id = :profissional_id
+             ORDER BY pa.nome ASC, pb.nome ASC, v.id ASC'
+        );
+        $filterRelationshipsStmt->execute([
+            'profissional_id' => $professionalId,
+        ]);
+
+        $filterRelationships = array_map(
+            static function (array $relationship): array {
+                $relationship['id'] = (int) $relationship['id'];
+
+                return $relationship;
+            },
+            $filterRelationshipsStmt->fetchAll(PDO::FETCH_ASSOC)
+        );
+
         return $this->json($response, [
             'versoes' => $versions,
             'vinculos' => $relationships,
+            'instrumentos' => $instruments,
+            'vinculos_filtro' => $filterRelationships,
         ]);
     }
 
