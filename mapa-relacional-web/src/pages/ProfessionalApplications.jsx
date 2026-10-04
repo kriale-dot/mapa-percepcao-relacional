@@ -19,11 +19,22 @@ const emptyForm = {
   duracao_vinculo_texto: '',
 }
 
+const emptyFilters = {
+  participante: '',
+  status: '',
+  instrumento_id: '',
+  vinculo_id: '',
+  tipo_vinculo: '',
+  data_de: '',
+  data_ate: '',
+}
+
 export default function ProfessionalApplications() {
   const [applications, setApplications] = useState([])
   const [versions, setVersions] = useState([])
   const [relationships, setRelationships] = useState([])
   const [form, setForm] = useState(emptyForm)
+  const [filters, setFilters] = useState(emptyFilters)
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
 
@@ -36,13 +47,13 @@ export default function ProfessionalApplications() {
     load()
   }, [])
 
-  async function load() {
+  async function load(activeFilters = filters) {
     setStatus('loading')
     setMessage('')
 
     try {
       const [applicationsResult, optionsResult] = await Promise.all([
-        listApplications(),
+        listApplications(activeFilters),
         getApplicationOptions(),
       ])
 
@@ -77,6 +88,23 @@ export default function ProfessionalApplications() {
     }))
   }
 
+  function updateFilter(field, value) {
+    setFilters((current) => ({
+      ...current,
+      [field]: value,
+    }))
+  }
+
+  function handleFilterSubmit(event) {
+    event.preventDefault()
+    load(filters)
+  }
+
+  function handleFilterReset() {
+    setFilters(emptyFilters)
+    load(emptyFilters)
+  }
+
   function handleRelationshipChange(value) {
     const relationship =
       relationships.find((item) => item.id === Number(value)) || null
@@ -105,7 +133,7 @@ export default function ProfessionalApplications() {
 
       await createApplication(payload)
 
-      const result = await listApplications()
+      const result = await listApplications(filters)
       setApplications(result.aplicacoes || [])
       setForm(emptyForm)
       setStatus('ready')
@@ -329,6 +357,124 @@ export default function ProfessionalApplications() {
             </h2>
           </div>
 
+          <form
+            className="mb-5 rounded-2xl border border-[#A8C8B8]/40 bg-white p-5"
+            onSubmit={handleFilterSubmit}
+          >
+            <p className="text-sm font-semibold">Filtros</p>
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <input
+                type="search"
+                placeholder="Participante ou e-mail"
+                value={filters.participante}
+                onChange={(event) =>
+                  updateFilter('participante', event.target.value)
+                }
+                className="rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 text-sm outline-none"
+              />
+
+              <select
+                value={filters.status}
+                onChange={(event) =>
+                  updateFilter('status', event.target.value)
+                }
+                className="rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 text-sm outline-none"
+              >
+                <option value="">Todos os status</option>
+                <option value="RASCUNHO">Rascunho</option>
+                <option value="PRONTA">Pronta</option>
+                <option value="EM_ANDAMENTO">Em andamento</option>
+                <option value="CONCLUIDA">Concluída</option>
+                <option value="CANCELADA">Cancelada</option>
+              </select>
+
+              <select
+                value={filters.instrumento_id}
+                onChange={(event) =>
+                  updateFilter('instrumento_id', event.target.value)
+                }
+                className="rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 text-sm outline-none"
+              >
+                <option value="">Todos os instrumentos</option>
+                {Array.from(
+                  new Map(
+                    versions.map((version) => [
+                      version.instrumento_id,
+                      version.instrumento_nome,
+                    ]),
+                  ),
+                ).map(([id, name]) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={filters.vinculo_id}
+                onChange={(event) =>
+                  updateFilter('vinculo_id', event.target.value)
+                }
+                className="rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 text-sm outline-none"
+              >
+                <option value="">Todos os vínculos cadastrados</option>
+                {relationships.map((relationship) => (
+                  <option key={relationship.id} value={relationship.id}>
+                    {relationship.pessoa_a_nome} ↔ {relationship.pessoa_b_nome}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="text"
+                placeholder="Tipo de vínculo"
+                value={filters.tipo_vinculo}
+                onChange={(event) =>
+                  updateFilter('tipo_vinculo', event.target.value)
+                }
+                className="rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 text-sm outline-none"
+              />
+
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="date"
+                  aria-label="Data inicial"
+                  value={filters.data_de}
+                  onChange={(event) =>
+                    updateFilter('data_de', event.target.value)
+                  }
+                  className="rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-3 py-3 text-sm outline-none"
+                />
+                <input
+                  type="date"
+                  aria-label="Data final"
+                  value={filters.data_ate}
+                  onChange={(event) =>
+                    updateFilter('data_ate', event.target.value)
+                  }
+                  className="rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-3 py-3 text-sm outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="submit"
+                className="rounded-xl bg-[#385048] px-4 py-2 text-sm font-semibold text-white"
+              >
+                Aplicar filtros
+              </button>
+              <button
+                type="button"
+                onClick={handleFilterReset}
+                className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
+              >
+                Limpar
+              </button>
+            </div>
+          </form>
+
           {status === 'loading' ? (
             <div className="rounded-2xl border border-[#A8C8B8]/40 bg-white p-6">
               Carregando avaliações...
@@ -362,6 +508,11 @@ export default function ProfessionalApplications() {
                   <span className="rounded-full bg-[#A8C8D0]/25 px-3 py-1 text-xs font-semibold">
                     {application.tipo_vinculo_snapshot}
                   </span>
+                  {application.devolutiva_status ? (
+                    <span className="rounded-full bg-[#D8B078]/16 px-3 py-1 text-xs font-semibold">
+                      Devolutiva {application.devolutiva_status.toLowerCase()}
+                    </span>
+                  ) : null}
                 </div>
 
                 <h3 className="mt-3 text-lg font-semibold">
@@ -407,19 +558,33 @@ export default function ProfessionalApplications() {
                   </div>
                 </div>
 
-                {application.status === 'CONCLUIDA' ? (
+                <div className="mt-5 flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() =>
                       navigate(
-                        `/profissional/avaliacoes/${application.id}/resultados`,
+                        `/profissional/avaliacoes/${application.id}`,
                       )
                     }
-                    className="mt-5 rounded-xl bg-[#385048] px-4 py-2 text-sm font-semibold text-white"
+                    className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
                   >
-                    Ver resultados
+                    Ver detalhes
                   </button>
-                ) : null}
+
+                  {application.status === 'CONCLUIDA' ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/profissional/avaliacoes/${application.id}/resultados`,
+                        )
+                      }
+                      className="rounded-xl bg-[#385048] px-4 py-2 text-sm font-semibold text-white"
+                    >
+                      Ver resultados
+                    </button>
+                  ) : null}
+                </div>
 
                 <p className="mt-4 text-xs text-[#385048]/50">
                   Aplicação #{application.id}
