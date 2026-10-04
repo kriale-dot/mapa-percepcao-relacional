@@ -9,6 +9,7 @@ use App\Controller\HealthController;
 use App\Controller\InstrumentController;
 use App\Controller\InstrumentVersionController;
 use App\Controller\ProfessionalController;
+use App\Controller\SectionController;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\ProfessionalAuthMiddleware;
 use Dotenv\Dotenv;
@@ -45,6 +46,7 @@ $authController = new AuthController();
 $professionalController = new ProfessionalController();
 $instrumentController = new InstrumentController();
 $instrumentVersionController = new InstrumentVersionController();
+$sectionController = new SectionController();
 
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
@@ -54,7 +56,8 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $authController,
     $professionalController,
     $instrumentController,
-    $instrumentVersionController
+    $instrumentVersionController,
+    $sectionController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->put('/senha', [$authController, 'changePassword']);
@@ -90,6 +93,23 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->delete(
         '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}',
         [$instrumentVersionController, 'delete']
+    );
+
+    $group->get(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/secoes',
+        [$sectionController, 'index']
+    );
+    $group->post(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/secoes',
+        [$sectionController, 'create']
+    );
+    $group->put(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/secoes/{sectionId:[0-9]+}',
+        [$sectionController, 'update']
+    );
+    $group->delete(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/secoes/{sectionId:[0-9]+}',
+        [$sectionController, 'delete']
     );
 })->add(new ProfessionalAuthMiddleware());
 
