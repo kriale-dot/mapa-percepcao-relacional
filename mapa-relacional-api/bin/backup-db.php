@@ -1,0 +1,148 @@
+<?php
+
+declare(strict_types=1);
+
+use Dotenv\Dotenv;
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+$root = dirname(__DIR__);
+
+if (is_file($root . '/.env')) {
+    Dotenv::createImmutable($root)->safeLoad();
+}
+
+if (!function_exists('proc_open')) {
+    fwrite(
+        STDERR,
+        "[ERRO] proc_open nao esta disponivel neste ambiente.\n"
+    );
+    exit(1);
+}
+
+$database = trim((string) ($_ENV['DB_DATABASE'] ?? ''));
+$username = trim((string) ($_ENV['DB_USERNAME'] ?? ''));
+$password = (string) ($_ENV['DB_PASSWORD'] ?? '');
+$host = trim((string) ($_ENV['DB_HOST'] ?? '127.0.0.1'));
+$port = trim((string) ($_ENV['DB_PORT'] ?? '3306'));
+$binary = trim((string) ($_ENV['MYSQLDUMP_BIN'] ?? 'mysqldump'));
+
+if ($database === '' || $username === '' || $binary === '') {
+    fwrite(
+        STDERR,
+        "[ERRO] DB_DATABASE, DB_USERNAME e MYSQLDUMP_BIN sao obrigatorios.\n"
+    );
+    exit(1);
+}
+
+$backupDir = $root . '/storage/backups';
+
+if (!is_dir($backupDir) && !@mkdir($backupDir, 0775, true)) {
+    fwrite(
+        STDERR,
+        "[ERRO] Nao foi possivel criar storage/backups.\n"
+    );
+    exit(1);
+}
+
+if (!is_writable($backupDir)) {
+    fwrite(
+        STDERR,
+        "[ERRO] storage/backups nao e gravavel.\n"
+    );
+    exit(1);
+}
+
+$timestamp = date('Ymd-His');
+$path = $backupDir . '/mapa-relacional-' . $timestamp . '.sql';
+
+$command = [
+    $binary,
+    '--single-transaction',
+    '--routines',
+    '--triggers',
+    '--events',
+    '--default-character-set=utf8mb4',
+    '--host=' . $host,
+    '--port=' . $port,
+    '--user=' . $username,
+    $database,
+];
+
+$descriptors = [
+    0 => ['pipe', 'r'],
+    1 => ['file', $path, 'w'],
+    2 => ['pipe', 'w'],
+];
+
+$previousMysqlPwd = getenv('MYSQL_PWD');
+putenv('MYSQL_PWD=' . $password);
+
+$process = proc_open(
+    $command,
+    $descriptors,
+    $pipes,
+    $root
+);
+
+if (!is_resource($process)) {
+    if ($previousMysqlPwd === false) {
+        putenv('MYSQL_PWD');
+    } else {
+        putenv('MYSQL_PWD=' . $previousMysqlPwd);
+    }
+
+    fwrite(
+        STDERR,
+        "[ERRO] Nao foi possivel iniciar mysqldump.\n"
+    );
+    exit(1);
+}
+
+fclose($pipes[0]);
+$stderr = stream_get_contents($pipes[2]) ?: '';
+fclose($pipes[2]);
+
+$exitCode = proc_close($process);
+
+if ($previousMysqlPwd === false) {
+    putenv('MYSQL_PWD');
+} else {
+    putenv('MYSQL_PWD=' . $previousMysqlPwd);
+}
+
+if ($exitCode !== 0) {
+    @unlink($path);
+
+    fwrite(
+        STDERR,
+        "[ERRO] mysqldump falhou com codigo {$exitCode}.\n"
+    );
+
+    if (trim($stderr) !== '') {
+        fwrite(
+            STDERR,
+            trim($stderr) . "\n"
+        );
+    }
+
+    exit(1);
+}
+
+if (!is_file($path) || filesize($path) === 0) {
+    @unlink($path);
+
+    fwrite(
+        STDERR,
+        "[ERRO] O backup foi criado vazio.\n"
+    );
+    exit(1);
+}
+
+$hash = hash_file('sha256', $path);
+$size = filesize($path);
+
+echo "[OK] Backup criado.\n";
+echo "Arquivo: {$path}\n";
+echo "Tamanho: {$size} bytes\n";
+echo "SHA-256: {$hash}\n";
