@@ -316,6 +316,8 @@ Para aparecer no catálogo público, o instrumento também precisa estar `ATIVO`
 
 A criação da aplicação e dos dois participantes deve permanecer atômica. A etapa seguinte deverá gerar os dois acessos individuais seguros e permitir que o fluxo prossiga sem intervenção manual do profissional.
 
+Após a geração dos dois acessos e o envio efetivo do e-mail, a tela pública de confirmação deverá informar claramente que **os links de acesso dos dois participantes foram enviados para o e-mail cadastrado**. Essa mensagem só deve ser exibida depois que o backend confirmar o envio com sucesso; enquanto o envio ainda não existir ou falhar, a interface não deve afirmar que os links foram enviados.
+
 O profissional visualiza automaticamente essas aplicações em sua área autenticada, acompanha o preenchimento, consulta os resultados e pode usar os dados de contato para abordagem posterior.
 
 A criação manual pela área profissional continua disponível apenas como modo assistido/administrativo, não como requisito para que uma avaliação pública exista.
