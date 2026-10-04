@@ -734,15 +734,26 @@ O profissional deverá visualizar:
 
 ### RF-130 — Infraestrutura de mensagens
 
-O sistema deverá ser preparado para envio de mensagens transacionais.
+A V1 utilizará mensagens transacionais por **e-mail via SMTP Brevo**.
+
+Os fluxos implementados incluem:
+
+- envio inicial dos dois acessos da avaliação;
+- reenvio individual de acesso de participante ainda não concluído;
+- envio da devolutiva liberada;
+- reenvio da devolutiva liberada.
+
+Sempre que um link seguro for reenviado, um novo token será gerado e o link anterior correspondente ficará inválido.
 
 ### RF-131 — Convite por e-mail
 
-O canal de e-mail deverá ser suportado quando o módulo de comunicação entrar em implementação.
+O e-mail é o canal transacional obrigatório da V1.
+
+As credenciais SMTP devem permanecer apenas no arquivo `.env` e nunca devem ser versionadas.
 
 ### RF-132 — Outros canais
 
-SMS e WhatsApp poderão ser incorporados conforme decisão futura de escopo e provedor.
+SMS e WhatsApp permanecem fora do escopo da V1. A arquitetura poderá receber esses canais em versão futura.
 
 ---
 
@@ -759,16 +770,22 @@ Aplicações concluídas deverão preservar:
 - cálculo;
 - comentário/devolutiva.
 
-### RF-141 — Auditoria futura
+### RF-141 — Auditoria
 
-A arquitetura deverá permitir registrar ações relevantes, incluindo:
+A V1 deverá registrar ações relevantes em trilha de auditoria, incluindo:
 
 - entidade afetada;
 - ação;
-- usuário/profissional;
+- ator;
+- profissional responsável;
 - data/hora;
-- contexto;
-- IP e user agent quando apropriado.
+- contexto não sensível;
+- IP;
+- user agent.
+
+A auditoria não deverá armazenar senhas, tokens, JWT, cabeçalhos de autorização ou credenciais SMTP.
+
+A área profissional deverá permitir consulta dos eventos vinculados ao próprio profissional.
 
 ---
 
