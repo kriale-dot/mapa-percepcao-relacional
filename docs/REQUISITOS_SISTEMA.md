@@ -104,7 +104,7 @@ A API deverá permanecer separada do frontend.
 - catálogo público de avaliações disponíveis;
 - início autônomo de uma avaliação pelo próprio visitante, sem intervenção prévia do profissional.
 
-O fluxo público de autoatendimento é parte central do produto: o visitante poderá escolher uma avaliação disponibilizada publicamente, informar os participantes, o tipo e a tempo de união e iniciar o processo. A aplicação criada deverá aparecer automaticamente na área profissional para acompanhamento e posterior contato.
+O fluxo público de autoatendimento é parte central do produto: o visitante poderá escolher uma avaliação disponibilizada publicamente, informar os participantes, o tipo de vínculo e o tempo de união e iniciar o processo. A aplicação criada deverá aparecer automaticamente na área profissional para acompanhamento e posterior contato.
 
 ### 3.2 Área do participante
 
@@ -398,10 +398,12 @@ Um visitante do site poderá, sem autenticação profissional e sem intervençã
 - informar o nome do participante B;
 - informar um e-mail de contato;
 - informar o tipo de vínculo;
-- informar a tempo de união, quando aplicável;
+- informar o tempo de união, quando aplicável;
 - iniciar a avaliação.
 
 A aplicação pública deverá ser associada automaticamente ao profissional responsável pela avaliação escolhida e deverá aparecer na área profissional para acompanhamento.
+
+Uma avaliação ficará disponível no catálogo público quando o instrumento estiver `ATIVO`, houver versão `PUBLICADA` e o profissional responsável estiver `ATIVO`. Quando houver mais de uma versão publicada do mesmo instrumento, o catálogo público utilizará a versão publicada mais recente.
 
 O autoatendimento público não deverá exigir cadastro prévio em `pessoas` nem criação prévia em `vinculos`.
 
