@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 concluída — estrutura completa e versionada de instrumentos  
-**Etapa atual:** Etapa 6.1 em validação — criação de aplicações com participantes A/B  
-**Próximo passo:** validar localmente criação de aplicações, snapshots e os dois participantes operacionais
+**Etapa atual:** Etapa 6.1 reaberta — refatorar criação para autoatendimento público  
+**Próximo passo:** implementar o fluxo público em que o visitante escolhe a avaliação e cria a própria aplicação
 
 ## 1. Situação atual
 
@@ -1341,3 +1341,28 @@ Validar:
 Não há migration nova nesta etapa; `aplicacoes` e `aplicacao_participantes` já existem na migration base.
 
 **Próxima subetapa prevista:** Etapa 6.2 — preparação dos acessos individuais seguros para A e B.
+
+### Correção funcional — autoatendimento público
+
+Em 2026-10-04 foi identificado que a implementação inicial da Etapa 6.1 estava excessivamente centrada na criação da aplicação pelo profissional.
+
+O objetivo correto do produto é que uma pessoa possa entrar no site público, conhecer as avaliações disponíveis, escolher uma delas e iniciar por conta própria, sem que o profissional tenha conhecimento prévio ou precise criar a avaliação manualmente.
+
+A área profissional continuará exibindo e acompanhando todas as aplicações, inclusive as iniciadas publicamente, e poderá manter a criação manual como recurso secundário.
+
+A Etapa 6.1 foi, portanto, **reaberta** antes de avançar para 6.2.
+
+Refatoração necessária:
+
+1. criar catálogo/entrada pública de avaliações;
+2. exibir apenas avaliações elegíveis baseadas em versões publicadas;
+3. permitir que o visitante informe participante A e participante B;
+4. coletar e-mail de contato;
+5. coletar tipo e duração do vínculo;
+6. criar a aplicação associada automaticamente ao profissional dono do instrumento;
+7. criar os dois participantes A/B usando snapshots, sem exigir registros prévios em `pessoas` ou `vinculos`;
+8. fazer a nova aplicação aparecer automaticamente em `/profissional/avaliacoes`;
+9. manter o fluxo profissional atual apenas como criação assistida opcional;
+10. somente depois dessa correção avançar para acessos individuais seguros.
+
+A validação anterior do fluxo profissional continua útil, mas não encerra a Etapa 6.1 porque não representa o fluxo principal desejado.
