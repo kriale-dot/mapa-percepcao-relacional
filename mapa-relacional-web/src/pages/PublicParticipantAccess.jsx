@@ -39,6 +39,13 @@ export default function PublicParticipantAccess({ token }) {
 
     try {
       const result = await getParticipantAccess(token)
+
+      if (!result?.acesso?.participante) {
+        throw new Error(
+          'A API não retornou os dados esperados para este acesso.',
+        )
+      }
+
       const currentAccess = result.acesso
 
       setAccess(currentAccess)
@@ -57,6 +64,13 @@ export default function PublicParticipantAccess({ token }) {
       }
 
       const questionnaireResult = await getParticipantQuestionnaire(token)
+
+      if (!questionnaireResult?.questionario) {
+        throw new Error(
+          'A API não retornou a estrutura esperada do questionário.',
+        )
+      }
+
       setQuestionnaire(questionnaireResult.questionario)
       setStatus('ready')
     } catch (error) {
@@ -86,9 +100,22 @@ export default function PublicParticipantAccess({ token }) {
         genero: form.genero,
       })
 
+      if (!result?.acesso?.participante) {
+        throw new Error(
+          'A API não retornou a identificação atualizada do participante.',
+        )
+      }
+
       setAccess(result.acesso)
 
       const questionnaireResult = await getParticipantQuestionnaire(token)
+
+      if (!questionnaireResult?.questionario) {
+        throw new Error(
+          'A API não retornou a estrutura esperada do questionário.',
+        )
+      }
+
       setQuestionnaire(questionnaireResult.questionario)
       setStatus('ready')
     } catch (error) {
