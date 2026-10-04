@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 6 em desenvolvimento — autoatendimento público de avaliações  
-**Etapa atual:** Etapa 6.2 em validação — acessos individuais e envio SMTP Brevo  
-**Próximo passo:** configurar SMTP Brevo no .env e validar geração, envio e abertura dos dois links individuais
+**Etapa atual:** Etapa 6.2 concluída — acessos individuais e envio SMTP Brevo  
+**Próximo passo:** iniciar a Etapa 6.3 — identificação inicial e início do preenchimento individual
 
 ## 1. Situação atual
 
@@ -1572,3 +1572,24 @@ Foi confirmado que:
 - o e-mail de teste foi entregue ao destinatário informado.
 
 A próxima validação da Etapa 6.2 é o fluxo completo da avaliação pública: criar uma nova aplicação, gerar os dois tokens, enviar os dois links no mesmo e-mail, abrir os links de A e B e confirmar o estado `PRONTA`.
+
+### Validação completa da Etapa 6.2 concluída
+
+Em 2026-10-04 a Etapa 6.2 foi validada com sucesso no fluxo completo.
+
+Foram confirmados:
+
+- criação pública da avaliação sem erro;
+- geração de dois tokens individuais diferentes;
+- envio real pelo SMTP Brevo para o e-mail cadastrado;
+- tela pública confirmando o envio somente após sucesso do SMTP;
+- e-mail contendo um link para o participante A e outro para o participante B;
+- abertura do link A identificando corretamente o participante e o lado A;
+- abertura do link B identificando corretamente o participante e o lado B;
+- aplicação exibida na área profissional com status `PRONTA`;
+- participantes permanecendo em `PENDENTE` antes do início do preenchimento;
+- armazenamento somente do hash do token em `acessos_aplicacao`.
+
+**Etapa 6.2 concluída.**
+
+**Próxima subetapa:** Etapa 6.3 — identificação inicial e início do preenchimento individual.
