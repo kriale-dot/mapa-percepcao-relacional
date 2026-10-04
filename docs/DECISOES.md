@@ -220,3 +220,22 @@ Na V1, os instrumentos pertencem ao profissional autenticado e usam os estados `
 A exclusão física de um instrumento somente é permitida quando ele ainda não possui nenhuma versão. Se já houver versão vinculada, a API recusa a exclusão para preservar a estrutura histórica; nesse caso, o instrumento deve ser arquivado.
 
 Todas as consultas e alterações de instrumentos devem ser filtradas por `profissional_id`, impedindo acesso cruzado entre profissionais.
+
+## D-019 — Imutabilidade das versões publicadas
+**Data:** 2026-10-04  
+**Status:** vigente
+
+A V1 adota regra mais conservadora que o mínimo exigido pelo RF-033: a imutabilidade começa no momento da publicação, mesmo antes de a versão ser utilizada em uma aplicação.
+
+Regras:
+
+- novas versões nascem como `RASCUNHO`;
+- somente `RASCUNHO` pode ter o número editado;
+- `RASCUNHO` pode ser publicado;
+- `PUBLICADA` é imutável e pode ser arquivada;
+- `ARQUIVADA` permanece imutável;
+- alterações após publicação exigem criação de uma nova versão;
+- rascunhos só podem ser excluídos quando não possuem seções nem aplicações vinculadas;
+- o número da versão é único dentro de cada instrumento.
+
+Essa regra reduz o risco de uma versão publicada mudar silenciosamente e simplifica a preservação histórica.
