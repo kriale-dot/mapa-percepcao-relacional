@@ -47,7 +47,8 @@
       "php -l src/Service/AccessTokenService.php",
       "php -l src/Service/MailService.php",
       "php -l src/Controller/ParticipantAccessController.php",
-      "php -l bin/check-smtp.php"
+      "php -l bin/check-smtp.php",
+      "php -l src/Service/ResultService.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
