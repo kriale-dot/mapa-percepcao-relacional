@@ -6,9 +6,9 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** Etapa 8 em desenvolvimento — devolutiva profissional e liberação de resultados  
-**Etapa atual:** Etapa 8 implementada — validação pulada por decisão do usuário  
-**Próximo passo:** aplicar a migration 006 e seguir para o painel profissional/dashboard, mantendo Etapas 7.2 e 8 sem validação formal
+**Marco atual:** Etapa 9 em desenvolvimento — dashboard e acompanhamento profissional  
+**Etapa atual:** Etapa 9 implementada — dashboard, filtros e detalhe de avaliações  
+**Próximo passo:** aplicar migrations pendentes e validar dashboard, filtros e detalhe das avaliações
 
 ## 1. Situação atual
 
@@ -2267,3 +2267,160 @@ composer migrate
 O `composer check-domain` agora exige `006_devolutivas.sql` e a tabela `devolutivas`.
 
 **Próximo passo sugerido:** Etapa 9 — dashboard profissional e refinamento da lista/detalhe das aplicações.
+
+## 37. Etapa 9 — dashboard e acompanhamento profissional
+
+Implementação criada no GitHub em 2026-10-04.
+
+A Etapa 9 foi implementada sobre a estrutura das Etapas 7 e 8. Como a Etapa 8 teve validação pulada, a migration `006_devolutivas.sql` precisa estar aplicada para o dashboard funcionar integralmente.
+
+### Backend
+
+`ApplicationController` recebeu:
+
+```text
+GET /api/profissional/dashboard
+```
+
+O endpoint retorna:
+
+- total de avaliações;
+- rascunhos;
+- prontas;
+- em andamento;
+- concluídas;
+- canceladas;
+- resultados disponíveis;
+- devolutivas em rascunho;
+- devolutivas liberadas;
+- seis avaliações mais recentes.
+
+A listagem `GET /api/profissional/aplicacoes` passou a aceitar filtros:
+
+```text
+participante
+status
+instrumento_id
+vinculo_id
+tipo_vinculo
+data_de
+data_ate
+```
+
+O filtro `participante` pesquisa nomes snapshot de A/B e o e-mail de contato.
+
+Os parâmetros PDO do filtro textual foram mantidos separados para compatibilidade com `PDO::ATTR_EMULATE_PREPARES = false`.
+
+O endpoint de opções profissionais também passa a devolver:
+
+- instrumentos do profissional, inclusive históricos;
+- vínculos para filtro, inclusive inativos;
+- versões publicadas e vínculos ativos continuam separados para criação assistida.
+
+O detalhe `GET /api/profissional/aplicacoes/{id}` agora retorna também:
+
+- itens excluídos por “Não se aplica”;
+- resumo dos resultados persistidos;
+- `resultados_count`;
+- `devolutiva_status`.
+
+### Frontend
+
+Nova página:
+
+```text
+mapa-relacional-web/src/pages/ProfessionalDashboard.jsx
+```
+
+A rota `/profissional` agora mostra:
+
+- saudação ao profissional;
+- cartões de métricas;
+- aviso de devolutivas em rascunho;
+- atalhos para módulos principais;
+- avaliações recentes;
+- acesso rápido a detalhe e resultados.
+
+Nova página:
+
+```text
+mapa-relacional-web/src/pages/ProfessionalApplicationDetail.jsx
+```
+
+Nova rota:
+
+```text
+/profissional/avaliacoes/{id}
+```
+
+O detalhe exibe:
+
+- status geral;
+- instrumento e versão;
+- e-mail de contato;
+- tipo de vínculo;
+- tempo de união;
+- datas principais;
+- participantes A e B;
+- idade, gênero e status de cada participante;
+- início e conclusão individual;
+- resumo técnico dos dois sentidos;
+- itens “Não se aplica”;
+- status da devolutiva;
+- atalho para resultados completos.
+
+A lista `/profissional/avaliacoes` recebeu filtros por participante/e-mail, status, instrumento, vínculo, tipo de vínculo e período, além do botão `Ver detalhes`.
+
+### Migration
+
+A Etapa 9 não cria migration nova.
+
+Como o dashboard consulta `devolutivas`, é obrigatório que as migrations anteriores estejam aplicadas, incluindo:
+
+```text
+004_resultados_comparacoes.sql
+005_ajustar_faixas_percentuais.sql
+006_devolutivas.sql
+```
+
+### Validação local pendente — Etapa 9
+
+Executar:
+
+```powershell
+cd mapa-relacional-api
+composer migrate
+composer check-domain
+composer check
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. entrar em `/profissional`;
+2. conferir os cartões de métricas;
+3. conferir se as avaliações recentes correspondem aos registros mais novos;
+4. abrir `Avaliações`;
+5. filtrar por participante;
+6. filtrar por status;
+7. filtrar por instrumento;
+8. filtrar por vínculo administrativo;
+9. filtrar por tipo de vínculo;
+10. filtrar por período;
+11. limpar os filtros;
+12. abrir `Ver detalhes`;
+13. conferir A/B, datas, tempo de união e status;
+14. em aplicação concluída, conferir resumo dos resultados;
+15. conferir itens “Não se aplica” quando existirem;
+16. conferir o status da devolutiva;
+17. usar o atalho `Ver resultados`.
+
+**Próximo passo sugerido:** Etapa 10 — notificações complementares, auditoria e preparação de produção/V1.
