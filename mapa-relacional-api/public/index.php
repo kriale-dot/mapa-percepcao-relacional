@@ -105,6 +105,14 @@ $app->put(
     '/api/public/acessos/{token}/respostas/{itemId:[0-9]+}',
     [$participantAccessController, 'saveResponse']
 );
+$app->post(
+    '/api/public/acessos/{token}/itens/{itemId:[0-9]+}/nao-se-aplica',
+    [$participantAccessController, 'excludeItem']
+);
+$app->post(
+    '/api/public/acessos/{token}/concluir',
+    [$participantAccessController, 'complete']
+);
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $alternativeController,
