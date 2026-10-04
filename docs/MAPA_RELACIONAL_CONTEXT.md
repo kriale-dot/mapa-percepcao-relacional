@@ -62,6 +62,8 @@ A API deve permanecer separada da interface.
 
 Deve apresentar a profissional, sua atuação, informações sobre o instrumento e meios de contato/acesso.
 
+O fluxo principal de entrada em uma avaliação é público e autônomo. Um visitante pode se interessar por uma das avaliações disponibilizadas no site, escolhê-la e iniciar o processo sem que o profissional precise criar previamente a pessoa, o vínculo ou a aplicação.
+
 ### Área profissional
 
 O profissional poderá, progressivamente:
@@ -290,28 +292,31 @@ Depois da criação, os lados A/B não são trocados pela edição comum do vín
 
 Um mesmo vínculo pode ser utilizado em múltiplas aplicações ao longo do tempo. A exclusão física é permitida somente enquanto não houver aplicações associadas; depois disso, o vínculo deve ser preservado e pode ser marcado como `INATIVO`.
 
-### Aplicações — núcleo inicial
+### Aplicações — fluxo público e gestão profissional
 
-O módulo profissional de avaliações é acessado em `/profissional/avaliacoes` e utiliza rotas protegidas sob `/api/profissional/aplicacoes`.
+O **autoatendimento público** é o fluxo principal de criação de aplicações. O módulo profissional em `/profissional/avaliacoes` deve funcionar principalmente como acompanhamento, consulta e gestão das avaliações que chegam pelo site, mantendo também a possibilidade de criação manual como fluxo secundário.
 
-Na criação de uma nova aplicação:
+No fluxo público, o visitante poderá escolher uma avaliação disponibilizada no site e informar diretamente:
 
-- a aplicação pertence ao profissional autenticado;
-- somente uma versão `PUBLICADA` do instrumento pode ser escolhida;
-- a aplicação nasce em `RASCUNHO`;
-- um vínculo existente é opcional;
-- o e-mail de contato é obrigatório;
-- tipo de vínculo e duração são preservados como snapshot;
-- exatamente dois registros de `aplicacao_participantes` são criados atomicamente, um lado `A` e um lado `B`;
-- os participantes nascem com status `PENDENTE`.
+- nome do participante A;
+- nome do participante B;
+- e-mail de contato;
+- tipo do vínculo;
+- duração do vínculo, quando aplicável.
 
-Quando existe vínculo selecionado, os lados A/B e os nomes atuais das duas pessoas são copiados para os participantes da aplicação, enquanto `tipo` e `duracao_texto` são copiados para os campos snapshot da aplicação.
+A aplicação será associada automaticamente ao profissional responsável pelo instrumento escolhido. Não será necessário o profissional conhecer previamente os participantes nem criar `pessoas` ou `vinculos`.
 
-Quando não existe vínculo cadastrado, a aplicação ainda cria os dois slots A/B com `pessoa_id = NULL`; o tipo do vínculo é informado no momento da criação e os dados de identificação dos participantes ficam pendentes para o fluxo de acesso/identificação.
+Para evitar poluir o cadastro administrativo, o autoatendimento público não cria automaticamente registros permanentes em `pessoas` e `vinculos`. A aplicação nasce com `vinculo_id = NULL`; seus dois registros de `aplicacao_participantes` podem permanecer com `pessoa_id = NULL`, mas recebem os nomes informados em `nome_snapshot`, preservando os lados A e B.
 
-`idade_snapshot` e `genero_snapshot` não são preenchidos administrativamente nesta etapa. Eles permanecem disponíveis para registrar os dados informados pelo participante no fluxo de identificação, conforme RF-052.
+O tipo e a duração informados pelo visitante são gravados diretamente nos snapshots da aplicação. Mudanças posteriores em cadastros administrativos não alteram esses valores históricos.
 
-A criação da aplicação e dos dois participantes ocorre dentro de uma única transação do banco para evitar aplicações incompletas.
+Somente avaliações baseadas em versão `PUBLICADA` podem ser iniciadas pelo público. O visitante escolhe a avaliação em linguagem de produto; detalhes internos de instrumento/versão não precisam ser expostos na interface pública.
+
+A criação da aplicação e dos dois participantes deve permanecer atômica. A etapa seguinte deverá gerar os dois acessos individuais seguros e permitir que o fluxo prossiga sem intervenção manual do profissional.
+
+O profissional visualiza automaticamente essas aplicações em sua área autenticada, acompanha o preenchimento, consulta os resultados e pode usar os dados de contato para abordagem posterior.
+
+A criação manual pela área profissional continua disponível apenas como modo assistido/administrativo, não como requisito para que uma avaliação pública exista.
 
 ### Instrumentos
 
