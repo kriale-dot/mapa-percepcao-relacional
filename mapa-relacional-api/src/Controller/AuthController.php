@@ -176,7 +176,7 @@ final class AuthController
         );
         $updateLogin->execute(['id' => $professional['id']]);
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             (int) $professional['id'],
             'LOGIN_SUCESSO',
@@ -288,7 +288,7 @@ final class AuthController
             'id' => $professionalId,
         ]);
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             $professionalId,
             'SENHA_ALTERADA',
