@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 3 concluída — autenticação profissional  
-**Próximo passo:** iniciar a Etapa 4 — CRUD de instrumentos, versões, seções e itens
+**Etapa atual:** Etapa 4.1 em validação — CRUD de instrumentos  
+**Próximo passo:** validar localmente o CRUD de instrumentos; depois iniciar versões do instrumento
 
 ## 1. Situação atual
 
@@ -704,3 +704,74 @@ A validação manual específica da Etapa 3.4 para token ausente/inválido foi d
 **Etapa 3 concluída.**
 
 **Próxima etapa:** Etapa 4 — CRUD de instrumentos, versões, seções e itens.
+
+## 20. Etapa 4.1 — CRUD de instrumentos
+
+Implementação criada no GitHub em 2026-10-03.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/InstrumentController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalInstruments.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Rotas protegidas adicionadas:
+
+```text
+GET    /api/profissional/instrumentos
+POST   /api/profissional/instrumentos
+GET    /api/profissional/instrumentos/{id}
+PUT    /api/profissional/instrumentos/{id}
+DELETE /api/profissional/instrumentos/{id}
+```
+
+Regras implementadas:
+
+- todo instrumento é filtrado pelo profissional autenticado;
+- nome obrigatório;
+- descrição opcional;
+- estados permitidos: `RASCUNHO`, `ATIVO`, `ARQUIVADO`;
+- listagem informa também o total de versões;
+- exclusão física permitida apenas quando o instrumento ainda não possui versões;
+- instrumento com versão deve ser preservado e pode ser arquivado.
+
+No frontend foi criada:
+
+```text
+/profissional/instrumentos
+```
+
+A área profissional agora permite abrir o módulo pelo card `Instrumentos`.
+
+### Validação local pendente
+
+Após `git pull`, executar na API:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+No frontend:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. abrir `Instrumentos` pela área profissional;
+2. criar um instrumento em rascunho;
+3. confirmar que aparece na listagem;
+4. editar nome, descrição e status;
+5. recarregar a página e confirmar persistência;
+6. excluir um instrumento que ainda não possui versões;
+7. confirmar que a sessão continua protegida.
+
+**Próxima subetapa prevista:** Etapa 4.2 — versões do instrumento.
