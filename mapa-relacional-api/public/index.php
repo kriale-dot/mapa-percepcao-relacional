@@ -56,11 +56,6 @@ $logger = LoggerFactory::create();
 $app = AppFactory::create();
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
-$app->add(new SecurityHeadersMiddleware());
-
-$app->add(new CorsMiddleware(
-    $_ENV['FRONTEND_URL'] ?? 'http://localhost:5173'
-));
 
 $errorMiddleware = $app->addErrorMiddleware(
     filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOL),
@@ -68,6 +63,12 @@ $errorMiddleware = $app->addErrorMiddleware(
     true,
     $logger
 );
+
+$app->add(new SecurityHeadersMiddleware());
+
+$app->add(new CorsMiddleware(
+    $_ENV['FRONTEND_URL'] ?? 'http://localhost:5173'
+));
 
 $healthController = new HealthController();
 $accessTokenService = new AccessTokenService();
