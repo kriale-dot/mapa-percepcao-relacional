@@ -35,6 +35,25 @@ export function getApiHealth() {
   return request('/api/health')
 }
 
+export function listPublicEvaluations() {
+  return request('/api/public/avaliacoes', {
+    method: 'GET',
+  })
+}
+
+export function getPublicEvaluation(versionId) {
+  return request(`/api/public/avaliacoes/${versionId}`, {
+    method: 'GET',
+  })
+}
+
+export function startPublicEvaluation(versionId, application) {
+  return request(`/api/public/avaliacoes/${versionId}/iniciar`, {
+    method: 'POST',
+    body: JSON.stringify(application),
+  })
+}
+
 export function loginProfessional(email, senha) {
   return request('/api/auth/login', {
     method: 'POST',
