@@ -279,7 +279,7 @@ Campos usados nesta etapa:
 - pessoa do lado B;
 - tipo do vínculo;
 - descrição opcional do tipo;
-- duração textual opcional;
+- tempo de união opcional;
 - status.
 
 Os estados adotados são `ATIVO` e `INATIVO`.
@@ -302,13 +302,13 @@ No fluxo público, o visitante poderá escolher uma avaliação disponibilizada 
 - nome do participante B;
 - e-mail de contato;
 - tipo do vínculo;
-- duração do vínculo, quando aplicável.
+- tempo de união, quando aplicável.
 
 A aplicação será associada automaticamente ao profissional responsável pelo instrumento escolhido. Não será necessário o profissional conhecer previamente os participantes nem criar `pessoas` ou `vinculos`.
 
 Para evitar poluir o cadastro administrativo, o autoatendimento público não cria automaticamente registros permanentes em `pessoas` e `vinculos`. A aplicação nasce com `vinculo_id = NULL`; seus dois registros de `aplicacao_participantes` podem permanecer com `pessoa_id = NULL`, mas recebem os nomes informados em `nome_snapshot`, preservando os lados A e B.
 
-O tipo e a duração informados pelo visitante são gravados diretamente nos snapshots da aplicação. Mudanças posteriores em cadastros administrativos não alteram esses valores históricos.
+O tipo de vínculo e o tempo de união informados pelo visitante são gravados diretamente nos snapshots da aplicação. Mudanças posteriores em cadastros administrativos não alteram esses valores históricos.
 
 Somente avaliações baseadas em versão `PUBLICADA` podem ser iniciadas pelo público. O visitante escolhe a avaliação em linguagem de produto; detalhes internos de instrumento/versão não precisam ser expostos na interface pública.
 
