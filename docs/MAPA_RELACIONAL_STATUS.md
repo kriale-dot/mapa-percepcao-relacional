@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 em desenvolvimento — instrumentos e versionamento  
-**Etapa atual:** Etapa 4.5 em validação — alternativas dos itens  
-**Próximo passo:** validar localmente criação, edição, ordenação, ativação e exclusão de alternativas
+**Etapa atual:** Etapa 4.5 concluída — alternativas dos itens  
+**Próximo passo:** revisar e fechar a Etapa 4 — estrutura completa de instrumentos
 
 ## 1. Situação atual
 
@@ -1013,37 +1013,25 @@ No frontend foi criada a rota:
 
 Cada item agora possui o botão `Alternativas`.
 
-### Validação local pendente
+### Validação local concluída
 
-Após `git pull`, executar na API:
+Em 2026-10-04 a Etapa 4.5 foi validada com sucesso no ambiente local.
 
-```powershell
-cd mapa-relacional-api
-composer check
-composer serve
-```
+Foram confirmados:
 
-No frontend:
+- acesso ao módulo de alternativas pelo item;
+- criação de múltiplas alternativas;
+- valores `1`, `2` e `3` com rótulos de resposta;
+- posicionamento automático quando a ordem é omitida;
+- edição de valor, rótulo, ordem e estado ativo/inativo;
+- rejeição de valor duplicado dentro do mesmo item;
+- ordenação da listagem conforme o campo `ordem`;
+- exclusão de alternativa sem respostas vinculadas;
+- persistência dos dados após recarregar a página;
+- modo somente leitura em versões publicadas ou arquivadas.
 
-```powershell
-cd ..\mapa-relacional-web
-npm run build
-npm run dev
-```
+Não houve necessidade de migration nova nesta etapa, pois a tabela `alternativas` já existe na estrutura base.
 
-Na versão `1.0` em `RASCUNHO`, selecionar um item de resposta fechada e validar:
+**Etapa 4.5 concluída.**
 
-1. abrir `Alternativas`;
-2. criar pelo menos três alternativas, por exemplo valores `1`, `2`, `3`;
-3. preencher rótulos, por exemplo `Nunca`, `Às vezes`, `Frequentemente`;
-4. deixar a ordem vazia em uma criação e confirmar posicionamento automático;
-5. editar valor, rótulo, ordem e estado ativo/inativo;
-6. tentar repetir o mesmo valor dentro do item e confirmar rejeição;
-7. confirmar que a listagem acompanha a ordem configurada;
-8. criar uma alternativa de teste e excluí-la;
-9. recarregar a página e confirmar persistência;
-10. abrir alternativas de um item pertencente a versão publicada/arquivada e confirmar modo somente leitura.
-
-Não há migration nova nesta etapa; a tabela `alternativas` já existe na estrutura base.
-
-**Próxima subetapa prevista:** revisar e fechar a Etapa 4 — estrutura completa de instrumentos.
+**Próximo passo:** revisar e fechar a Etapa 4 — estrutura completa de instrumentos.
