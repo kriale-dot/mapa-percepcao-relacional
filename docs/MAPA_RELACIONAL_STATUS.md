@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 em desenvolvimento — instrumentos e versionamento  
-**Etapa atual:** Etapa 4.2 em validação — versões do instrumento  
-**Próximo passo:** validar localmente criação, edição, publicação, arquivamento e exclusão de rascunhos
+**Etapa atual:** Etapa 4.2 concluída — versões do instrumento  
+**Próximo passo:** iniciar a Etapa 4.3 — seções da versão
 
 ## 1. Situação atual
 
@@ -810,36 +810,28 @@ No frontend foi criada a rota dinâmica:
 
 O catálogo de instrumentos agora possui o botão `Versões`.
 
-### Validação local pendente
+### Validação local concluída
 
-Após `git pull`, executar na API:
+Em 2026-10-04 a Etapa 4.2 foi validada com sucesso no ambiente local.
 
-```powershell
-cd mapa-relacional-api
-composer check
-composer serve
-```
+Foram confirmados:
 
-No frontend:
+- acesso ao gerenciamento de versões pelo catálogo de instrumentos;
+- criação da versão `1.0` em `RASCUNHO`;
+- edição do número de uma versão em rascunho;
+- criação e exclusão de rascunho de teste;
+- publicação de versão descartável;
+- estado `PUBLICADA` após publicação;
+- bloqueio de edição e exclusão após publicação;
+- arquivamento da versão publicada;
+- estado `ARQUIVADA` após arquivamento;
+- persistência dos dados após recarregar a página;
+- atualização do total de versões no catálogo.
 
-```powershell
-cd ..\mapa-relacional-web
-npm run build
-npm run dev
-```
-
-Validar:
-
-1. abrir um instrumento e clicar em `Versões`;
-2. criar a versão `1.0` e mantê-la em `RASCUNHO` para a próxima etapa;
-3. editar o número de um rascunho e confirmar a alteração;
-4. criar um segundo rascunho de teste e excluí-lo;
-5. criar uma versão descartável, por exemplo `teste-publicacao`, e publicá-la;
-6. confirmar que a versão publicada não oferece edição/exclusão;
-7. arquivar essa versão de teste e confirmar o estado `ARQUIVADA`;
-8. recarregar a página e confirmar persistência;
-9. retornar ao catálogo e confirmar que o total de versões foi atualizado.
+A versão `1.0` foi mantida em `RASCUNHO` para receber a estrutura nas próximas subetapas.
 
 Observação: a V1 adota imutabilidade a partir da publicação, regra deliberadamente mais conservadora que o mínimo do RF-033.
 
-**Próxima subetapa prevista:** Etapa 4.3 — seções da versão.
+**Etapa 4.2 concluída.**
+
+**Próxima subetapa:** Etapa 4.3 — seções da versão.
