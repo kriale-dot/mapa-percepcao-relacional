@@ -26,6 +26,7 @@ use App\Middleware\SecurityHeadersMiddleware;
 use App\Service\AccessTokenService;
 use App\Service\AuditService;
 use App\Service\MailService;
+use App\Service\RateLimitService;
 use App\Service\ResultService;
 use App\Middleware\ProfessionalAuthMiddleware;
 use Dotenv\Dotenv;
@@ -73,12 +74,18 @@ $accessTokenService = new AccessTokenService();
 $mailService = new MailService();
 $resultService = new ResultService();
 $auditService = new AuditService();
+$rateLimitService = new RateLimitService();
 $alternativeController = new AlternativeController();
 $auditController = new AuditController();
 $applicationController = new ApplicationController($resultService);
-$authController = new AuthController($auditService);
+$authController = new AuthController($auditService, $rateLimitService);
 $professionalController = new ProfessionalController($auditService);
-$publicEvaluationController = new PublicEvaluationController($accessTokenService, $mailService, $logger);
+$publicEvaluationController = new PublicEvaluationController(
+    $accessTokenService,
+    $mailService,
+    $logger,
+    $rateLimitService
+);
 $participantAccessController = new ParticipantAccessController($accessTokenService, $resultService);
 $feedbackController = new FeedbackController(
     $accessTokenService,
