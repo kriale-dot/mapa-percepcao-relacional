@@ -136,8 +136,8 @@ final class InstrumentVersionController
             );
 
             foreach ([
-                ['RUIM', 'Ruim', 0.00, 33.00, 1],
-                ['REGULAR', 'Regular', 34.00, 66.00, 2],
+                ['RUIM', 'Ruim', 0.00, 33.99, 1],
+                ['REGULAR', 'Regular', 34.00, 66.99, 2],
                 ['BOM', 'Bom', 67.00, 100.00, 3],
             ] as [$codigo, $rotulo, $minimo, $maximo, $ordem]) {
                 $bandStmt->execute([
