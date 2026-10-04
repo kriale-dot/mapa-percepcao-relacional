@@ -20,6 +20,7 @@ use App\Controller\SectionController;
 use App\Middleware\CorsMiddleware;
 use App\Service\AccessTokenService;
 use App\Service\MailService;
+use App\Service\ResultService;
 use App\Middleware\ProfessionalAuthMiddleware;
 use Dotenv\Dotenv;
 use Slim\Factory\AppFactory;
@@ -63,12 +64,13 @@ $errorMiddleware = $app->addErrorMiddleware(
 $healthController = new HealthController();
 $accessTokenService = new AccessTokenService();
 $mailService = new MailService();
+$resultService = new ResultService();
 $alternativeController = new AlternativeController();
-$applicationController = new ApplicationController();
+$applicationController = new ApplicationController($resultService);
 $authController = new AuthController();
 $professionalController = new ProfessionalController();
 $publicEvaluationController = new PublicEvaluationController($accessTokenService, $mailService, $logger);
-$participantAccessController = new ParticipantAccessController($accessTokenService);
+$participantAccessController = new ParticipantAccessController($accessTokenService, $resultService);
 $instrumentController = new InstrumentController();
 $instrumentVersionController = new InstrumentVersionController();
 $sectionController = new SectionController();
@@ -147,6 +149,14 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->get('/aplicacoes', [$applicationController, 'index']);
     $group->post('/aplicacoes', [$applicationController, 'create']);
     $group->get('/aplicacoes/{id:[0-9]+}', [$applicationController, 'show']);
+    $group->get(
+        '/aplicacoes/{id:[0-9]+}/resultados',
+        [$applicationController, 'results']
+    );
+    $group->post(
+        '/aplicacoes/{id:[0-9]+}/resultados/calcular',
+        [$applicationController, 'calculateResults']
+    );
 
     $group->get('/instrumentos', [$instrumentController, 'index']);
     $group->post('/instrumentos', [$instrumentController, 'create']);
