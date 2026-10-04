@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import {
   getParticipantAccess,
+  completeParticipantEvaluation,
   getParticipantQuestionnaire,
   identifyParticipant,
+  markParticipantItemNotApplicable,
   saveParticipantResponse,
 } from '../services/api'
 
@@ -98,6 +100,9 @@ export default function PublicParticipantAccess({ token }) {
   })
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
+  const [questionnaireNotice, setQuestionnaireNotice] = useState('')
+  const [excludingItemId, setExcludingItemId] = useState(null)
+  const [completion, setCompletion] = useState(null)
 
   useEffect(() => {
     load()
@@ -294,6 +299,68 @@ export default function PublicParticipantAccess({ token }) {
     })
   }
 
+  async function reloadQuestionnaire() {
+    const result = await getParticipantQuestionnaire(token)
+
+    if (!result?.questionario) {
+      throw new Error(
+        'A API não retornou a estrutura esperada do questionário.',
+      )
+    }
+
+    setQuestionnaireData(result.questionario)
+    return result.questionario
+  }
+
+  async function handleNotApplicable(item) {
+    const confirmed = window.confirm(
+      'Ao marcar “Não se aplica”, este item será retirado desta avaliação para os dois participantes e não entrará no resultado. Deseja continuar?',
+    )
+
+    if (!confirmed) return
+
+    setExcludingItemId(item.id)
+    setQuestionnaireNotice('')
+
+    try {
+      await markParticipantItemNotApplicable(token, item.id)
+      await reloadQuestionnaire()
+      setQuestionnaireNotice(
+        'Item marcado como “Não se aplica” e removido da avaliação para os dois participantes.',
+      )
+    } catch (error) {
+      setQuestionnaireNotice(
+        error.message || 'Não foi possível marcar este item como “Não se aplica”.',
+      )
+    } finally {
+      setExcludingItemId(null)
+    }
+  }
+
+  async function handleComplete() {
+    setQuestionnaireNotice('')
+
+    try {
+      const result = await completeParticipantEvaluation(token)
+      setCompletion(result)
+    } catch (error) {
+      if (error?.data?.progresso && questionnaire) {
+        setQuestionnaire((current) =>
+          current
+            ? {
+                ...current,
+                progresso: error.data.progresso,
+              }
+            : current,
+        )
+      }
+
+      setQuestionnaireNotice(
+        error.message || 'Não foi possível concluir sua participação.',
+      )
+    }
+  }
+
   function renderAnswerControl(item, perspective, label) {
     const key = answerKey(item.id, perspective)
     const state = saveStates[key]
@@ -350,9 +417,19 @@ export default function PublicParticipantAccess({ token }) {
               onBlur={() => handleOpenSave(item, perspective)}
               className="w-full rounded-xl border border-[#385048]/20 bg-white px-4 py-3 outline-none focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20"
             />
-            <p className="mt-2 text-xs text-[#385048]/55">
-              A resposta é salva ao sair do campo.
-            </p>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <p className="text-xs text-[#385048]/55">
+                A resposta também é salva ao sair do campo.
+              </p>
+              <button
+                type="button"
+                disabled={String(draft).trim() === '' || state?.status === 'saving'}
+                onClick={() => handleOpenSave(item, perspective)}
+                className="rounded-lg border border-[#385048]/15 bg-white px-3 py-2 text-xs font-semibold disabled:opacity-45"
+              >
+                Salvar resposta
+              </button>
+            </div>
           </div>
         ) : (
           <div className="mt-4">
@@ -365,9 +442,19 @@ export default function PublicParticipantAccess({ token }) {
               onBlur={() => handleOpenSave(item, perspective)}
               className="w-full resize-y rounded-xl border border-[#385048]/20 bg-white px-4 py-3 outline-none focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20"
             />
-            <p className="mt-2 text-xs text-[#385048]/55">
-              A resposta é salva ao sair do campo.
-            </p>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <p className="text-xs text-[#385048]/55">
+                A resposta também é salva ao sair do campo.
+              </p>
+              <button
+                type="button"
+                disabled={String(draft).trim() === '' || state?.status === 'saving'}
+                onClick={() => handleOpenSave(item, perspective)}
+                className="rounded-lg border border-[#385048]/15 bg-white px-3 py-2 text-xs font-semibold disabled:opacity-45"
+              >
+                Salvar resposta
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -409,12 +496,58 @@ export default function PublicParticipantAccess({ token }) {
     )
   }
 
+  if (completion) {
+    return (
+      <div className="min-h-screen bg-[#FEFDFB] px-6 py-12 text-[#385048]">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-[#A8C8B8]/45 bg-white p-8 shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
+            Participação concluída
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold">
+            Suas respostas foram finalizadas
+          </h1>
+          <p className="mt-4 leading-7 text-[#385048]/70">
+            {completion.ambos_concluidos
+              ? 'Os dois participantes concluíram a avaliação. Ela agora está pronta para a etapa de comparação e resultados.'
+              : 'Sua parte foi concluída com sucesso. A avaliação ficará aguardando a conclusão do outro participante.'}
+          </p>
+
+          <div className="mt-7 rounded-2xl bg-[#A8C8B8]/12 p-5 text-sm">
+            <p>
+              <strong>Status da sua participação:</strong> CONCLUÍDO
+            </p>
+            <p className="mt-2">
+              <strong>Status da avaliação:</strong>{' '}
+              {completion.aplicacao_status}
+            </p>
+          </div>
+
+          <p className="mt-6 text-sm leading-6 text-[#385048]/60">
+            Depois de concluir, este acesso não permite alterar as respostas.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="mt-7 rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white"
+          >
+            Voltar ao início
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (questionnaire) {
     const progress = questionnaire.progresso || {
       respondidas: 0,
       total: questionnaire.total_itens * 2,
       percentual: 0,
     }
+    const isComplete = progress.respondidas === progress.total
+    const hasSaving = Object.values(saveStates).some(
+      (state) => state?.status === 'saving',
+    )
 
     return (
       <div className="min-h-screen bg-[#FEFDFB] text-[#385048]">
@@ -474,6 +607,12 @@ export default function PublicParticipantAccess({ token }) {
             </div>
           </div>
 
+          {questionnaireNotice ? (
+            <div className="mt-5 rounded-2xl bg-[#D8B078]/15 px-5 py-4 text-sm leading-6">
+              {questionnaireNotice}
+            </div>
+          ) : null}
+
           <div className="mt-7 space-y-6">
             {questionnaire.secoes.map((section) => (
               <section
@@ -506,6 +645,25 @@ export default function PublicParticipantAccess({ token }) {
                         {item.texto}
                       </p>
 
+                      {item.permite_nao_se_aplica ? (
+                        <div className="mt-4">
+                          <button
+                            type="button"
+                            disabled={excludingItemId === item.id}
+                            onClick={() => handleNotApplicable(item)}
+                            className="rounded-xl border border-[#D8B078]/65 bg-[#D8B078]/10 px-4 py-2 text-sm font-semibold transition hover:bg-[#D8B078]/18 disabled:opacity-60"
+                          >
+                            {excludingItemId === item.id
+                              ? 'Marcando...'
+                              : 'Não se aplica'}
+                          </button>
+                          <p className="mt-2 text-xs leading-5 text-[#385048]/55">
+                            Esta opção remove o item desta avaliação para os dois
+                            participantes e também do cálculo final.
+                          </p>
+                        </div>
+                      ) : null}
+
                       <div className="mt-5 grid gap-4 lg:grid-cols-2">
                         {renderAnswerControl(
                           item,
@@ -528,6 +686,26 @@ export default function PublicParticipantAccess({ token }) {
           <div className="mt-7 rounded-2xl border border-[#A8C8D0]/45 bg-[#A8C8D0]/12 p-5 text-sm leading-6">
             Você pode interromper o preenchimento e retornar depois pelo mesmo
             link. As respostas já salvas serão carregadas novamente.
+          </div>
+
+          <div className="mt-6 rounded-3xl border border-[#A8C8B8]/45 bg-white p-7 shadow-sm">
+            <h2 className="text-xl font-semibold">Concluir participação</h2>
+            <p className="mt-3 text-sm leading-6 text-[#385048]/65">
+              A conclusão só é liberada quando todas as duas perspectivas dos
+              itens válidos estiverem respondidas. Depois de concluir, as
+              respostas não poderão mais ser alteradas por este link.
+            </p>
+
+            <button
+              type="button"
+              disabled={!isComplete || hasSaving || excludingItemId !== null}
+              onClick={handleComplete}
+              className="mt-5 rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-45"
+            >
+              {isComplete
+                ? 'Concluir minha participação'
+                : `Faltam ${Math.max(0, progress.total - progress.respondidas)} resposta(s)`}
+            </button>
           </div>
         </main>
       </div>
