@@ -32,6 +32,9 @@ $requiredTables = [
     'acessos_aplicacao',
     'aplicacao_itens_excluidos',
     'respostas',
+    'resultado_faixas',
+    'comparacoes',
+    'resultados',
 ];
 
 $stmt = $pdo->prepare(
@@ -68,6 +71,7 @@ $requiredMigrations = [
     '001_base_dominio.sql',
     '002_profissional_autenticacao.sql',
     '003_profissional_perfil.sql',
+    '004_resultados_comparacoes.sql',
 ];
 
 $migrationStmt = $pdo->query(
