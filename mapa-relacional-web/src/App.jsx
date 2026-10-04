@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import ProfessionalProfile from './pages/ProfessionalProfile'
 import ProfessionalPassword from './pages/ProfessionalPassword'
 import ProfessionalInstruments from './pages/ProfessionalInstruments'
+import ProfessionalInstrumentVersions from './pages/ProfessionalInstrumentVersions'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -50,6 +51,18 @@ function App() {
 
   if (path === '/profissional/instrumentos') {
     return <ProfessionalInstruments />
+  }
+
+  const versionsMatch = path.match(
+    /^\/profissional\/instrumentos\/([1-9][0-9]*)\/versoes$/,
+  )
+
+  if (versionsMatch) {
+    return (
+      <ProfessionalInstrumentVersions
+        instrumentId={Number(versionsMatch[1])}
+      />
+    )
   }
 
   if (path.startsWith('/profissional')) {
