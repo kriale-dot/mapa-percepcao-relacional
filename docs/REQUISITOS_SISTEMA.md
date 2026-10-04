@@ -483,7 +483,9 @@ A arquitetura deverá permitir distribuição do link por diferentes meios, como
 - WhatsApp;
 - outros meios externos.
 
-**Observação:** os canais que farão parte da V1 ainda devem ser formalmente fechados.
+Na V1, o canal obrigatório de envio dos acessos será **e-mail via SMTP Brevo**.
+
+No autoatendimento público, os dois links individuais de A e B serão enviados ao e-mail de contato cadastrado na aplicação. A tela só poderá afirmar que os links foram enviados depois de confirmação real de sucesso do SMTP.
 
 ### RF-064 — Retomada
 
