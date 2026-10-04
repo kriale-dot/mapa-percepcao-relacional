@@ -6,6 +6,7 @@ use App\Config\Database;
 use App\Config\LoggerFactory;
 use App\Controller\AuthController;
 use App\Controller\HealthController;
+use App\Controller\InstrumentController;
 use App\Controller\ProfessionalController;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\ProfessionalAuthMiddleware;
@@ -41,6 +42,7 @@ $errorMiddleware = $app->addErrorMiddleware(
 $healthController = new HealthController();
 $authController = new AuthController();
 $professionalController = new ProfessionalController();
+$instrumentController = new InstrumentController();
 
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
@@ -48,12 +50,19 @@ $app->post('/api/auth/login', [$authController, 'login']);
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $authController,
-    $professionalController
+    $professionalController,
+    $instrumentController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->put('/senha', [$authController, 'changePassword']);
     $group->get('/perfil', [$professionalController, 'profile']);
     $group->put('/perfil', [$professionalController, 'updateProfile']);
+
+    $group->get('/instrumentos', [$instrumentController, 'index']);
+    $group->post('/instrumentos', [$instrumentController, 'create']);
+    $group->get('/instrumentos/{id:[0-9]+}', [$instrumentController, 'show']);
+    $group->put('/instrumentos/{id:[0-9]+}', [$instrumentController, 'update']);
+    $group->delete('/instrumentos/{id:[0-9]+}', [$instrumentController, 'delete']);
 })->add(new ProfessionalAuthMiddleware());
 
 $app->get('/api', function ($request, $response) {
