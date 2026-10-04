@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 6 em desenvolvimento — autoatendimento público de avaliações  
-**Etapa atual:** Etapa 6.3 concluída — identificação inicial e carregamento do questionário  
-**Próximo passo:** iniciar a Etapa 6.4 — respostas individuais e persistência progressiva
+**Etapa atual:** Etapa 6.4 em validação — respostas individuais e persistência progressiva  
+**Próximo passo:** validar salvamento, edição e retomada das duas perspectivas de cada item
 
 ## 1. Situação atual
 
@@ -1718,3 +1718,91 @@ Foram confirmados:
 **Etapa 6.3 concluída.**
 
 **Próxima subetapa:** Etapa 6.4 — respostas individuais e persistência progressiva das duas perspectivas.
+
+## 32. Etapa 6.4 — respostas individuais e persistência progressiva
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/ParticipantAccessController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/PublicParticipantAccess.jsx`.
+
+Nova rota pública:
+
+```text
+PUT /api/public/acessos/{token}/respostas/{itemId}
+```
+
+Payload conceitual:
+
+```json
+{
+  "perspectiva": "SOBRE_MIM | SOBRE_OUTRO",
+  "alternativa_id": 1
+}
+```
+
+Para itens abertos, `alternativa_id` é substituído por `valor_texto` ou `valor_numero`.
+
+Regras implementadas:
+
+- respondente é sempre o participante associado ao token;
+- alvo é derivado no backend pela perspectiva;
+- o cliente não escolhe IDs de participantes;
+- respostas são salvas progressivamente, uma perspectiva por vez;
+- selecionar uma alternativa salva imediatamente;
+- respostas abertas são salvas ao sair do campo;
+- salvar novamente a mesma perspectiva atualiza o registro existente;
+- alternativas são validadas como ativas e pertencentes ao item;
+- itens excluídos, inativos ou fora da versão da aplicação não aceitam respostas;
+- o endpoint do questionário devolve as respostas já salvas somente daquele participante;
+- ao recarregar a página, respostas anteriores voltam preenchidas;
+- progresso é calculado como perspectivas respondidas sobre o total de `itens × 2`;
+- o acesso registra `ultimo_acesso_em` a cada salvamento;
+- respostas do outro participante não são retornadas.
+
+A interface agora exibe controles reais para `Sobre mim` e `Sobre a outra pessoa`, estado `Salvando...`/`Salvo`, barra de progresso e orientação de retomada pelo mesmo link.
+
+A regra “Não se aplica” ainda não foi habilitada nesta subetapa. A conclusão individual também permanece pendente.
+
+### Validação local pendente — Etapa 6.4
+
+Após `git pull`:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar com o link de um participante já identificado:
+
+1. abrir o questionário;
+2. responder `Sobre mim` no primeiro item;
+3. confirmar a indicação `Salvo`;
+4. responder `Sobre a outra pessoa` no mesmo item;
+5. confirmar que o progresso aumenta para duas perspectivas respondidas;
+6. alterar uma das duas respostas e confirmar que ela é atualizada, sem duplicar;
+7. responder algumas perspectivas de outros itens;
+8. pressionar `F5`;
+9. confirmar que todas as respostas já salvas voltam marcadas/preenchidas;
+10. confirmar que o percentual de progresso é preservado;
+11. abrir o link do outro participante e confirmar que ele não vê nenhuma resposta do primeiro;
+12. voltar ao primeiro link e confirmar que as respostas continuam intactas.
+
+No banco, pode-se confirmar que cada combinação de aplicação/respondente/alvo/item possui no máximo um registro em `respostas`.
+
+Não há migration nova nesta etapa; a tabela `respostas` e a chave única necessária já existem na migration base.
+
+**Próxima subetapa prevista:** Etapa 6.5 — regra “Não se aplica” e conclusão individual do participante.
