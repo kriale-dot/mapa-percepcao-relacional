@@ -572,3 +572,21 @@ Na liberação:
 A página pública mostra resultados agregados e conteúdo profissional, mas não expõe respostas individuais brutas nem comparação item a item.
 
 Essa separação preserva privacidade, rastreabilidade e o princípio de que comentário profissional não altera o cálculo técnico.
+
+## D-037 — Dashboard é derivado do estado das aplicações
+**Data:** 2026-10-04  
+**Status:** vigente
+
+O dashboard profissional não terá uma tabela própria de métricas na V1.
+
+Os indicadores são derivados em tempo real de:
+
+- `aplicacoes.status`;
+- existência de registros em `resultados`;
+- estado de `devolutivas`.
+
+A lista de avaliações recebe filtros server-side e todos os filtros continuam subordinados ao `profissional_id` obtido da autenticação.
+
+A página de detalhe é a visão operacional principal de uma aplicação e deve funcionar tanto para aplicações vinculadas a cadastros administrativos quanto para aplicações criadas pelo autoatendimento público sem `pessoas` ou `vinculos` permanentes.
+
+Essa decisão evita duplicação de estado e mantém o dashboard consistente com os dados transacionais reais.
