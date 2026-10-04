@@ -185,13 +185,29 @@ export default function ProfessionalApplicationResults({ applicationId }) {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate('/profissional/avaliacoes')}
-            className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
-          >
-            Voltar
-          </button>
+          <div className="flex flex-wrap gap-2">
+            {application?.instrumento_id &&
+            application?.instrumento_versao_id ? (
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/profissional/instrumentos/${application.instrumento_id}/versoes/${application.instrumento_versao_id}/faixas-resultados`,
+                  )
+                }
+                className="rounded-xl border border-[#D8B078]/65 px-4 py-2 text-sm font-semibold"
+              >
+                Ver faixas
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => navigate('/profissional/avaliacoes')}
+              className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
+            >
+              Voltar
+            </button>
+          </div>
         </div>
       </header>
 
@@ -208,6 +224,10 @@ export default function ProfessionalApplicationResults({ applicationId }) {
             O resultado compara a percepção que cada participante tem do outro
             com a forma como o outro se percebe. Itens marcados como “Não se
             aplica” ficam fora do cálculo.
+          </p>
+
+          <p className="mt-3 text-sm text-[#385048]/55">
+            Versão do instrumento: {application?.numero_versao}
           </p>
 
           {!hasResults ? (
