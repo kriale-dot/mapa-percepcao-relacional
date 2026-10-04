@@ -265,6 +265,38 @@ export function calculateApplicationResults(id) {
   )
 }
 
+export function getApplicationFeedback(id) {
+  return request(`/api/profissional/aplicacoes/${id}/devolutiva`, {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function saveApplicationFeedback(id, feedback) {
+  return request(`/api/profissional/aplicacoes/${id}/devolutiva`, {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify(feedback),
+  })
+}
+
+export function releaseApplicationFeedback(id) {
+  return request(
+    `/api/profissional/aplicacoes/${id}/devolutiva/liberar`,
+    {
+      method: 'POST',
+      auth: true,
+      body: JSON.stringify({}),
+    },
+  )
+}
+
+export function getPublicResult(token) {
+  return request(`/api/public/resultados/${token}`, {
+    method: 'GET',
+  })
+}
+
 export function listInstruments() {
   return request('/api/profissional/instrumentos', {
     method: 'GET',
