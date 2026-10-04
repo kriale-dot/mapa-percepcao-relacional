@@ -1669,3 +1669,19 @@ Usar um dos links individuais recebidos por e-mail e validar:
 Não há migration nova nesta etapa.
 
 **Próxima subetapa prevista:** Etapa 6.4 — respostas individuais e persistência progressiva das duas perspectivas.
+
+### Correção de resposta nula na tela de acesso
+
+Durante a validação da Etapa 6.3, a tela do participante exibiu `Cannot read properties of null (reading 'acesso')`.
+
+A causa imediata era o frontend assumir que toda resposta HTTP 2xx da API sempre continha JSON válido com a propriedade `acesso`.
+
+Correções aplicadas:
+
+- o cliente HTTP agora lê primeiro o corpo bruto;
+- resposta vazia em HTTP 2xx gera erro explícito;
+- resposta não-JSON gera erro explícito;
+- a tela do participante valida a presença de `acesso.participante` antes de continuar;
+- a mesma proteção foi adicionada à resposta de identificação e ao carregamento do questionário.
+
+Essa correção evita o erro JavaScript genérico e permitirá identificar claramente se houver uma resposta vazia ou inválida originada no backend.
