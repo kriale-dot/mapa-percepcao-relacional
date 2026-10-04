@@ -36,6 +36,7 @@ $requiredTables = [
     'comparacoes',
     'resultados',
     'devolutivas',
+    'auditoria_eventos',
 ];
 
 $stmt = $pdo->prepare(
@@ -75,6 +76,7 @@ $requiredMigrations = [
     '004_resultados_comparacoes.sql',
     '005_ajustar_faixas_percentuais.sql',
     '006_devolutivas.sql',
+    '007_auditoria.sql',
 ];
 
 $migrationStmt = $pdo->query(
