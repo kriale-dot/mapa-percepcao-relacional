@@ -17,7 +17,21 @@ async function request(path, options = {}) {
     },
   })
 
-  const data = await response.json().catch(() => null)
+  const raw = await response.text()
+  let data = null
+
+  if (raw.trim() !== '') {
+    try {
+      data = JSON.parse(raw)
+    } catch {
+      const error = new Error(
+        `Resposta inválida da API (HTTP ${response.status}).`,
+      )
+      error.status = response.status
+      error.raw = raw
+      throw error
+    }
+  }
 
   if (!response.ok) {
     const error = new Error(
@@ -25,6 +39,14 @@ async function request(path, options = {}) {
     )
     error.status = response.status
     error.data = data
+    throw error
+  }
+
+  if (data === null) {
+    const error = new Error(
+      `A API respondeu sem conteúdo (HTTP ${response.status}).`,
+    )
+    error.status = response.status
     throw error
   }
 
