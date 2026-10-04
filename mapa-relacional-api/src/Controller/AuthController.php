@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Config\Database;
 use App\Service\AuditService;
 use App\Service\JwtService;
+use App\Service\RateLimitService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,7 +15,8 @@ use Psr\Http\Message\ServerRequestInterface;
 final class AuthController
 {
     public function __construct(
-        private readonly AuditService $auditService
+        private readonly AuditService $auditService,
+        private readonly RateLimitService $rateLimitService
     ) {
     }
 
@@ -60,6 +62,29 @@ final class AuthController
             || empty($professional['senha_hash'])
             || !password_verify($password, (string) $professional['senha_hash'])
         ) {
+            $rate = $this->rateLimitService->hit(
+                'professional_login',
+                $this->rateLimitService->requestKey($request, $email),
+                max(1, (int) ($_ENV['LOGIN_RATE_LIMIT_MAX'] ?? 10)),
+                max(
+                    60,
+                    (int) (
+                        $_ENV['LOGIN_RATE_LIMIT_WINDOW_SECONDS']
+                            ?? 900
+                    )
+                )
+            );
+
+            if (!$rate['allowed']) {
+                return $this->json($response, [
+                    'error' => 'rate_limit_exceeded',
+                    'message' => 'Muitas tentativas de acesso. Aguarde antes de tentar novamente.',
+                ], 429)->withHeader(
+                    'Retry-After',
+                    (string) $rate['retry_after']
+                );
+            }
+
             return $this->json($response, [
                 'error' => 'invalid_credentials',
                 'message' => 'E-mail ou senha invalidos.',
