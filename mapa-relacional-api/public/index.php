@@ -12,6 +12,7 @@ use App\Controller\InstrumentVersionController;
 use App\Controller\ItemController;
 use App\Controller\PersonController;
 use App\Controller\ProfessionalController;
+use App\Controller\RelationshipController;
 use App\Controller\SectionController;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\ProfessionalAuthMiddleware;
@@ -53,6 +54,7 @@ $instrumentVersionController = new InstrumentVersionController();
 $sectionController = new SectionController();
 $itemController = new ItemController();
 $personController = new PersonController();
+$relationshipController = new RelationshipController();
 
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
@@ -66,7 +68,8 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $instrumentVersionController,
     $sectionController,
     $itemController,
-    $personController
+    $personController,
+    $relationshipController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->put('/senha', [$authController, 'changePassword']);
@@ -78,6 +81,12 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->get('/pessoas/{id:[0-9]+}', [$personController, 'show']);
     $group->put('/pessoas/{id:[0-9]+}', [$personController, 'update']);
     $group->delete('/pessoas/{id:[0-9]+}', [$personController, 'delete']);
+
+    $group->get('/vinculos', [$relationshipController, 'index']);
+    $group->post('/vinculos', [$relationshipController, 'create']);
+    $group->get('/vinculos/{id:[0-9]+}', [$relationshipController, 'show']);
+    $group->put('/vinculos/{id:[0-9]+}', [$relationshipController, 'update']);
+    $group->delete('/vinculos/{id:[0-9]+}', [$relationshipController, 'delete']);
 
     $group->get('/instrumentos', [$instrumentController, 'index']);
     $group->post('/instrumentos', [$instrumentController, 'create']);
