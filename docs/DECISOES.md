@@ -239,3 +239,19 @@ Regras:
 - o número da versão é único dentro de cada instrumento.
 
 Essa regra reduz o risco de uma versão publicada mudar silenciosamente e simplifica a preservação histórica.
+
+## D-020 — Edição de seções somente em rascunho
+**Data:** 2026-10-04  
+**Status:** vigente
+
+As seções fazem parte da estrutura versionada do instrumento e, por isso, só podem ser criadas, editadas ou excluídas enquanto a versão está em `RASCUNHO`.
+
+Regras:
+
+- versões `PUBLICADA` e `ARQUIVADA` exibem seções somente para leitura;
+- a seção possui título, descrição opcional, ordem e indicador ativo;
+- na criação, a ordem pode ser omitida e será calculada como a próxima posição;
+- a ordem pode ser alterada manualmente enquanto a versão estiver em rascunho;
+- uma seção com itens vinculados não pode ser excluída fisicamente;
+- se já possuir itens, a seção pode ser desativada para preservação da estrutura;
+- toda operação valida a relação profissional → instrumento → versão → seção.
