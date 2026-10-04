@@ -160,7 +160,7 @@ final class FeedbackController
             'u_comentario_profissional' => $comment,
         ]);
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             $professionalId,
             'DEVOLUTIVA_RASCUNHO_SALVA',
@@ -319,7 +319,7 @@ final class FeedbackController
             'draft_status' => 'RASCUNHO',
         ]);
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             $professionalId,
             'DEVOLUTIVA_LIBERADA',
