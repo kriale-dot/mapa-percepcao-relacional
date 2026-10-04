@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 6 em desenvolvimento — autoatendimento público de avaliações  
-**Etapa atual:** Etapa 6.2 concluída — acessos individuais e envio SMTP Brevo  
-**Próximo passo:** iniciar a Etapa 6.3 — identificação inicial e início do preenchimento individual
+**Etapa atual:** Etapa 6.3 em validação — identificação inicial e carregamento do questionário  
+**Próximo passo:** validar identificação do participante, transição para EM_ANDAMENTO e carregamento da estrutura individual
 
 ## 1. Situação atual
 
@@ -1593,3 +1593,79 @@ Foram confirmados:
 **Etapa 6.2 concluída.**
 
 **Próxima subetapa:** Etapa 6.3 — identificação inicial e início do preenchimento individual.
+
+## 31. Etapa 6.3 — identificação inicial e carregamento do questionário
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/ParticipantAccessController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/PublicParticipantAccess.jsx`.
+
+Rotas públicas adicionadas:
+
+```text
+POST /api/public/acessos/{token}/identificacao
+GET  /api/public/acessos/{token}/questionario
+```
+
+Regras implementadas:
+
+- link individual continua sendo a única credencial do participante;
+- antes do questionário, participante confirma nome, idade e gênero;
+- nome pode corrigir o snapshot inicial informado na abertura pública;
+- idade obrigatória entre 1 e 120;
+- gênero obrigatório e textual, sem enumeração fechada nesta etapa;
+- tempo de união é apenas exibido a partir do snapshot da aplicação;
+- identificação atualiza `nome_snapshot`, `idade_snapshot` e `genero_snapshot`;
+- participante muda de `PENDENTE` para `EM_ANDAMENTO`;
+- `participante.iniciou_em` é preenchido somente no primeiro início;
+- aplicação muda de `PRONTA` para `EM_ANDAMENTO` no primeiro participante que inicia;
+- `aplicacao.iniciada_em` preserva o primeiro início;
+- questionário não é entregue enquanto a identificação estiver pendente;
+- questionário usa exatamente a versão congelada da aplicação;
+- apenas seções, itens e alternativas ativos são retornados;
+- itens já excluídos globalmente por “Não se aplica” não são retornados;
+- frontend mostra as seções, itens, alternativas e as duas perspectivas esperadas por item.
+
+A persistência das respostas ainda não foi habilitada nesta subetapa. O frontend deixa isso explícito para não simular um salvamento inexistente.
+
+### Validação local pendente
+
+Após `git pull`:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Usar um dos links individuais recebidos por e-mail e validar:
+
+1. abrir o link de A;
+2. confirmar que aparecem nome, tipo de vínculo e tempo de união corretos;
+3. informar idade e gênero e, se desejar, corrigir o nome;
+4. clicar em `Confirmar e iniciar`;
+5. confirmar que o questionário da versão publicada é carregado;
+6. confirmar a quantidade de seções e itens;
+7. confirmar que aparecem as alternativas cadastradas;
+8. confirmar que cada item mostra as duas perspectivas: “sobre mim” e “sobre a outra pessoa”;
+9. recarregar a página e confirmar que a identificação não é solicitada novamente;
+10. na área profissional, confirmar que a aplicação passou para `EM_ANDAMENTO`;
+11. confirmar que o participante A passou para `EM_ANDAMENTO` e B continua `PENDENTE`;
+12. abrir o link B e repetir o processo, confirmando depois os dois participantes em `EM_ANDAMENTO`.
+
+Não há migration nova nesta etapa.
+
+**Próxima subetapa prevista:** Etapa 6.4 — respostas individuais e persistência progressiva das duas perspectivas.
