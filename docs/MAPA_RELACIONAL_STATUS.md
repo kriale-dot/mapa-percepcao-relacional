@@ -6,9 +6,9 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** Etapa 4 concluída — estrutura completa e versionada de instrumentos  
-**Etapa atual:** Etapa 6.1 reaberta — refatorar criação para autoatendimento público  
-**Próximo passo:** implementar o fluxo público em que o visitante escolhe a avaliação e cria a própria aplicação
+**Marco atual:** Etapa 6 em desenvolvimento — autoatendimento público de avaliações  
+**Etapa atual:** Etapa 6.1 em validação — autoatendimento público  
+**Próximo passo:** validar catálogo público e criação autônoma de aplicação pelo visitante
 
 ## 1. Situação atual
 
@@ -1251,7 +1251,7 @@ Objetivos iniciais:
 - selecionar uma versão específica do instrumento;
 - vincular um vínculo existente quando aplicável;
 - registrar e-mail de contato;
-- preservar tipo de vínculo e tempo de união do vínculo como snapshot;
+- preservar tipo de vínculo e tempo de união como snapshot;
 - criar exatamente dois participantes operacionais, lados A e B;
 - preservar dados da aplicação independentemente de alterações futuras nos cadastros permanentes;
 - iniciar o ciclo de estados da aplicação em `RASCUNHO`.
@@ -1358,7 +1358,7 @@ Refatoração necessária:
 2. exibir apenas avaliações elegíveis baseadas em versões publicadas;
 3. permitir que o visitante informe participante A e participante B;
 4. coletar e-mail de contato;
-5. coletar tipo de vínculo e tempo de união do vínculo;
+5. coletar tipo de vínculo e tempo de união;
 6. criar a aplicação associada automaticamente ao profissional dono do instrumento;
 7. criar os dois participantes A/B usando snapshots, sem exigir registros prévios em `pessoas` ou `vinculos`;
 8. fazer a nova aplicação aparecer automaticamente em `/profissional/avaliacoes`;
@@ -1366,3 +1366,87 @@ Refatoração necessária:
 10. somente depois dessa correção avançar para acessos individuais seguros.
 
 A validação anterior do fluxo profissional continua útil, mas não encerra a Etapa 6.1 porque não representa o fluxo principal desejado.
+
+### Implementação do autoatendimento público
+
+A refatoração principal da Etapa 6.1 foi implementada em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/PublicEvaluationController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/PublicEvaluations.jsx`;
+- `mapa-relacional-web/src/pages/PublicEvaluationStart.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Rotas públicas adicionadas:
+
+```text
+GET  /api/public/avaliacoes
+GET  /api/public/avaliacoes/{versionId}
+POST /api/public/avaliacoes/{versionId}/iniciar
+```
+
+Rotas públicas do frontend:
+
+```text
+/avaliacoes
+/avaliacao/{versionId}/iniciar
+```
+
+Fluxo implementado:
+
+1. a página inicial oferece o botão `Fazer uma avaliação`;
+2. o visitante acessa o catálogo público;
+3. o catálogo mostra instrumentos `ATIVO` com versão `PUBLICADA`, usando a versão publicada mais recente;
+4. o visitante escolhe a avaliação sem precisar conhecer o número da versão;
+5. informa participante A, participante B, e-mail, tipo de vínculo e tempo de união;
+6. o backend identifica automaticamente o profissional responsável pela avaliação;
+7. a aplicação é criada em `RASCUNHO` com `vinculo_id = NULL`;
+8. são criados atomicamente os participantes A e B com `pessoa_id = NULL`, nomes em snapshot e status `PENDENTE`;
+9. a aplicação passa a aparecer automaticamente em `/profissional/avaliacoes`;
+10. nenhum cadastro permanente em `pessoas` ou `vinculos` é criado pelo autoatendimento.
+
+A criação assistida na área profissional continua disponível como fluxo secundário.
+
+### Validação local pendente — autoatendimento público
+
+Após `git pull`, executar:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Antes do teste, o instrumento que deve aparecer publicamente precisa estar com status `ATIVO` e possuir uma versão `PUBLICADA`.
+
+Validar:
+
+1. abrir a página inicial e clicar em `Fazer uma avaliação`;
+2. confirmar que o catálogo público lista a avaliação ativa;
+3. confirmar que o número técnico da versão não aparece ao visitante;
+4. clicar em `Fazer avaliação`;
+5. preencher nomes dos participantes A e B;
+6. informar um e-mail válido;
+7. informar tipo de vínculo e tempo de união;
+8. iniciar a avaliação;
+9. confirmar a tela de sucesso com os dois participantes;
+10. entrar na área profissional e confirmar que a nova aplicação apareceu automaticamente;
+11. confirmar que ela está em `RASCUNHO`, com A e B em `PENDENTE`;
+12. confirmar que os nomes, tipo de vínculo e tempo de união foram preservados;
+13. confirmar que nenhum registro novo foi criado automaticamente em `Pessoas` ou `Vínculos`.
+
+Não há migration nova nesta correção.
+
+**Próximo passo após a validação:** concluir a Etapa 6.1 e implementar a geração dos dois acessos individuais seguros.
