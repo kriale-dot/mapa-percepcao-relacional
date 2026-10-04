@@ -137,8 +137,8 @@ export default function PublicEvaluationStart({ versionId }) {
           </div>
 
           <p className="mt-6 text-sm text-[#385048]/60">
-            Os dois acessos individuais serão gerados no próximo passo do
-            fluxo da plataforma.
+            Os dois acessos individuais serão preparados para que cada
+            participante responda separadamente.
           </p>
 
           <button
