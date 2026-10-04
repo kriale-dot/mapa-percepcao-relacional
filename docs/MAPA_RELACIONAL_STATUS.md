@@ -2,13 +2,13 @@
 
 > Documento de checkpoint. Atualizar ao final de cada etapa relevante, correção ou mudança de estado do projeto.
 
-**Data do checkpoint:** 2026-10-03  
+**Data do checkpoint:** 2026-10-04  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 4.1 concluída — CRUD de instrumentos  
-**Próximo passo:** iniciar a Etapa 4.2 — versões do instrumento
+**Marco atual:** Etapa 4 em desenvolvimento — instrumentos e versionamento  
+**Etapa atual:** Etapa 4.2 em validação — versões do instrumento  
+**Próximo passo:** validar localmente criação, edição, publicação, arquivamento e exclusão de rascunhos
 
 ## 1. Situação atual
 
@@ -765,3 +765,81 @@ Durante a validação ocorreu `ERR_CONNECTION_REFUSED` ao tentar excluir um inst
 **Etapa 4.1 concluída.**
 
 **Próxima subetapa:** Etapa 4.2 — versões do instrumento.
+
+## 21. Etapa 4.2 — versões do instrumento
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/InstrumentVersionController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalInstrumentVersions.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalInstruments.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Rotas protegidas adicionadas:
+
+```text
+GET    /api/profissional/instrumentos/{instrumentId}/versoes
+POST   /api/profissional/instrumentos/{instrumentId}/versoes
+PUT    /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}
+POST   /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/publicar
+POST   /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/arquivar
+DELETE /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}
+```
+
+Regras implementadas:
+
+- novas versões são criadas como `RASCUNHO`;
+- número da versão é obrigatório e único dentro do instrumento;
+- somente rascunhos podem ser editados;
+- publicação muda o estado para `PUBLICADA` e registra `publicado_em`;
+- versões publicadas ficam imutáveis;
+- versões publicadas podem ser arquivadas;
+- rascunhos só podem ser excluídos se não tiverem seções nem aplicações;
+- todas as operações conferem se o instrumento pertence ao profissional autenticado.
+
+No frontend foi criada a rota dinâmica:
+
+```text
+/profissional/instrumentos/{id}/versoes
+```
+
+O catálogo de instrumentos agora possui o botão `Versões`.
+
+### Validação local pendente
+
+Após `git pull`, executar na API:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+No frontend:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. abrir um instrumento e clicar em `Versões`;
+2. criar a versão `1.0`;
+3. editar o número enquanto estiver em rascunho;
+4. criar um segundo rascunho e excluí-lo;
+5. publicar a versão `1.0` e confirmar o estado `PUBLICADA`;
+6. confirmar que a versão publicada não oferece edição/exclusão;
+7. arquivar a versão publicada e confirmar o estado `ARQUIVADA`;
+8. recarregar a página e confirmar persistência;
+9. retornar ao catálogo e confirmar que o total de versões foi atualizado.
+
+Observação: a V1 adota imutabilidade a partir da publicação, regra deliberadamente mais conservadora que o mínimo do RF-033.
+
+**Próxima subetapa prevista:** Etapa 4.3 — seções da versão.
