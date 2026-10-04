@@ -31,7 +31,8 @@ mapa-percepcao-relacional/
 │   ├── MAPA_RELACIONAL_STATUS.md
 │   ├── DECISOES.md
 │   ├── REQUISITOS_SISTEMA.md
-│   └── MODELO_DOMINIO_V1.md
+│   ├── MODELO_DOMINIO_V1.md
+│   └── PRODUCAO_V1.md
 │
 ├── deploy/
 ├── README.md
@@ -76,3 +77,19 @@ Ao concluir uma etapa relevante, atualize o STATUS.
 ## Estado atual
 
 Consulte `docs/MAPA_RELACIONAL_STATUS.md`.
+
+
+## Operação da V1
+
+Na preparação para produção, use:
+
+```bash
+cd mapa-relacional-api
+composer migrate
+composer check-domain
+composer check
+composer check-v1
+composer backup-db
+```
+
+O checklist completo está em `docs/PRODUCAO_V1.md`.
