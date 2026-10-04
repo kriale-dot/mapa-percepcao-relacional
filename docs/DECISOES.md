@@ -288,3 +288,19 @@ Regras:
 - versões `PUBLICADA` e `ARQUIVADA` mantêm alternativas somente para leitura;
 - uma alternativa com respostas vinculadas não pode ser excluída fisicamente;
 - a proteção contra exclusão prevalece na aplicação mesmo com a FK de `respostas.alternativa_id` definida como `ON DELETE SET NULL`, para evitar perda de rastreabilidade.
+
+## D-023 — Pessoas preservam histórico por inativação
+**Data:** 2026-10-04  
+**Status:** vigente
+
+O cadastro de pessoas é administrativo e separado dos snapshots armazenados em avaliações.
+
+Regras:
+
+- cada pessoa pertence ao profissional autenticado;
+- estados adotados: `ATIVO` e `INATIVO`;
+- nome é obrigatório; e-mail, telefone, data de nascimento e observação administrativa são opcionais;
+- alterações no cadastro atual não modificam snapshots de avaliações anteriores;
+- a exclusão física é permitida somente quando a pessoa não possui vínculos nem aplicações associadas;
+- quando já existir histórico, a pessoa deve ser preservada e pode ser marcada como `INATIVO`;
+- todas as consultas e alterações são filtradas por `profissional_id`.
