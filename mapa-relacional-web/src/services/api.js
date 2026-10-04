@@ -75,6 +75,36 @@ export function changeProfessionalPassword(senhaAtual, novaSenha) {
   })
 }
 
+export function listPeople() {
+  return request('/api/profissional/pessoas', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function createPerson(person) {
+  return request('/api/profissional/pessoas', {
+    method: 'POST',
+    auth: true,
+    body: JSON.stringify(person),
+  })
+}
+
+export function updatePerson(id, person) {
+  return request(`/api/profissional/pessoas/${id}`, {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify(person),
+  })
+}
+
+export function deletePerson(id) {
+  return request(`/api/profissional/pessoas/${id}`, {
+    method: 'DELETE',
+    auth: true,
+  })
+}
+
 export function listInstruments() {
   return request('/api/profissional/instrumentos', {
     method: 'GET',
