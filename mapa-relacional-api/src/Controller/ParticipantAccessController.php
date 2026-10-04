@@ -290,6 +290,55 @@ final class ParticipantAccessController
             $sections
         ));
 
+        $savedResponses = $this->listSavedResponses(
+            (int) $access['aplicacao_id'],
+            (int) $access['participante_id']
+        );
+
+        $responseMap = [];
+
+        foreach ($savedResponses as $savedResponse) {
+            $savedItemId = (int) $savedResponse['item_id'];
+
+            if (!isset($responseMap[$savedItemId])) {
+                $responseMap[$savedItemId] = [
+                    'sobre_mim' => null,
+                    'sobre_outro' => null,
+                ];
+            }
+
+            $perspective = (int) $savedResponse['alvo_id']
+                === (int) $access['participante_id']
+                    ? 'sobre_mim'
+                    : 'sobre_outro';
+
+            $responseMap[$savedItemId][$perspective] =
+                $this->serializeSavedResponse(
+                    $savedResponse,
+                    (int) $access['participante_id']
+                );
+        }
+
+        $sections = array_map(
+            static function (array $section) use ($responseMap): array {
+                $section['itens'] = array_map(
+                    static function (array $item) use ($responseMap): array {
+                        $item['respostas'] = $responseMap[$item['id']]
+                            ?? [
+                                'sobre_mim' => null,
+                                'sobre_outro' => null,
+                            ];
+
+                        return $item;
+                    },
+                    $section['itens']
+                );
+
+                return $section;
+            },
+            $sections
+        );
+
         return $this->json($response, [
             'questionario' => [
                 'avaliacao_nome' => (string) $access['avaliacao_nome'],
@@ -299,8 +348,225 @@ final class ParticipantAccessController
                     'nome_snapshot' => $access['nome_snapshot'],
                 ],
                 'total_itens' => $totalItems,
+                'progresso' => $this->calculateProgress($access),
                 'secoes' => $sections,
             ],
+        ]);
+    }
+
+    public function saveResponse(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface {
+        $token = trim((string) ($args['token'] ?? ''));
+        $access = $this->resolveAccess($token, $response);
+
+        if ($access instanceof ResponseInterface) {
+            return $access;
+        }
+
+        if (
+            (string) $access['participante_status'] === 'PENDENTE'
+            || $access['idade_snapshot'] === null
+            || trim((string) ($access['genero_snapshot'] ?? '')) === ''
+        ) {
+            return $this->json($response, [
+                'error' => 'identification_required',
+                'message' => 'Conclua sua identificacao antes de responder.',
+            ], 409);
+        }
+
+        $itemId = $this->positiveId($args['itemId'] ?? null);
+
+        if ($itemId === null) {
+            return $this->json($response, [
+                'error' => 'item_not_found',
+                'message' => 'Item nao encontrado nesta avaliacao.',
+            ], 404);
+        }
+
+        $item = $this->findAnswerableItem(
+            (int) $access['instrumento_versao_id'],
+            (int) $access['aplicacao_id'],
+            $itemId
+        );
+
+        if ($item === null) {
+            return $this->json($response, [
+                'error' => 'item_not_available',
+                'message' => 'Este item nao esta disponivel para resposta.',
+            ], 409);
+        }
+
+        $data = $request->getParsedBody();
+        $data = is_array($data) ? $data : [];
+
+        $perspective = strtoupper(trim(
+            (string) ($data['perspectiva'] ?? '')
+        ));
+
+        if (!in_array($perspective, ['SOBRE_MIM', 'SOBRE_OUTRO'], true)) {
+            return $this->validation(
+                $response,
+                'Perspectiva invalida. Use SOBRE_MIM ou SOBRE_OUTRO.'
+            );
+        }
+
+        $respondentId = (int) $access['participante_id'];
+        $otherParticipantId = $this->findOtherParticipantId(
+            (int) $access['aplicacao_id'],
+            $respondentId
+        );
+
+        if ($otherParticipantId === null) {
+            return $this->json($response, [
+                'error' => 'participant_pair_incomplete',
+                'message' => 'Nao foi possivel identificar o outro participante.',
+            ], 409);
+        }
+
+        $targetId = $perspective === 'SOBRE_MIM'
+            ? $respondentId
+            : $otherParticipantId;
+
+        $alternativeId = $this->nullablePositiveId(
+            $data['alternativa_id'] ?? null
+        );
+        $textValue = $this->optional($data['valor_texto'] ?? null);
+        $numberValueRaw = $data['valor_numero'] ?? null;
+        $numberValue = null;
+
+        if ($numberValueRaw !== null && $numberValueRaw !== '') {
+            if (!is_numeric($numberValueRaw)) {
+                return $this->validation(
+                    $response,
+                    'O valor numerico informado e invalido.'
+                );
+            }
+
+            $numberValue = (string) $numberValueRaw;
+        }
+
+        $activeAlternativeCount = (int) $item['total_alternativas_ativas'];
+
+        if ($activeAlternativeCount > 0) {
+            if ($alternativeId === null) {
+                return $this->validation(
+                    $response,
+                    'Selecione uma das alternativas disponiveis.'
+                );
+            }
+
+            if (
+                !$this->alternativeBelongsToItem(
+                    $itemId,
+                    $alternativeId
+                )
+            ) {
+                return $this->validation(
+                    $response,
+                    'A alternativa selecionada nao pertence a este item.'
+                );
+            }
+
+            $textValue = null;
+            $numberValue = null;
+        } else {
+            if ($alternativeId !== null) {
+                return $this->validation(
+                    $response,
+                    'Este item nao utiliza alternativas cadastradas.'
+                );
+            }
+
+            $filledValues = ($textValue !== null ? 1 : 0)
+                + ($numberValue !== null ? 1 : 0);
+
+            if ($filledValues !== 1) {
+                return $this->validation(
+                    $response,
+                    'Informe exatamente uma resposta textual ou numerica.'
+                );
+            }
+
+            if ($textValue !== null && strlen($textValue) > 10000) {
+                return $this->validation(
+                    $response,
+                    'A resposta textual deve ter no maximo 10000 caracteres.'
+                );
+            }
+        }
+
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO respostas (
+                aplicacao_id,
+                respondente_id,
+                alvo_id,
+                item_id,
+                alternativa_id,
+                valor_texto,
+                valor_numero,
+                nao_se_aplica,
+                respondido_em
+             ) VALUES (
+                :aplicacao_id,
+                :respondente_id,
+                :alvo_id,
+                :item_id,
+                :alternativa_id,
+                :valor_texto,
+                :valor_numero,
+                0,
+                NOW()
+             )
+             ON DUPLICATE KEY UPDATE
+                alternativa_id = :u_alternativa_id,
+                valor_texto = :u_valor_texto,
+                valor_numero = :u_valor_numero,
+                nao_se_aplica = 0,
+                respondido_em = NOW()'
+        );
+        $stmt->execute([
+            'aplicacao_id' => (int) $access['aplicacao_id'],
+            'respondente_id' => $respondentId,
+            'alvo_id' => $targetId,
+            'item_id' => $itemId,
+            'alternativa_id' => $alternativeId,
+            'valor_texto' => $textValue,
+            'valor_numero' => $numberValue,
+            'u_alternativa_id' => $alternativeId,
+            'u_valor_texto' => $textValue,
+            'u_valor_numero' => $numberValue,
+        ]);
+
+        $updateAccess = $pdo->prepare(
+            'UPDATE acessos_aplicacao
+                SET ultimo_acesso_em = NOW()
+              WHERE id = :id'
+        );
+        $updateAccess->execute([
+            'id' => (int) $access['acesso_id'],
+        ]);
+
+        $saved = $this->findSavedResponse(
+            (int) $access['aplicacao_id'],
+            $respondentId,
+            $targetId,
+            $itemId
+        );
+
+        return $this->json($response, [
+            'message' => 'Resposta salva com sucesso.',
+            'resposta' => $saved === null
+                ? null
+                : $this->serializeSavedResponse(
+                    $saved,
+                    $respondentId
+                ),
+            'progresso' => $this->calculateProgress($access),
         ]);
     }
 
@@ -421,6 +687,292 @@ final class ParticipantAccessController
                 'concluiu_em' => $access['concluiu_em'],
             ],
         ];
+    }
+
+    private function findAnswerableItem(
+        int $versionId,
+        int $applicationId,
+        int $itemId
+    ): ?array {
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            'SELECT
+                i.id,
+                i.tipo_resposta,
+                i.permite_nao_se_aplica,
+                (
+                    SELECT COUNT(*)
+                    FROM alternativas a
+                    WHERE a.item_id = i.id
+                      AND a.ativo = 1
+                ) AS total_alternativas_ativas
+             FROM itens i
+             INNER JOIN secoes s
+               ON s.id = i.secao_id
+             WHERE i.id = :item_id
+               AND i.ativo = 1
+               AND s.instrumento_versao_id = :versao_id
+               AND s.ativo = 1
+               AND NOT EXISTS (
+                    SELECT 1
+                    FROM aplicacao_itens_excluidos ex
+                    WHERE ex.aplicacao_id = :aplicacao_id
+                      AND ex.item_id = i.id
+               )
+             LIMIT 1'
+        );
+        $stmt->execute([
+            'item_id' => $itemId,
+            'versao_id' => $versionId,
+            'aplicacao_id' => $applicationId,
+        ]);
+
+        $item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $item === false ? null : $item;
+    }
+
+    private function alternativeBelongsToItem(
+        int $itemId,
+        int $alternativeId
+    ): bool {
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            'SELECT 1
+             FROM alternativas
+             WHERE id = :id
+               AND item_id = :item_id
+               AND ativo = 1
+             LIMIT 1'
+        );
+        $stmt->execute([
+            'id' => $alternativeId,
+            'item_id' => $itemId,
+        ]);
+
+        return $stmt->fetchColumn() !== false;
+    }
+
+    private function findOtherParticipantId(
+        int $applicationId,
+        int $respondentId
+    ): ?int {
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            'SELECT id
+             FROM aplicacao_participantes
+             WHERE aplicacao_id = :aplicacao_id
+               AND id <> :respondente_id
+             ORDER BY id ASC
+             LIMIT 1'
+        );
+        $stmt->execute([
+            'aplicacao_id' => $applicationId,
+            'respondente_id' => $respondentId,
+        ]);
+
+        $id = $stmt->fetchColumn();
+
+        return $id === false ? null : (int) $id;
+    }
+
+    /**
+     * @return array<int,array<string,mixed>>
+     */
+    private function listSavedResponses(
+        int $applicationId,
+        int $respondentId
+    ): array {
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            'SELECT
+                r.id,
+                r.item_id,
+                r.alvo_id,
+                r.alternativa_id,
+                r.valor_texto,
+                r.valor_numero,
+                r.nao_se_aplica,
+                r.respondido_em,
+                a.rotulo AS alternativa_rotulo,
+                a.valor AS alternativa_valor
+             FROM respostas r
+             LEFT JOIN alternativas a
+               ON a.id = r.alternativa_id
+             WHERE r.aplicacao_id = :aplicacao_id
+               AND r.respondente_id = :respondente_id
+             ORDER BY r.item_id ASC, r.id ASC'
+        );
+        $stmt->execute([
+            'aplicacao_id' => $applicationId,
+            'respondente_id' => $respondentId,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    private function findSavedResponse(
+        int $applicationId,
+        int $respondentId,
+        int $targetId,
+        int $itemId
+    ): ?array {
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            'SELECT
+                r.id,
+                r.item_id,
+                r.alvo_id,
+                r.alternativa_id,
+                r.valor_texto,
+                r.valor_numero,
+                r.nao_se_aplica,
+                r.respondido_em,
+                a.rotulo AS alternativa_rotulo,
+                a.valor AS alternativa_valor
+             FROM respostas r
+             LEFT JOIN alternativas a
+               ON a.id = r.alternativa_id
+             WHERE r.aplicacao_id = :aplicacao_id
+               AND r.respondente_id = :respondente_id
+               AND r.alvo_id = :alvo_id
+               AND r.item_id = :item_id
+             LIMIT 1'
+        );
+        $stmt->execute([
+            'aplicacao_id' => $applicationId,
+            'respondente_id' => $respondentId,
+            'alvo_id' => $targetId,
+            'item_id' => $itemId,
+        ]);
+
+        $saved = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $saved === false ? null : $saved;
+    }
+
+    private function serializeSavedResponse(
+        array $saved,
+        int $respondentId
+    ): array {
+        return [
+            'id' => (int) $saved['id'],
+            'item_id' => (int) $saved['item_id'],
+            'perspectiva' => (int) $saved['alvo_id'] === $respondentId
+                ? 'SOBRE_MIM'
+                : 'SOBRE_OUTRO',
+            'alternativa_id' => $saved['alternativa_id'] === null
+                ? null
+                : (int) $saved['alternativa_id'],
+            'alternativa_rotulo' => $saved['alternativa_rotulo'],
+            'alternativa_valor' => $saved['alternativa_valor'],
+            'valor_texto' => $saved['valor_texto'],
+            'valor_numero' => $saved['valor_numero'],
+            'nao_se_aplica' => (bool) $saved['nao_se_aplica'],
+            'respondido_em' => $saved['respondido_em'],
+        ];
+    }
+
+    private function calculateProgress(array $access): array
+    {
+        $pdo = Database::connect();
+
+        $totalStmt = $pdo->prepare(
+            'SELECT COUNT(*)
+             FROM itens i
+             INNER JOIN secoes s
+               ON s.id = i.secao_id
+             WHERE s.instrumento_versao_id = :versao_id
+               AND s.ativo = 1
+               AND i.ativo = 1
+               AND NOT EXISTS (
+                    SELECT 1
+                    FROM aplicacao_itens_excluidos ex
+                    WHERE ex.aplicacao_id = :aplicacao_id
+                      AND ex.item_id = i.id
+               )'
+        );
+        $totalStmt->execute([
+            'versao_id' => (int) $access['instrumento_versao_id'],
+            'aplicacao_id' => (int) $access['aplicacao_id'],
+        ]);
+
+        $totalItems = (int) $totalStmt->fetchColumn();
+        $totalPerspectives = $totalItems * 2;
+
+        $answeredStmt = $pdo->prepare(
+            'SELECT COUNT(*)
+             FROM respostas r
+             INNER JOIN itens i
+               ON i.id = r.item_id
+              AND i.ativo = 1
+             INNER JOIN secoes s
+               ON s.id = i.secao_id
+              AND s.ativo = 1
+             WHERE r.aplicacao_id = :aplicacao_id
+               AND r.respondente_id = :respondente_id
+               AND r.nao_se_aplica = 0
+               AND s.instrumento_versao_id = :versao_id
+               AND NOT EXISTS (
+                    SELECT 1
+                    FROM aplicacao_itens_excluidos ex
+                    WHERE ex.aplicacao_id = r.aplicacao_id
+                      AND ex.item_id = r.item_id
+               )'
+        );
+        $answeredStmt->execute([
+            'aplicacao_id' => (int) $access['aplicacao_id'],
+            'respondente_id' => (int) $access['participante_id'],
+            'versao_id' => (int) $access['instrumento_versao_id'],
+        ]);
+
+        $answeredPerspectives = (int) $answeredStmt->fetchColumn();
+        $percentage = $totalPerspectives > 0
+            ? round(($answeredPerspectives / $totalPerspectives) * 100, 1)
+            : 0.0;
+
+        return [
+            'respondidas' => $answeredPerspectives,
+            'total' => $totalPerspectives,
+            'percentual' => $percentage,
+        ];
+    }
+
+    private function positiveId(mixed $value): ?int
+    {
+        if (
+            !is_scalar($value)
+            || preg_match('/^[1-9][0-9]*$/', (string) $value) !== 1
+        ) {
+            return null;
+        }
+
+        return (int) $value;
+    }
+
+    private function nullablePositiveId(mixed $value): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return $this->positiveId($value);
+    }
+
+    private function optional(mixed $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+
+        return $value === '' ? null : $value;
     }
 
     private function notFound(ResponseInterface $response): ResponseInterface
