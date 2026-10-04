@@ -54,6 +54,12 @@ export function startPublicEvaluation(versionId, application) {
   })
 }
 
+export function getParticipantAccess(token) {
+  return request(`/api/public/acessos/${token}`, {
+    method: 'GET',
+  })
+}
+
 export function loginProfessional(email, senha) {
   return request('/api/auth/login', {
     method: 'POST',
