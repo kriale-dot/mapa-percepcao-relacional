@@ -13,6 +13,7 @@ use App\Controller\InstrumentVersionController;
 use App\Controller\ItemController;
 use App\Controller\PersonController;
 use App\Controller\ProfessionalController;
+use App\Controller\PublicEvaluationController;
 use App\Controller\RelationshipController;
 use App\Controller\SectionController;
 use App\Middleware\CorsMiddleware;
@@ -51,6 +52,7 @@ $alternativeController = new AlternativeController();
 $applicationController = new ApplicationController();
 $authController = new AuthController();
 $professionalController = new ProfessionalController();
+$publicEvaluationController = new PublicEvaluationController();
 $instrumentController = new InstrumentController();
 $instrumentVersionController = new InstrumentVersionController();
 $sectionController = new SectionController();
@@ -61,6 +63,16 @@ $relationshipController = new RelationshipController();
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
 $app->post('/api/auth/login', [$authController, 'login']);
+
+$app->get('/api/public/avaliacoes', [$publicEvaluationController, 'index']);
+$app->get(
+    '/api/public/avaliacoes/{versionId:[0-9]+}',
+    [$publicEvaluationController, 'show']
+);
+$app->post(
+    '/api/public/avaliacoes/{versionId:[0-9]+}/iniciar',
+    [$publicEvaluationController, 'create']
+);
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $alternativeController,
