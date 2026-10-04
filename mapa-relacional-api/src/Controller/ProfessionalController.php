@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Config\Database;
+use App\Service\AuditService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class ProfessionalController
 {
+    public function __construct(
+        private readonly AuditService $auditService
+    ) {
+    }
+
     public function profile(
         ServerRequestInterface $request,
         ResponseInterface $response
@@ -145,6 +151,18 @@ final class ProfessionalController
             'dados_contato' => $dadosContato,
             'id' => $id,
         ]);
+
+        $this->auditService->record(
+            'PROFISSIONAL',
+            $id,
+            'PERFIL_ATUALIZADO',
+            'PROFISSIONAL',
+            $id,
+            [],
+            $request,
+            $id,
+            $pdo
+        );
 
         return $this->json($response, [
             'message' => 'Perfil atualizado com sucesso.',
