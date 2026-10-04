@@ -8,6 +8,7 @@ use App\Controller\AlternativeController;
 use App\Controller\ApplicationController;
 use App\Controller\AuthController;
 use App\Controller\HealthController;
+use App\Controller\FeedbackController;
 use App\Controller\InstrumentController;
 use App\Controller\InstrumentVersionController;
 use App\Controller\ItemController;
@@ -72,6 +73,7 @@ $authController = new AuthController();
 $professionalController = new ProfessionalController();
 $publicEvaluationController = new PublicEvaluationController($accessTokenService, $mailService, $logger);
 $participantAccessController = new ParticipantAccessController($accessTokenService, $resultService);
+$feedbackController = new FeedbackController($accessTokenService, $mailService, $resultService);
 $instrumentController = new InstrumentController();
 $instrumentVersionController = new InstrumentVersionController();
 $sectionController = new SectionController();
@@ -117,6 +119,10 @@ $app->post(
     '/api/public/acessos/{token}/concluir',
     [$participantAccessController, 'complete']
 );
+$app->get(
+    '/api/public/resultados/{token}',
+    [$feedbackController, 'publicShow']
+);
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $alternativeController,
@@ -129,7 +135,8 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $itemController,
     $personController,
     $relationshipController,
-    $resultBandController
+    $resultBandController,
+    $feedbackController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->put('/senha', [$authController, 'changePassword']);
@@ -159,6 +166,18 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->post(
         '/aplicacoes/{id:[0-9]+}/resultados/calcular',
         [$applicationController, 'calculateResults']
+    );
+    $group->get(
+        '/aplicacoes/{id:[0-9]+}/devolutiva',
+        [$feedbackController, 'show']
+    );
+    $group->put(
+        '/aplicacoes/{id:[0-9]+}/devolutiva',
+        [$feedbackController, 'save']
+    );
+    $group->post(
+        '/aplicacoes/{id:[0-9]+}/devolutiva/liberar',
+        [$feedbackController, 'release']
     );
 
     $group->get('/instrumentos', [$instrumentController, 'index']);
