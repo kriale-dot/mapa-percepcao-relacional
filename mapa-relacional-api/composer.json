@@ -48,7 +48,8 @@
       "php -l src/Service/MailService.php",
       "php -l src/Controller/ParticipantAccessController.php",
       "php -l bin/check-smtp.php",
-      "php -l src/Service/ResultService.php"
+      "php -l src/Service/ResultService.php",
+      "php -l src/Controller/ResultBandController.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
