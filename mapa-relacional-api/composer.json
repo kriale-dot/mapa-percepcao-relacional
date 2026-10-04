@@ -50,11 +50,16 @@
       "php -l bin/check-smtp.php",
       "php -l src/Service/ResultService.php",
       "php -l src/Controller/ResultBandController.php",
-      "php -l src/Controller/FeedbackController.php"
+      "php -l src/Controller/FeedbackController.php",
+      "php -l src/Service/AuditService.php",
+      "php -l src/Middleware/SecurityHeadersMiddleware.php",
+      "php -l src/Controller/NotificationController.php",
+      "php -l bin/check-v1.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
     "check-professional": "php bin/check-professional.php",
-    "check-smtp": "php bin/check-smtp.php"
+    "check-smtp": "php bin/check-smtp.php",
+    "check-v1": "php bin/check-v1.php"
   }
 }
