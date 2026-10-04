@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 concluída — estrutura completa e versionada de instrumentos  
-**Etapa atual:** Etapa 5.2 em validação — vínculos entre pessoas  
-**Próximo passo:** validar localmente criação, edição, inativação e exclusão de vínculos sem aplicações
+**Etapa atual:** Etapa 5 concluída — pessoas e vínculos  
+**Próximo passo:** iniciar a Etapa 6.1 — criação de aplicações com versão e participantes A/B
 
 ## 1. Situação atual
 
@@ -1193,38 +1193,67 @@ No frontend foi criada:
 
 A área profissional agora possui o card `Vínculos`.
 
-### Validação local pendente
+### Validação local concluída
 
-Após `git pull`, executar na API:
+Em 2026-10-04 a Etapa 5.2 foi validada com sucesso no ambiente local.
 
-```powershell
-cd mapa-relacional-api
-composer check
-composer serve
-```
+Foram confirmados:
 
-No frontend:
+- acesso ao módulo `Vínculos` pela área profissional;
+- criação de vínculo entre duas pessoas distintas;
+- preenchimento de tipo e duração;
+- rejeição da mesma pessoa nos lados A e B;
+- validação de `OUTRO` exigindo descrição personalizada;
+- edição de tipo, descrição, duração e status;
+- preservação dos lados A/B durante a edição;
+- alteração do vínculo para `INATIVO`;
+- persistência dos dados após recarregar a página;
+- exclusão de vínculo sem aplicações associadas.
 
-```powershell
-cd ..\mapa-relacional-web
-npm run build
-npm run dev
-```
+Não houve necessidade de migration nova nesta etapa, pois a tabela `vinculos` já existe na migration base.
 
-Validar:
+**Etapa 5.2 concluída.**
 
-1. garantir que existam pelo menos duas pessoas cadastradas;
-2. abrir `Vínculos` pela área profissional;
-3. criar um vínculo selecionando pessoas diferentes para A e B;
-4. preencher tipo e duração;
-5. tentar criar um vínculo usando a mesma pessoa nos lados A e B e confirmar rejeição;
-6. criar um vínculo com tipo `OUTRO` sem descrição e confirmar rejeição;
-7. completar a descrição do tipo `OUTRO` e confirmar criação;
-8. editar tipo, descrição, duração e status;
-9. confirmar que as pessoas A/B permanecem fixas durante a edição;
-10. marcar um vínculo como `INATIVO` e confirmar persistência após recarregar;
-11. criar um vínculo de teste sem aplicações e excluí-lo.
+## 28. Fechamento da Etapa 5
 
-Não há migration nova nesta etapa; a tabela `vinculos` já existe na migration base.
+A Etapa 5 — Pessoas e vínculos foi encerrada em 2026-10-04 após validação local das subetapas 5.1 e 5.2.
 
-**Próximo passo previsto:** revisar e fechar a Etapa 5 — pessoas e vínculos; depois iniciar o módulo de aplicações.
+Requisitos atendidos:
+
+- `RF-020` — cadastro de pessoa;
+- `RF-021` — edição administrativa de pessoa sem alterar snapshots históricos;
+- `RF-022` — vínculo entre exatamente duas pessoas;
+- `RF-023` — tipo de vínculo com suporte a `OUTRO`;
+- `RF-024` — backend impede a mesma pessoa nos lados A e B;
+- `RF-025` — estrutura de vínculo pronta para múltiplas aplicações ao longo do tempo.
+
+Regras históricas preservadas:
+
+- pessoas com vínculos/aplicações não são excluídas fisicamente;
+- vínculos com aplicações não são excluídos fisicamente;
+- pessoas e vínculos podem ser inativados;
+- lados A/B permanecem estáveis dentro do vínculo;
+- todas as operações permanecem isoladas por profissional autenticado.
+
+**Etapa 5 oficialmente concluída.**
+
+### Próxima etapa — Etapa 6: Aplicações
+
+A Etapa 6 começará pelo núcleo de criação da aplicação, baseado em `RF-050` a `RF-054`.
+
+Subetapa inicial prevista:
+
+**Etapa 6.1 — criação de aplicações com versão e participantes A/B**
+
+Objetivos iniciais:
+
+- criar aplicação vinculada ao profissional autenticado;
+- selecionar uma versão específica do instrumento;
+- vincular um vínculo existente quando aplicável;
+- registrar e-mail de contato;
+- preservar tipo e duração do vínculo como snapshot;
+- criar exatamente dois participantes operacionais, lados A e B;
+- preservar dados da aplicação independentemente de alterações futuras nos cadastros permanentes;
+- iniciar o ciclo de estados da aplicação em `RASCUNHO`.
+
+As tabelas `aplicacoes` e `aplicacao_participantes` já existem na migration base. A próxima implementação deve primeiro usar essa estrutura existente antes de considerar qualquer migration adicional.
