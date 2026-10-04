@@ -24,7 +24,7 @@ final class MailService
         $username = trim((string) ($_ENV['SMTP_USERNAME'] ?? ''));
         $password = (string) ($_ENV['SMTP_PASSWORD'] ?? '');
         $encryption = strtolower(trim(
-            (string) ($_ENV['SMTP_ENCRYPTION'] ?? 'tls')
+            (string) ($_ENV['SMTP_ENCRYPTION'] ?? '')
         ));
         $fromEmail = trim((string) ($_ENV['MAIL_FROM_EMAIL'] ?? ''));
         $fromName = trim((string) (
@@ -68,7 +68,11 @@ final class MailService
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         } elseif ($encryption === 'tls' || $encryption === 'starttls') {
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        } elseif ($encryption === '' || $encryption === 'none') {
+        } elseif ($encryption === '' || $encryption === 'auto') {
+            // Para Brevo na porta 587, deixe o PHPMailer negociar STARTTLS
+            // automaticamente quando o servidor anunciar suporte.
+            $mail->SMTPSecure = '';
+        } elseif ($encryption === 'none') {
             $mail->SMTPAutoTLS = false;
             $mail->SMTPSecure = '';
         } else {
