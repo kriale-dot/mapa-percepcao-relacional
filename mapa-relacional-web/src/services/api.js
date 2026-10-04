@@ -98,6 +98,16 @@ export function getParticipantQuestionnaire(token) {
   })
 }
 
+export function saveParticipantResponse(token, itemId, answer) {
+  return request(
+    `/api/public/acessos/${token}/respostas/${itemId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(answer),
+    },
+  )
+}
+
 export function loginProfessional(email, senha) {
   return request('/api/auth/login', {
     method: 'POST',
