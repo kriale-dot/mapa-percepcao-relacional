@@ -261,6 +261,20 @@ Cada instrumento pertence ao profissional autenticado e possui nome, descrição
 
 A exclusão física é permitida somente enquanto o instrumento não possui versões. Depois que houver ao menos uma versão, o histórico deve ser preservado e o instrumento pode ser arquivado em vez de excluído.
 
+### Versões do instrumento
+
+Cada versão pertence a um instrumento e possui `numero_versao`, `status` e `publicado_em`.
+
+Estados adotados:
+
+- `RASCUNHO`;
+- `PUBLICADA`;
+- `ARQUIVADA`.
+
+Na V1 foi adotada uma regra conservadora de imutabilidade: somente versões em `RASCUNHO` podem ser editadas ou excluídas. Ao publicar, a versão passa a ser imutável; qualquer mudança posterior deve ser feita em uma nova versão. Uma versão `PUBLICADA` pode ser `ARQUIVADA`, sem apagar seu histórico.
+
+A exclusão de rascunho também é bloqueada se a versão já possuir seções ou aplicações vinculadas. Todas as operações de versão validam a propriedade do instrumento pelo profissional autenticado.
+
 ### Perfil profissional
 
 O perfil profissional da V1 é acessado em `/profissional/perfil` e usa as rotas protegidas `GET /api/profissional/perfil` e `PUT /api/profissional/perfil`.
