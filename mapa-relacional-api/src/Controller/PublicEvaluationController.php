@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Config\Database;
 use App\Service\AccessTokenService;
 use App\Service\MailService;
+use App\Service\RateLimitService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -19,7 +20,8 @@ final class PublicEvaluationController
     public function __construct(
         private readonly AccessTokenService $tokenService,
         private readonly MailService $mailService,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly RateLimitService $rateLimitService
     ) {
     }
 
@@ -153,6 +155,35 @@ final class PublicEvaluationController
             return $this->validation(
                 $response,
                 'Tempo de uniao deve ter no maximo 100 caracteres.'
+            );
+        }
+
+        $rate = $this->rateLimitService->hit(
+            'public_evaluation_start',
+            $this->rateLimitService->requestKey($request, $email),
+            max(
+                1,
+                (int) (
+                    $_ENV['PUBLIC_START_RATE_LIMIT_MAX']
+                        ?? 10
+                )
+            ),
+            max(
+                60,
+                (int) (
+                    $_ENV['PUBLIC_START_RATE_LIMIT_WINDOW_SECONDS']
+                        ?? 900
+                )
+            )
+        );
+
+        if (!$rate['allowed']) {
+            return $this->json($response, [
+                'error' => 'rate_limit_exceeded',
+                'message' => 'Muitas avaliacoes foram iniciadas recentemente. Aguarde antes de tentar novamente.',
+            ], 429)->withHeader(
+                'Retry-After',
+                (string) $rate['retry_after']
             );
         }
 
