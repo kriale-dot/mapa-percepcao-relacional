@@ -5,13 +5,22 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Config\Database;
+use App\Service\AccessTokenService;
+use App\Service\MailService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use RuntimeException;
 use Throwable;
 
 final class PublicEvaluationController
 {
+    public function __construct(
+        private readonly AccessTokenService $tokenService,
+        private readonly MailService $mailService
+    ) {
+    }
+
     public function index(
         ServerRequestInterface $request,
         ResponseInterface $response
@@ -206,12 +215,89 @@ final class PublicEvaluationController
                 'nome_snapshot' => $nameA,
                 'status' => 'PENDENTE',
             ]);
+            $participantAId = (int) $pdo->lastInsertId();
 
             $insertParticipant->execute([
                 'aplicacao_id' => $applicationId,
                 'lado' => 'B',
                 'nome_snapshot' => $nameB,
                 'status' => 'PENDENTE',
+            ]);
+            $participantBId = (int) $pdo->lastInsertId();
+
+            $accessA = $this->tokenService->generate();
+            $accessB = $this->tokenService->generate();
+
+            $insertAccess = $pdo->prepare(
+                'INSERT INTO acessos_aplicacao (
+                    aplicacao_participante_id,
+                    token_hash,
+                    status
+                 ) VALUES (
+                    :participante_id,
+                    :token_hash,
+                    :status
+                 )'
+            );
+
+            $insertAccess->execute([
+                'participante_id' => $participantAId,
+                'token_hash' => $accessA['hash'],
+                'status' => 'ATIVO',
+            ]);
+            $accessAId = (int) $pdo->lastInsertId();
+
+            $insertAccess->execute([
+                'participante_id' => $participantBId,
+                'token_hash' => $accessB['hash'],
+                'status' => 'ATIVO',
+            ]);
+            $accessBId = (int) $pdo->lastInsertId();
+
+            $linkA = $this->buildAccessLink($accessA['token']);
+            $linkB = $this->buildAccessLink($accessB['token']);
+
+            try {
+                $this->mailService->sendParticipantAccessLinks(
+                    $email,
+                    (string) $evaluation['nome'],
+                    [
+                        'name' => $nameA,
+                        'link' => $linkA,
+                    ],
+                    [
+                        'name' => $nameB,
+                        'link' => $linkB,
+                    ]
+                );
+            } catch (Throwable $mailError) {
+                $pdo->rollBack();
+
+                return $this->json($response, [
+                    'error' => 'email_delivery_failed',
+                    'message' => 'Nao foi possivel enviar os links de acesso para o e-mail informado. Tente novamente.',
+                ], 502);
+            }
+
+            $markAccessSent = $pdo->prepare(
+                'UPDATE acessos_aplicacao
+                    SET enviado_em = NOW()
+                  WHERE id IN (:acesso_a_id, :acesso_b_id)'
+            );
+            $markAccessSent->execute([
+                'acesso_a_id' => $accessAId,
+                'acesso_b_id' => $accessBId,
+            ]);
+
+            $markApplicationReady = $pdo->prepare(
+                'UPDATE aplicacoes
+                    SET status = :status,
+                        enviado_em = NOW()
+                  WHERE id = :id'
+            );
+            $markApplicationReady->execute([
+                'status' => 'PRONTA',
+                'id' => $applicationId,
             ]);
 
             $pdo->commit();
@@ -226,10 +312,11 @@ final class PublicEvaluationController
         return $this->json(
             $response,
             [
-                'message' => 'Avaliacao iniciada com sucesso.',
+                'message' => 'Avaliacao iniciada e acessos enviados com sucesso.',
+                'email_enviado' => true,
                 'aplicacao' => [
                     'id' => $applicationId,
-                    'status' => 'RASCUNHO',
+                    'status' => 'PRONTA',
                     'avaliacao_nome' => $evaluation['nome'],
                     'email_contato' => $email,
                     'tipo_vinculo' => $relationshipType,
@@ -293,6 +380,25 @@ final class PublicEvaluationController
         }
 
         return $this->normalizeEvaluation($evaluation);
+    }
+
+    private function buildAccessLink(string $token): string
+    {
+        $frontendUrl = rtrim(
+            trim((string) ($_ENV['FRONTEND_URL'] ?? '')),
+            '/'
+        );
+
+        if (
+            $frontendUrl === ''
+            || filter_var($frontendUrl, FILTER_VALIDATE_URL) === false
+        ) {
+            throw new RuntimeException(
+                'FRONTEND_URL invalida para gerar os links de acesso.'
+            );
+        }
+
+        return $frontendUrl . '/avaliacao/acesso/' . $token;
     }
 
     private function normalizeEvaluation(array $evaluation): array
