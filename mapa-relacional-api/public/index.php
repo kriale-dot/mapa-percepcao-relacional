@@ -7,6 +7,7 @@ use App\Config\LoggerFactory;
 use App\Controller\AuthController;
 use App\Controller\HealthController;
 use App\Controller\InstrumentController;
+use App\Controller\InstrumentVersionController;
 use App\Controller\ProfessionalController;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\ProfessionalAuthMiddleware;
@@ -43,6 +44,7 @@ $healthController = new HealthController();
 $authController = new AuthController();
 $professionalController = new ProfessionalController();
 $instrumentController = new InstrumentController();
+$instrumentVersionController = new InstrumentVersionController();
 
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
@@ -51,7 +53,8 @@ $app->post('/api/auth/login', [$authController, 'login']);
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $authController,
     $professionalController,
-    $instrumentController
+    $instrumentController,
+    $instrumentVersionController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->put('/senha', [$authController, 'changePassword']);
@@ -63,6 +66,31 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->get('/instrumentos/{id:[0-9]+}', [$instrumentController, 'show']);
     $group->put('/instrumentos/{id:[0-9]+}', [$instrumentController, 'update']);
     $group->delete('/instrumentos/{id:[0-9]+}', [$instrumentController, 'delete']);
+
+    $group->get(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes',
+        [$instrumentVersionController, 'index']
+    );
+    $group->post(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes',
+        [$instrumentVersionController, 'create']
+    );
+    $group->put(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}',
+        [$instrumentVersionController, 'update']
+    );
+    $group->post(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/publicar',
+        [$instrumentVersionController, 'publish']
+    );
+    $group->post(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/arquivar',
+        [$instrumentVersionController, 'archive']
+    );
+    $group->delete(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}',
+        [$instrumentVersionController, 'delete']
+    );
 })->add(new ProfessionalAuthMiddleware());
 
 $app->get('/api', function ($request, $response) {
