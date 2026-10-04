@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 6 em desenvolvimento — autoatendimento público de avaliações  
-**Etapa atual:** Etapa 6.4 em validação — respostas individuais e persistência progressiva  
-**Próximo passo:** validar salvamento, edição e retomada das duas perspectivas de cada item
+**Etapa atual:** Etapa 6.5 em validação — Não se aplica e conclusão individual  
+**Próximo passo:** validar exclusão global por Não se aplica e conclusão individual dos dois participantes
 
 ## 1. Situação atual
 
@@ -1806,3 +1806,72 @@ No banco, pode-se confirmar que cada combinação de aplicação/respondente/alv
 Não há migration nova nesta etapa; a tabela `respostas` e a chave única necessária já existem na migration base.
 
 **Próxima subetapa prevista:** Etapa 6.5 — regra “Não se aplica” e conclusão individual do participante.
+
+## 33. Etapa 6.5 — Não se aplica e conclusão individual
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/ParticipantAccessController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/PublicParticipantAccess.jsx`.
+
+Novas rotas:
+
+```text
+POST /api/public/acessos/{token}/itens/{itemId}/nao-se-aplica
+POST /api/public/acessos/{token}/concluir
+```
+
+Regras implementadas para **Não se aplica**:
+
+- somente itens configurados para permitir a opção podem ser marcados;
+- a interface pede confirmação explícita;
+- é criado `aplicacao_itens_excluidos`;
+- a exclusão vale para A e B;
+- respostas antigas ficam preservadas;
+- o item desaparece do questionário dos dois participantes;
+- o item sai do denominador de progresso;
+- o primeiro registro de exclusão é preservado em tentativas duplicadas;
+- não há reversão da exclusão na V1.
+
+Regras implementadas para conclusão:
+
+- participante só conclui com todas as perspectivas válidas respondidas;
+- participante passa para `CONCLUIDO`;
+- acesso passa para `CONCLUIDO`;
+- `concluiu_em` é registrado no participante e no acesso;
+- depois disso o link não aceita novas respostas;
+- com apenas um participante concluído, aplicação permanece `EM_ANDAMENTO`;
+- quando os dois concluem, aplicação passa para `CONCLUIDA`;
+- `aplicacoes.concluida_em` é preenchido na conclusão do segundo participante.
+
+A interface inclui botão `Não se aplica` somente nos itens permitidos e botão final `Concluir minha participação`, liberado apenas quando o progresso válido estiver completo.
+
+Também foi adicionado botão explícito `Salvar resposta` para respostas abertas, mantendo o salvamento por saída do campo e evitando dificuldade para salvar a última resposta antes da conclusão.
+
+### Validação local pendente — Etapa 6.5
+
+Após `git pull` e reinício da API/frontend, validar:
+
+1. abrir o link do participante A;
+2. responder parcialmente alguns itens;
+3. em um item que permita, clicar `Não se aplica`;
+4. confirmar o aviso;
+5. verificar que o item desaparece imediatamente;
+6. pressionar `F5` e confirmar que o item continua ausente;
+7. abrir o link do participante B e confirmar que o mesmo item também não aparece;
+8. confirmar que respostas anteriores desse item, se existirem, não reaparecem no questionário;
+9. completar todas as perspectivas válidas de A;
+10. confirmar que o botão de conclusão é liberado;
+11. concluir A e verificar `CONCLUIDO` na área profissional;
+12. tentar reabrir o link A e confirmar que não é possível alterar respostas;
+13. concluir todas as perspectivas válidas de B;
+14. concluir B;
+15. verificar na área profissional que A e B estão `CONCLUIDO` e a aplicação está `CONCLUIDA`.
+
+Não há migration nova nesta etapa.
+
+**Próxima subetapa prevista:** Etapa 7 — comparação das percepções e cálculo dos resultados.
