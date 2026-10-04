@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 concluída — estrutura completa e versionada de instrumentos  
-**Etapa atual:** Etapa 4 concluída — instrumentos, versões, seções, itens e alternativas  
-**Próximo passo:** iniciar a Etapa 5.1 — CRUD de pessoas
+**Etapa atual:** Etapa 5.1 em validação — CRUD de pessoas  
+**Próximo passo:** validar localmente o cadastro, edição, inativação e exclusão de pessoas sem histórico
 
 ## 1. Situação atual
 
@@ -1080,3 +1080,80 @@ A sequência prevista é:
 As tabelas `pessoas` e `vinculos` já existem na migration base; portanto, a Etapa 5 deve começar pela API e frontend, sem presumir migration nova.
 
 **Etapa 4 oficialmente concluída.**
+
+## 26. Etapa 5.1 — CRUD de pessoas
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/PersonController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalPeople.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Rotas protegidas adicionadas:
+
+```text
+GET    /api/profissional/pessoas
+POST   /api/profissional/pessoas
+GET    /api/profissional/pessoas/{id}
+PUT    /api/profissional/pessoas/{id}
+DELETE /api/profissional/pessoas/{id}
+```
+
+Regras implementadas:
+
+- toda pessoa pertence ao profissional autenticado;
+- nome obrigatório;
+- e-mail opcional e validado quando informado;
+- telefone opcional;
+- data de nascimento opcional em formato válido;
+- observação administrativa opcional;
+- estados permitidos: `ATIVO` e `INATIVO`;
+- edição administrativa não altera snapshots de avaliações anteriores;
+- listagem informa também total de vínculos e aplicações associadas;
+- exclusão física bloqueada quando a pessoa possui vínculos ou aplicações;
+- pessoa com histórico deve ser preservada e pode ser marcada como inativa.
+
+No frontend foi criada:
+
+```text
+/profissional/pessoas
+```
+
+A área profissional agora possui o card `Pessoas`.
+
+### Validação local pendente
+
+Após `git pull`, executar na API:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+No frontend:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. abrir `Pessoas` pela área profissional;
+2. cadastrar uma pessoa apenas com nome;
+3. cadastrar outra pessoa com todos os campos;
+4. editar nome, e-mail, telefone, data de nascimento e observação;
+5. marcar uma pessoa como `INATIVO` e confirmar persistência após recarregar a página;
+6. criar uma pessoa de teste sem histórico e excluí-la;
+7. confirmar que a listagem permanece filtrada ao profissional autenticado.
+
+Não há migration nova nesta etapa; a tabela `pessoas` já existe na migration base.
+
+**Próxima subetapa prevista:** Etapa 5.2 — vínculos entre pessoas.
