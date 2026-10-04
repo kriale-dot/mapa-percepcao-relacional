@@ -155,7 +155,7 @@ final class NotificationController
             'id' => (int) $context['acesso_id'],
         ]);
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             $professionalId,
             'ACESSO_PARTICIPANTE_REENVIADO',
@@ -290,7 +290,7 @@ final class NotificationController
             'id' => (int) $context['devolutiva_id'],
         ]);
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             $professionalId,
             'DEVOLUTIVA_REENVIADA',
