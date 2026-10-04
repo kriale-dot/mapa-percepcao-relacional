@@ -150,6 +150,17 @@ final class AuthController
             ], 401);
         }
 
+        $this->rateLimitService->clear(
+            'professional_login_ip',
+            $ipKey,
+            $pdo
+        );
+        $this->rateLimitService->clear(
+            'professional_login_account',
+            $email,
+            $pdo
+        );
+
         if (password_needs_rehash((string) $professional['senha_hash'], PASSWORD_DEFAULT)) {
             $newHash = password_hash($password, PASSWORD_DEFAULT);
 
