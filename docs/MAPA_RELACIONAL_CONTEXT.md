@@ -312,6 +312,8 @@ O tipo de vínculo e o tempo de união informados pelo visitante são gravados d
 
 Somente avaliações baseadas em versão `PUBLICADA` podem ser iniciadas pelo público. O visitante escolhe a avaliação em linguagem de produto; detalhes internos de instrumento/versão não precisam ser expostos na interface pública.
 
+Para aparecer no catálogo público, o instrumento também precisa estar `ATIVO` e o profissional responsável precisa estar `ATIVO`. Se houver mais de uma versão publicada para o mesmo instrumento, o catálogo oferece somente a versão publicada mais recente.
+
 A criação da aplicação e dos dois participantes deve permanecer atômica. A etapa seguinte deverá gerar os dois acessos individuais seguros e permitir que o fluxo prossiga sem intervenção manual do profissional.
 
 O profissional visualiza automaticamente essas aplicações em sua área autenticada, acompanha o preenchimento, consulta os resultados e pode usar os dados de contato para abordagem posterior.
