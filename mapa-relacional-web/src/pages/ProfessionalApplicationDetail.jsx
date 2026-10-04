@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getApplication } from '../services/api'
+import {
+  getApplication,
+  resendApplicationFeedback,
+  resendParticipantAccess,
+} from '../services/api'
 import { clearAuthToken, getAuthToken } from '../services/auth'
 
 function navigate(path) {
@@ -39,6 +43,8 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
   const [results, setResults] = useState([])
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
+  const [actionStatus, setActionStatus] = useState('')
+  const [actionMessage, setActionMessage] = useState('')
 
   useEffect(() => {
     if (!getAuthToken()) {
@@ -70,6 +76,70 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
       setMessage(
         error.message || 'Não foi possível carregar a avaliação.',
       )
+    }
+  }
+
+  async function handleResendParticipant(side) {
+    const participant =
+      side === 'A'
+        ? application?.participante_a
+        : application?.participante_b
+
+    const confirmed = window.confirm(
+      `Gerar um novo link para o participante ${side} (${participant?.nome_snapshot || 'participante'})? O link anterior deixará de funcionar.`,
+    )
+
+    if (!confirmed) return
+
+    setActionStatus(`participant-${side}`)
+    setActionMessage('')
+
+    try {
+      const result = await resendParticipantAccess(
+        applicationId,
+        side,
+      )
+      setActionMessage(result.message)
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setActionMessage(
+        error.message || 'Não foi possível reenviar o acesso.',
+      )
+    } finally {
+      setActionStatus('')
+    }
+  }
+
+  async function handleResendFeedback() {
+    const confirmed = window.confirm(
+      'Gerar um novo link da devolutiva e reenviar por e-mail? O link anterior deixará de funcionar.',
+    )
+
+    if (!confirmed) return
+
+    setActionStatus('feedback')
+    setActionMessage('')
+
+    try {
+      const result = await resendApplicationFeedback(applicationId)
+      setActionMessage(result.message)
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setActionMessage(
+        error.message || 'Não foi possível reenviar a devolutiva.',
+      )
+    } finally {
+      setActionStatus('')
     }
   }
 
@@ -205,6 +275,25 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
               </p>
             </div>
           </div>
+
+          {actionMessage ? (
+            <div className="mt-5 rounded-2xl bg-[#A8C8D0]/14 px-5 py-4 text-sm">
+              {actionMessage}
+            </div>
+          ) : null}
+
+          {application.devolutiva_status === 'LIBERADA' ? (
+            <button
+              type="button"
+              disabled={actionStatus !== ''}
+              onClick={handleResendFeedback}
+              className="mt-5 rounded-xl border border-[#D8B078]/65 px-4 py-2 text-sm font-semibold disabled:opacity-50"
+            >
+              {actionStatus === 'feedback'
+                ? 'Reenviando devolutiva...'
+                : 'Reenviar devolutiva por e-mail'}
+            </button>
+          ) : null}
         </section>
 
         <section className="mt-7">
@@ -256,6 +345,22 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
                     </dd>
                   </div>
                 </dl>
+
+                {participant?.status !== 'CONCLUIDO' &&
+                !['CONCLUIDA', 'CANCELADA'].includes(
+                  application.status,
+                ) ? (
+                  <button
+                    type="button"
+                    disabled={actionStatus !== ''}
+                    onClick={() => handleResendParticipant(side)}
+                    className="mt-5 rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                  >
+                    {actionStatus === `participant-${side}`
+                      ? 'Reenviando...'
+                      : `Reenviar acesso do participante ${side}`}
+                  </button>
+                ) : null}
               </article>
             ))}
           </div>
