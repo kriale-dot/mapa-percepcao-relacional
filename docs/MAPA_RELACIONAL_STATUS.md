@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 em desenvolvimento — instrumentos e versionamento  
-**Etapa atual:** Etapa 4.2 concluída — versões do instrumento  
-**Próximo passo:** iniciar a Etapa 4.3 — seções da versão
+**Etapa atual:** Etapa 4.3 em validação — seções da versão  
+**Próximo passo:** validar localmente criação, edição, ordenação, ativação e exclusão de seções
 
 ## 1. Situação atual
 
@@ -835,3 +835,80 @@ Observação: a V1 adota imutabilidade a partir da publicação, regra deliberad
 **Etapa 4.2 concluída.**
 
 **Próxima subetapa:** Etapa 4.3 — seções da versão.
+
+## 22. Etapa 4.3 — seções da versão
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/SectionController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalSections.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalInstrumentVersions.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Rotas protegidas adicionadas:
+
+```text
+GET    /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes
+POST   /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes
+PUT    /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}
+DELETE /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}
+```
+
+Regras implementadas:
+
+- somente versões em `RASCUNHO` permitem alteração estrutural;
+- título obrigatório;
+- descrição opcional;
+- ordem inteira igual ou maior que zero;
+- na criação, ordem omitida posiciona a seção automaticamente ao final;
+- seção pode ser ativa ou inativa;
+- listagem é ordenada por `ordem` e depois por ID;
+- exclusão é bloqueada quando a seção já possui itens;
+- versões publicadas/arquivadas exibem as seções somente para leitura;
+- toda operação valida a propriedade do instrumento pelo profissional autenticado.
+
+No frontend foi criada a rota:
+
+```text
+/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes
+```
+
+Cada versão agora possui o botão `Seções`.
+
+### Validação local pendente
+
+Após `git pull`, executar na API:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+No frontend:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Na versão `1.0`, que deve continuar em `RASCUNHO`, validar:
+
+1. abrir `Seções`;
+2. criar pelo menos duas seções;
+3. deixar a ordem vazia na primeira criação e confirmar posicionamento automático;
+4. editar título, descrição, ordem e estado ativo/inativo;
+5. confirmar que a ordenação da lista acompanha o campo `ordem`;
+6. criar uma seção de teste e excluí-la enquanto ainda não possui itens;
+7. recarregar a página e confirmar persistência;
+8. abrir as seções de uma versão publicada/arquivada e confirmar modo somente leitura.
+
+Não há migration nova nesta etapa; a tabela `secoes` já existe na estrutura base.
+
+**Próxima subetapa prevista:** Etapa 4.4 — itens/perguntas das seções.
