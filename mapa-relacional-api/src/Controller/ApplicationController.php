@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Config\Database;
+use App\Service\ResultService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -12,6 +13,11 @@ use Throwable;
 
 final class ApplicationController
 {
+    public function __construct(
+        private readonly ResultService $resultService
+    ) {
+    }
+
     public function index(
         ServerRequestInterface $request,
         ResponseInterface $response
@@ -62,6 +68,91 @@ final class ApplicationController
         }
 
         return $this->json($response, ['aplicacao' => $application]);
+    }
+
+    public function results(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface {
+        $professionalId = $this->professionalId($request);
+
+        if ($professionalId === null) {
+            return $this->unauthorized($response);
+        }
+
+        $id = $this->positiveId($args['id'] ?? null);
+
+        if ($id === null) {
+            return $this->notFound($response);
+        }
+
+        $application = $this->find($professionalId, $id);
+
+        if ($application === null) {
+            return $this->notFound($response);
+        }
+
+        if ($application['status'] !== 'CONCLUIDA') {
+            return $this->json($response, [
+                'error' => 'application_not_completed',
+                'message' => 'Os resultados ficam disponiveis depois que os dois participantes concluem.',
+            ], 409);
+        }
+
+        return $this->json($response, [
+            'resultado' => $this->resultService->getResults($id),
+        ]);
+    }
+
+    public function calculateResults(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface {
+        $professionalId = $this->professionalId($request);
+
+        if ($professionalId === null) {
+            return $this->unauthorized($response);
+        }
+
+        $id = $this->positiveId($args['id'] ?? null);
+
+        if ($id === null) {
+            return $this->notFound($response);
+        }
+
+        $application = $this->find($professionalId, $id);
+
+        if ($application === null) {
+            return $this->notFound($response);
+        }
+
+        if ($application['status'] !== 'CONCLUIDA') {
+            return $this->json($response, [
+                'error' => 'application_not_completed',
+                'message' => 'Os dois participantes precisam concluir antes do calculo.',
+            ], 409);
+        }
+
+        $pdo = Database::connect();
+        $pdo->beginTransaction();
+
+        try {
+            $this->resultService->calculate($id, $pdo);
+            $pdo->commit();
+        } catch (Throwable $error) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $error;
+        }
+
+        return $this->json($response, [
+            'message' => 'Resultados calculados com sucesso.',
+            'resultado' => $this->resultService->getResults($id),
+        ]);
     }
 
     public function options(
