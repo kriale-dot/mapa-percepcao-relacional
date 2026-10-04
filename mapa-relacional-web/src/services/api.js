@@ -178,4 +178,51 @@ export function deleteInstrumentVersion(instrumentId, versionId) {
   )
 }
 
+export function listSections(instrumentId, versionId) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes`,
+    {
+      method: 'GET',
+      auth: true,
+    },
+  )
+}
+
+export function createSection(instrumentId, versionId, section) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes`,
+    {
+      method: 'POST',
+      auth: true,
+      body: JSON.stringify(section),
+    },
+  )
+}
+
+export function updateSection(
+  instrumentId,
+  versionId,
+  sectionId,
+  section,
+) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}`,
+    {
+      method: 'PUT',
+      auth: true,
+      body: JSON.stringify(section),
+    },
+  )
+}
+
+export function deleteSection(instrumentId, versionId, sectionId) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}`,
+    {
+      method: 'DELETE',
+      auth: true,
+    },
+  )
+}
+
 export { API_URL }
