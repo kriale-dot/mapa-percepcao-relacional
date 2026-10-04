@@ -320,12 +320,49 @@ final class ResultService
             $comparisonStmt->fetchAll(PDO::FETCH_ASSOC)
         );
 
+        $excludedStmt = $pdo->prepare(
+            'SELECT
+                ex.item_id,
+                ex.motivo,
+                ex.created_at,
+                i.codigo AS item_codigo,
+                i.texto AS item_texto,
+                s.id AS secao_id,
+                s.titulo AS secao_titulo,
+                ap.lado AS marcado_por_lado,
+                ap.nome_snapshot AS marcado_por_nome
+             FROM aplicacao_itens_excluidos ex
+             INNER JOIN itens i
+               ON i.id = ex.item_id
+             INNER JOIN secoes s
+               ON s.id = i.secao_id
+             INNER JOIN aplicacao_participantes ap
+               ON ap.id = ex.marcado_por_participante_id
+             WHERE ex.aplicacao_id = :aplicacao_id
+             ORDER BY s.ordem ASC, s.id ASC, i.ordem ASC, i.id ASC'
+        );
+        $excludedStmt->execute([
+            'aplicacao_id' => $applicationId,
+        ]);
+
+        $excludedItems = array_map(
+            static function (array $item): array {
+                $item['item_id'] = (int) $item['item_id'];
+                $item['secao_id'] = (int) $item['secao_id'];
+
+                return $item;
+            },
+            $excludedStmt->fetchAll(PDO::FETCH_ASSOC)
+        );
+
         return [
             'aplicacao' => [
                 'id' => (int) $application['id'],
                 'status' => (string) $application['status'],
                 'instrumento_versao_id' =>
                     (int) $application['instrumento_versao_id'],
+                'instrumento_nome' => (string) $application['instrumento_nome'],
+                'numero_versao' => (string) $application['numero_versao'],
                 'participante_a' => [
                     'id' => (int) $application['participante_a_id'],
                     'nome' => $application['participante_a_nome'],
@@ -351,6 +388,7 @@ final class ResultService
                 $resultsStmt->fetchAll(PDO::FETCH_ASSOC)
             ),
             'comparacoes' => $comparisons,
+            'itens_excluidos' => $excludedItems,
             'secoes' => $this->buildSectionResults(
                 $pdo,
                 (int) $application['instrumento_versao_id'],
@@ -368,6 +406,8 @@ final class ResultService
                 a.id,
                 a.status,
                 a.instrumento_versao_id,
+                i.nome AS instrumento_nome,
+                v.numero_versao,
                 pa.id AS participante_a_id,
                 pa.nome_snapshot AS participante_a_nome,
                 pa.status AS participante_a_status,
@@ -375,6 +415,10 @@ final class ResultService
                 pb.nome_snapshot AS participante_b_nome,
                 pb.status AS participante_b_status
              FROM aplicacoes a
+             INNER JOIN instrumento_versoes v
+               ON v.id = a.instrumento_versao_id
+             INNER JOIN instrumentos i
+               ON i.id = v.instrumento_id
              INNER JOIN aplicacao_participantes pa
                ON pa.aplicacao_id = a.id
               AND pa.lado = \'A\'
