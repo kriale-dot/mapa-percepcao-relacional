@@ -1544,3 +1544,17 @@ Validar:
 Não há migration nova; `acessos_aplicacao` e os campos `enviado_em` já existem na migration base.
 
 **Próxima subetapa prevista:** Etapa 6.3 — identificação inicial e início do preenchimento individual.
+
+### Ajuste de diagnóstico SMTP — 2026-10-04
+
+Durante a validação local, o fluxo público retornou `502 Bad Gateway` em `POST /api/public/avaliacoes/{versionId}/iniciar`, indicando falha real no envio SMTP. Como a criação pública usa transação, a aplicação foi revertida corretamente.
+
+Ajustes aplicados:
+
+- `SMTP_ENCRYPTION` passa a ficar vazio por padrão na porta 587, permitindo negociação automática do STARTTLS pelo PHPMailer;
+- falhas SMTP são registradas no log da aplicação;
+- quando `APP_DEBUG=true`, a resposta 502 inclui o detalhe técnico da exceção para diagnóstico local;
+- criado `bin/check-smtp.php` para testar o Brevo isoladamente do fluxo da avaliação;
+- adicionado script `composer check-smtp -- <email>`.
+
+Próximo teste: validar primeiro o SMTP isoladamente e somente depois repetir a criação pública da avaliação.
