@@ -321,6 +321,17 @@ export default function ProfessionalInstruments() {
                   <div className="flex shrink-0 flex-wrap gap-2">
                     <button
                       type="button"
+                      onClick={() =>
+                        navigate(
+                          `/profissional/instrumentos/${instrument.id}/versoes`,
+                        )
+                      }
+                      className="rounded-xl border border-[#88B098] px-4 py-2 text-sm font-semibold"
+                    >
+                      Versões
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => beginEdit(instrument)}
                       className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
                     >
