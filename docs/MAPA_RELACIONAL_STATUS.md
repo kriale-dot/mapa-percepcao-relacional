@@ -1558,3 +1558,17 @@ Ajustes aplicados:
 - adicionado script `composer check-smtp -- <email>`.
 
 Próximo teste: validar primeiro o SMTP isoladamente e somente depois repetir a criação pública da avaliação.
+
+### Validação SMTP Brevo isolada concluída
+
+Em 2026-10-04 o envio SMTP pelo Brevo foi validado com sucesso pelo script `bin/check-smtp.php`.
+
+Foi confirmado que:
+
+- PHPMailer está instalado e carregado corretamente;
+- a conexão com `smtp-relay.brevo.com` funciona;
+- autenticação SMTP funciona;
+- o remetente configurado foi aceito;
+- o e-mail de teste foi entregue ao destinatário informado.
+
+A próxima validação da Etapa 6.2 é o fluxo completo da avaliação pública: criar uma nova aplicação, gerar os dois tokens, enviar os dois links no mesmo e-mail, abrir os links de A e B e confirmar o estado `PRONTA`.
