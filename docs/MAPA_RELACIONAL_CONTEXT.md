@@ -624,3 +624,30 @@ A área profissional pode consultar:
 - itens removidos por “Não se aplica”.
 
 O cálculo é técnico e não produz diagnóstico clínico automático.
+
+### Configuração profissional das faixas de resultado
+
+Na Etapa 7.2, as faixas de interpretação deixam de ser apenas registros técnicos e passam a ser configuráveis pelo profissional no contexto de cada versão do instrumento.
+
+Rota profissional da interface:
+
+```text
+/profissional/instrumentos/{instrumentId}/versoes/{versionId}/faixas-resultados
+```
+
+Regras:
+
+- toda nova versão já nasce com as faixas-base Ruim / Regular / Bom;
+- faixas pertencem à `instrumento_versao`;
+- somente versões em `RASCUNHO` permitem edição;
+- versões `PUBLICADA` ou `ARQUIVADA` exibem as faixas apenas para leitura;
+- publicar a versão congela também sua interpretação percentual;
+- mudanças futuras de faixas exigem uma nova versão do instrumento;
+- a primeira faixa precisa começar em 0,00%;
+- a última precisa terminar em 100,00%;
+- as faixas intermediárias precisam formar cobertura contínua, sem lacunas nem sobreposições;
+- como o cálculo usa duas casas decimais, a faixa seguinte deve começar 0,01 ponto após o limite máximo anterior;
+- o profissional pode alterar rótulos, limites e quantidade de faixas enquanto a versão estiver em rascunho;
+- resultados já calculados continuam preservando o rótulo da faixa gravado em `resultados.faixa`.
+
+A página de resultados profissionais identifica a versão usada pela aplicação e permite consultar as faixas daquela versão em modo de leitura.
