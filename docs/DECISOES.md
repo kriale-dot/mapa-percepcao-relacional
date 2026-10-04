@@ -552,3 +552,23 @@ Consequências:
 - o rótulo persistido no resultado serve como snapshot interpretativo do cálculo realizado.
 
 Essa decisão mantém a imutabilidade histórica já adotada para versões publicadas e evita que a mesma aplicação passe a ter interpretação diferente depois de concluída.
+
+## D-036 — Devolutiva é liberada por link seguro enviado pelo Brevo
+**Data:** 2026-10-04  
+**Status:** vigente
+
+Na V1, o resultado não é enviado como anexo nem incorporado integralmente ao corpo do e-mail.
+
+O profissional prepara uma devolutiva em rascunho e executa uma ação explícita de liberação.
+
+Na liberação:
+
+- um token aleatório exclusivo da devolutiva é gerado;
+- somente o hash SHA-256 do token é armazenado;
+- um link `/resultado/{token}` é enviado ao e-mail de contato pela infraestrutura SMTP Brevo já validada;
+- a devolutiva somente passa para `LIBERADA` depois do envio confirmado;
+- depois de liberada, síntese, observações e comentário profissional ficam imutáveis na V1.
+
+A página pública mostra resultados agregados e conteúdo profissional, mas não expõe respostas individuais brutas nem comparação item a item.
+
+Essa separação preserva privacidade, rastreabilidade e o princípio de que comentário profissional não altera o cálculo técnico.
