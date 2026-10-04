@@ -225,4 +225,57 @@ export function deleteSection(instrumentId, versionId, sectionId) {
   )
 }
 
+export function listItems(instrumentId, versionId, sectionId) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}/itens`,
+    {
+      method: 'GET',
+      auth: true,
+    },
+  )
+}
+
+export function createItem(instrumentId, versionId, sectionId, item) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}/itens`,
+    {
+      method: 'POST',
+      auth: true,
+      body: JSON.stringify(item),
+    },
+  )
+}
+
+export function updateItem(
+  instrumentId,
+  versionId,
+  sectionId,
+  itemId,
+  item,
+) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}/itens/${itemId}`,
+    {
+      method: 'PUT',
+      auth: true,
+      body: JSON.stringify(item),
+    },
+  )
+}
+
+export function deleteItem(
+  instrumentId,
+  versionId,
+  sectionId,
+  itemId,
+) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}/itens/${itemId}`,
+    {
+      method: 'DELETE',
+      auth: true,
+    },
+  )
+}
+
 export { API_URL }
