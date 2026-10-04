@@ -172,7 +172,7 @@ final class InstrumentVersionController
             throw $error;
         }
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             $professionalId,
             'VERSAO_CRIADA',
@@ -331,7 +331,7 @@ final class InstrumentVersionController
             'draft_status' => 'RASCUNHO',
         ]);
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             $professionalId,
             'VERSAO_PUBLICADA',
@@ -403,7 +403,7 @@ final class InstrumentVersionController
             'published_status' => 'PUBLICADA',
         ]);
 
-        $this->auditService->record(
+        $this->auditService->recordSafe(
             'PROFISSIONAL',
             $professionalId,
             'VERSAO_ARQUIVADA',
