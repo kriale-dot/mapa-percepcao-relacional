@@ -651,3 +651,47 @@ Regras:
 - resultados já calculados continuam preservando o rótulo da faixa gravado em `resultados.faixa`.
 
 A página de resultados profissionais identifica a versão usada pela aplicação e permite consultar as faixas daquela versão em modo de leitura.
+
+### Devolutiva profissional e liberação aos participantes
+
+Na Etapa 8, cálculo técnico e interpretação profissional permanecem separados.
+
+Depois que a aplicação estiver `CONCLUIDA`, o profissional pode preparar uma devolutiva com:
+
+- síntese;
+- observações;
+- comentário profissional.
+
+A devolutiva começa em `RASCUNHO` e pode ser alterada livremente enquanto não tiver sido liberada.
+
+A liberação é uma ação explícita do profissional. Ao liberar:
+
+- o sistema garante que os resultados técnicos existam;
+- gera um token aleatório independente dos acessos de preenchimento;
+- persiste somente `SHA-256(token)`;
+- envia pelo **SMTP Brevo** um link seguro ao e-mail de contato cadastrado na aplicação;
+- somente após o envio confirmado a devolutiva passa para `LIBERADA`;
+- `liberada_em` e `enviado_em` são registrados;
+- o conteúdo da devolutiva fica congelado para preservar o histórico do que foi disponibilizado.
+
+Rota pública da V1:
+
+```text
+/resultado/{token}
+```
+
+A página pública da devolutiva mostra:
+
+- nomes dos dois participantes;
+- tipo de vínculo e tempo de união;
+- os dois resultados direcionais;
+- percentuais e faixas;
+- resultados por seção;
+- síntese;
+- observações;
+- comentário profissional;
+- itens excluídos por “Não se aplica”.
+
+Por privacidade, a página pública **não mostra as respostas individuais brutas nem a comparação item a item**. Essas informações continuam disponíveis somente na área profissional.
+
+A devolutiva técnica não constitui diagnóstico clínico automático.
