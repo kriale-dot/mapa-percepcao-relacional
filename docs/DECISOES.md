@@ -400,3 +400,24 @@ Depois que a avaliação pública for iniciada, o sistema deverá gerar dois ace
 A tela de confirmação deverá informar explicitamente que os links de acesso dos participantes foram enviados para o e-mail cadastrado.
 
 Essa mensagem só pode ser exibida após confirmação real de sucesso no envio pelo backend. Se o envio ainda não tiver ocorrido ou falhar, a interface deve apresentar uma mensagem correspondente e nunca afirmar que o e-mail foi enviado.
+
+## D-030 — Acessos individuais por token e SMTP Brevo
+**Data:** 2026-10-04  
+**Status:** vigente
+
+Cada aplicação pública gera exatamente dois acessos individuais, um para o lado A e outro para o lado B.
+
+Regras:
+
+- token bruto gerado com 32 bytes aleatórios criptograficamente seguros e representado em hexadecimal;
+- nunca armazenar o token bruto;
+- armazenar apenas `SHA-256(token)` em `acessos_aplicacao.token_hash`;
+- cada link aponta para `/avaliacao/acesso/{token}`;
+- o endpoint público converte novamente o token em hash para localizar o acesso;
+- acesso revogado, concluído ou inválido não pode abrir novo preenchimento;
+- `primeiro_acesso_em` e `ultimo_acesso_em` são atualizados quando um link válido é aberto;
+- a V1 usa e-mail por **SMTP Brevo**;
+- o e-mail de contato recebe os dois links, identificados separadamente como participante A e participante B;
+- somente após o SMTP confirmar o envio são preenchidos os campos `enviado_em` e a aplicação passa para `PRONTA`;
+- falha de SMTP durante o autoatendimento reverte a criação da aplicação e dos acessos para evitar registro sem entrega dos links;
+- credenciais Brevo ficam apenas no arquivo `.env`, nunca no Git.
