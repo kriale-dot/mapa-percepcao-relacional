@@ -110,7 +110,7 @@ final class AuditService
                 continue;
             }
 
-            $result[$key] = mb_substr((string) $value, 0, 2000);
+            $result[$key] = substr((string) $value, 0, 2000);
         }
 
         return $result;
@@ -136,6 +136,6 @@ final class AuditService
             return null;
         }
 
-        return mb_substr($value, 0, 500);
+        return substr($value, 0, 500);
     }
 }
