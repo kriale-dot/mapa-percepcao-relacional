@@ -54,7 +54,9 @@
       "php -l src/Service/AuditService.php",
       "php -l src/Middleware/SecurityHeadersMiddleware.php",
       "php -l src/Controller/NotificationController.php",
-      "php -l bin/check-v1.php"
+      "php -l bin/check-v1.php",
+      "php -l src/Controller/AuditController.php",
+      "php -l src/Service/RateLimitService.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
