@@ -275,6 +275,14 @@ Na V1 foi adotada uma regra conservadora de imutabilidade: somente versões em `
 
 A exclusão de rascunho também é bloqueada se a versão já possuir seções ou aplicações vinculadas. Todas as operações de versão validam a propriedade do instrumento pelo profissional autenticado.
 
+### Seções da versão
+
+As seções organizam a versão do instrumento em tópicos. Cada seção possui título, descrição opcional, ordem e indicador ativo.
+
+Somente versões em `RASCUNHO` podem receber criação, edição ou exclusão de seções. Versões `PUBLICADA` ou `ARQUIVADA` exibem a estrutura em modo somente leitura.
+
+A ordem pode ser informada pelo profissional; na criação, se omitida, a API coloca a seção automaticamente ao final. A exclusão física de uma seção é permitida somente enquanto ela não possui itens vinculados. Depois que possuir itens, a seção deve ser preservada, podendo ser marcada como inativa.
+
 ### Perfil profissional
 
 O perfil profissional da V1 é acessado em `/profissional/perfil` e usa as rotas protegidas `GET /api/profissional/perfil` e `PUT /api/profissional/perfil`.
