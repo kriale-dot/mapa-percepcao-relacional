@@ -62,26 +62,52 @@ final class AuthController
             || empty($professional['senha_hash'])
             || !password_verify($password, (string) $professional['senha_hash'])
         ) {
-            $rate = $this->rateLimitService->hit(
-                'professional_login',
-                $this->rateLimitService->requestKey($request, $email),
-                max(1, (int) ($_ENV['LOGIN_RATE_LIMIT_MAX'] ?? 10)),
-                max(
-                    60,
-                    (int) (
-                        $_ENV['LOGIN_RATE_LIMIT_WINDOW_SECONDS']
-                            ?? 900
-                    )
+            $window = max(
+                60,
+                (int) (
+                    $_ENV['LOGIN_RATE_LIMIT_WINDOW_SECONDS']
+                        ?? 900
                 )
             );
 
-            if (!$rate['allowed']) {
+            $rateIp = $this->rateLimitService->hit(
+                'professional_login_ip',
+                $this->rateLimitService->requestKey($request),
+                max(
+                    1,
+                    (int) (
+                        $_ENV['LOGIN_IP_RATE_LIMIT_MAX']
+                            ?? 30
+                    )
+                ),
+                $window
+            );
+
+            $rateAccount = $this->rateLimitService->hit(
+                'professional_login_account',
+                $email,
+                max(
+                    1,
+                    (int) (
+                        $_ENV['LOGIN_RATE_LIMIT_MAX']
+                            ?? 10
+                    )
+                ),
+                $window
+            );
+
+            if (!$rateIp['allowed'] || !$rateAccount['allowed']) {
+                $retryAfter = max(
+                    $rateIp['retry_after'],
+                    $rateAccount['retry_after']
+                );
+
                 return $this->json($response, [
                     'error' => 'rate_limit_exceeded',
                     'message' => 'Muitas tentativas de acesso. Aguarde antes de tentar novamente.',
                 ], 429)->withHeader(
                     'Retry-After',
-                    (string) $rate['retry_after']
+                    (string) $retryAfter
                 );
             }
 
