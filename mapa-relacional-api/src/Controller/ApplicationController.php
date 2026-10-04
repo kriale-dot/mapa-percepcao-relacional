@@ -84,11 +84,14 @@ final class ApplicationController
 
         if ($participant !== '') {
             $where[] = '(
-                pa.nome_snapshot LIKE :participante
-                OR pb.nome_snapshot LIKE :participante
-                OR a.email_contato LIKE :participante
+                pa.nome_snapshot LIKE :participante_a
+                OR pb.nome_snapshot LIKE :participante_b
+                OR a.email_contato LIKE :participante_email
             )';
-            $params['participante'] = '%' . $participant . '%';
+            $searchParticipant = '%' . $participant . '%';
+            $params['participante_a'] = $searchParticipant;
+            $params['participante_b'] = $searchParticipant;
+            $params['participante_email'] = $searchParticipant;
         }
 
         if ($relationshipType !== '') {
