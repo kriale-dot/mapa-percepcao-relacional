@@ -321,7 +321,7 @@ final class RelationshipController
         if ($duracaoTexto !== null && strlen($duracaoTexto) > 100) {
             return $this->validation(
                 $response,
-                'Duracao do vinculo deve ter no maximo 100 caracteres.'
+                'Tempo de uniao deve ter no maximo 100 caracteres.'
             );
         }
 
