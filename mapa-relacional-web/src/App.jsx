@@ -5,6 +5,7 @@ import ProfessionalInstruments from './pages/ProfessionalInstruments'
 import ProfessionalInstrumentVersions from './pages/ProfessionalInstrumentVersions'
 import ProfessionalSections from './pages/ProfessionalSections'
 import ProfessionalItems from './pages/ProfessionalItems'
+import ProfessionalAlternatives from './pages/ProfessionalAlternatives'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -90,6 +91,21 @@ function App() {
         instrumentId={Number(itemsMatch[1])}
         versionId={Number(itemsMatch[2])}
         sectionId={Number(itemsMatch[3])}
+      />
+    )
+  }
+
+  const alternativesMatch = path.match(
+    /^\/profissional\/instrumentos\/([1-9][0-9]*)\/versoes\/([1-9][0-9]*)\/secoes\/([1-9][0-9]*)\/itens\/([1-9][0-9]*)\/alternativas$/,
+  )
+
+  if (alternativesMatch) {
+    return (
+      <ProfessionalAlternatives
+        instrumentId={Number(alternativesMatch[1])}
+        versionId={Number(alternativesMatch[2])}
+        sectionId={Number(alternativesMatch[3])}
+        itemId={Number(alternativesMatch[4])}
       />
     )
   }
