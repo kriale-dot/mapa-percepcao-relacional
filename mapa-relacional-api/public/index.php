@@ -12,6 +12,7 @@ use App\Controller\FeedbackController;
 use App\Controller\InstrumentController;
 use App\Controller\InstrumentVersionController;
 use App\Controller\ItemController;
+use App\Controller\NotificationController;
 use App\Controller\ParticipantAccessController;
 use App\Controller\PersonController;
 use App\Controller\ProfessionalController;
@@ -20,7 +21,9 @@ use App\Controller\RelationshipController;
 use App\Controller\ResultBandController;
 use App\Controller\SectionController;
 use App\Middleware\CorsMiddleware;
+use App\Middleware\SecurityHeadersMiddleware;
 use App\Service\AccessTokenService;
+use App\Service\AuditService;
 use App\Service\MailService;
 use App\Service\ResultService;
 use App\Middleware\ProfessionalAuthMiddleware;
@@ -51,6 +54,7 @@ $logger = LoggerFactory::create();
 $app = AppFactory::create();
 $app->addBodyParsingMiddleware();
 $app->addRoutingMiddleware();
+$app->add(new SecurityHeadersMiddleware());
 
 $app->add(new CorsMiddleware(
     $_ENV['FRONTEND_URL'] ?? 'http://localhost:5173'
@@ -67,6 +71,7 @@ $healthController = new HealthController();
 $accessTokenService = new AccessTokenService();
 $mailService = new MailService();
 $resultService = new ResultService();
+$auditService = new AuditService();
 $alternativeController = new AlternativeController();
 $applicationController = new ApplicationController($resultService);
 $authController = new AuthController();
@@ -81,6 +86,11 @@ $itemController = new ItemController();
 $personController = new PersonController();
 $relationshipController = new RelationshipController();
 $resultBandController = new ResultBandController();
+$notificationController = new NotificationController(
+    $accessTokenService,
+    $mailService,
+    $auditService
+);
 
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
@@ -136,7 +146,8 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $personController,
     $relationshipController,
     $resultBandController,
-    $feedbackController
+    $feedbackController,
+    $notificationController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->put('/senha', [$authController, 'changePassword']);
@@ -179,6 +190,14 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->post(
         '/aplicacoes/{id:[0-9]+}/devolutiva/liberar',
         [$feedbackController, 'release']
+    );
+    $group->post(
+        '/aplicacoes/{id:[0-9]+}/acessos/{lado:[AB]}/reenviar',
+        [$notificationController, 'resendParticipantAccess']
+    );
+    $group->post(
+        '/aplicacoes/{id:[0-9]+}/devolutiva/reenviar',
+        [$notificationController, 'resendFeedback']
     );
 
     $group->get('/instrumentos', [$instrumentController, 'index']);
