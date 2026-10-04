@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Config\Database;
+use App\Service\AuditService;
 use App\Service\JwtService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
@@ -12,6 +13,11 @@ use Psr\Http\Message\ServerRequestInterface;
 
 final class AuthController
 {
+    public function __construct(
+        private readonly AuditService $auditService
+    ) {
+    }
+
     public function login(
         ServerRequestInterface $request,
         ResponseInterface $response
@@ -85,6 +91,18 @@ final class AuthController
               WHERE id = :id'
         );
         $updateLogin->execute(['id' => $professional['id']]);
+
+        $this->auditService->record(
+            'PROFISSIONAL',
+            (int) $professional['id'],
+            'LOGIN_SUCESSO',
+            'PROFISSIONAL',
+            (int) $professional['id'],
+            [],
+            $request,
+            (int) $professional['id'],
+            $pdo
+        );
 
         $token = (new JwtService())->issueProfessionalToken([
             'id' => $professional['id'],
@@ -185,6 +203,18 @@ final class AuthController
             'senha_hash' => $newHash,
             'id' => $professionalId,
         ]);
+
+        $this->auditService->record(
+            'PROFISSIONAL',
+            $professionalId,
+            'SENHA_ALTERADA',
+            'PROFISSIONAL',
+            $professionalId,
+            [],
+            $request,
+            $professionalId,
+            $pdo
+        );
 
         return $this->json($response, [
             'message' => 'Senha alterada com sucesso. Entre novamente.',
