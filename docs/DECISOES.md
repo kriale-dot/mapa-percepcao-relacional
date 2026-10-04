@@ -374,3 +374,19 @@ Na interface, documentação funcional e comunicação com usuários, o termo of
 Não utilizar “duração do vínculo” como rótulo ou texto apresentado ao usuário.
 
 Para preservar a continuidade técnica e evitar migration desnecessária, nomes internos já existentes, como `duracao_texto` e `duracao_vinculo_texto`, podem permanecer no banco e na API enquanto não houver necessidade técnica de renomeação. Essa nomenclatura interna não deve aparecer na interface.
+
+## D-028 — Catálogo público usa instrumento ativo e versão publicada mais recente
+**Data:** 2026-10-04  
+**Status:** vigente
+
+Uma avaliação pode ser iniciada diretamente pelo visitante quando:
+
+- o instrumento está com status `ATIVO`;
+- existe ao menos uma versão `PUBLICADA`;
+- o profissional responsável está `ATIVO`.
+
+Quando houver mais de uma versão publicada do mesmo instrumento, o catálogo público mostra apenas uma entrada para a avaliação e utiliza a versão publicada mais recente.
+
+O visitante não vê número de versão na experiência pública; essa informação permanece técnica e histórica.
+
+A criação pública não exige registros prévios em `pessoas` ou `vinculos`. Os nomes dos participantes são armazenados em `nome_snapshot`, o tipo de vínculo e o **tempo de união** são preservados nos campos snapshot da aplicação, e `vinculo_id`/`pessoa_id` podem permanecer nulos.
