@@ -6,9 +6,9 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** Etapa 6 em desenvolvimento — autoatendimento público de avaliações  
-**Etapa atual:** Etapa 6.5 em validação — Não se aplica e conclusão individual  
-**Próximo passo:** validar exclusão global por Não se aplica e conclusão individual dos dois participantes
+**Marco atual:** Etapa 7 em desenvolvimento — comparação das percepções e resultados  
+**Etapa atual:** Etapa 7.1 em validação — cálculo e painel profissional de resultados  
+**Próximo passo:** aplicar migrations 004/005 e validar cálculo automático, percentuais, faixas e comparações item a item
 
 ## 1. Situação atual
 
@@ -1875,3 +1875,149 @@ Após `git pull` e reinício da API/frontend, validar:
 Não há migration nova nesta etapa.
 
 **Próxima subetapa prevista:** Etapa 7 — comparação das percepções e cálculo dos resultados.
+
+## 34. Etapa 7.1 — comparação e resultados técnicos
+
+Implementação criada no GitHub em 2026-10-04.
+
+A implementação da Etapa 6.5 permanece disponível no repositório. O usuário solicitou prosseguir diretamente para a Etapa 7 sem um checkpoint textual separado de validação da 6.5.
+
+### Estrutura de banco
+
+Novas migrations:
+
+```text
+004_resultados_comparacoes.sql
+005_ajustar_faixas_percentuais.sql
+```
+
+Novas tabelas:
+
+- `resultado_faixas`;
+- `comparacoes`;
+- `resultados`.
+
+`resultado_faixas` é vinculada a `instrumento_versoes`, permitindo manter a interpretação associada à versão usada pela aplicação.
+
+Faixas iniciais:
+
+```text
+0,00–33,99   Ruim
+34,00–66,99  Regular
+67,00–100    Bom
+```
+
+A migration 005 elimina lacunas para percentuais decimais entre os intervalos inteiros descritos no material-base.
+
+Novas versões criadas depois desta etapa recebem automaticamente as três faixas-base.
+
+### Backend
+
+Novo serviço:
+
+```text
+src/Service/ResultService.php
+```
+
+Algoritmo `1.0`:
+
+```text
+A_SOBRE_B = A→B × B→B
+B_SOBRE_A = B→A × A→A
+percentual = coincidências / comparações válidas × 100
+```
+
+Regras:
+
+- itens “Não se aplica” não entram na comparação;
+- alternativas coincidem quando possuem a mesma alternativa;
+- números coincidem quando possuem o mesmo valor;
+- textos coincidem por igualdade após remoção de espaços nas extremidades;
+- resposta ausente ou representação incompatível gera comparação não comparável;
+- somente comparações válidas entram no denominador;
+- não é calculado resultado global automático nesta etapa.
+
+Quando o segundo participante conclui, o cálculo ocorre automaticamente dentro da transação de conclusão.
+
+Rotas profissionais:
+
+```text
+GET  /api/profissional/aplicacoes/{id}/resultados
+POST /api/profissional/aplicacoes/{id}/resultados/calcular
+```
+
+A segunda rota permite calcular/recalcular aplicações concluídas, inclusive registros concluídos antes da implementação da Etapa 7.
+
+### Frontend profissional
+
+Nova página:
+
+```text
+/profissional/avaliacoes/{id}/resultados
+```
+
+Arquivo:
+
+```text
+mapa-relacional-web/src/pages/ProfessionalApplicationResults.jsx
+```
+
+A lista de avaliações exibe `Ver resultados` para aplicações `CONCLUIDA`.
+
+O painel mostra:
+
+- resultado A sobre B;
+- resultado B sobre A;
+- percentual;
+- faixa;
+- coincidências / comparações válidas;
+- barra percentual;
+- resultados derivados por seção;
+- comparação item a item;
+- resposta percebida versus autorreferida;
+- indicação de coincidência/divergência/não comparável;
+- itens excluídos por “Não se aplica”;
+- versão do algoritmo.
+
+Não há diagnóstico automático.
+
+### Validação local pendente — Etapa 7.1
+
+Depois de sincronizar, executar obrigatoriamente:
+
+```powershell
+cd mapa-relacional-api
+composer migrate
+composer check-domain
+composer check
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar preferencialmente com uma aplicação nova:
+
+1. concluir A e B;
+2. confirmar que a aplicação passa para `CONCLUIDA`;
+3. entrar em Profissional → Avaliações;
+4. clicar em `Ver resultados`;
+5. confirmar os dois sentidos `A_SOBRE_B` e `B_SOBRE_A`;
+6. conferir manualmente ao menos três itens, comparando as respostas exibidas;
+7. confirmar que coincidências e divergências estão corretas;
+8. confirmar que itens “Não se aplica” aparecem somente na área `Fora do cálculo`;
+9. confirmar que esses itens não entram nas comparações válidas;
+10. conferir o percentual com a fórmula manual;
+11. conferir a faixa correspondente;
+12. conferir o resultado por seção;
+13. testar uma aplicação concluída anteriormente; se estiver sem resultado persistido, usar `Calcular resultados`;
+14. confirmar que o recálculo mantém o mesmo resultado quando as respostas não mudaram.
+
+O `composer check-domain` agora exige as migrations 004 e 005 e as três novas tabelas.
+
+**Próximo passo previsto após validação:** Etapa 7.2 — configuração profissional das faixas por versão e refinamentos da apresentação dos resultados, antes da devolutiva/comentário profissional.
