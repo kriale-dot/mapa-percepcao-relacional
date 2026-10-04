@@ -101,6 +101,10 @@ $app->get(
     '/api/public/acessos/{token}/questionario',
     [$participantAccessController, 'questionnaire']
 );
+$app->put(
+    '/api/public/acessos/{token}/respostas/{itemId:[0-9]+}',
+    [$participantAccessController, 'saveResponse']
+);
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $alternativeController,
