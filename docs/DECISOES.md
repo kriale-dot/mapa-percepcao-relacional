@@ -533,3 +533,22 @@ As faixas são vinculadas à versão do instrumento, não codificadas apenas no 
 Novas versões do instrumento recebem essas faixas-base automaticamente e podem evoluir futuramente sem alterar resultados históricos já calculados.
 
 Ao concluir o segundo participante, o cálculo ocorre automaticamente e é persistido. Aplicações antigas concluídas podem ser recalculadas explicitamente pela área profissional.
+
+## D-035 — Faixas são editáveis apenas em versões em rascunho
+**Data:** 2026-10-04  
+**Status:** vigente
+
+As faixas de interpretação são parte da definição versionada do instrumento.
+
+Consequências:
+
+- toda versão recebe faixas-base no momento da criação;
+- o profissional pode editar as faixas somente enquanto a versão estiver `RASCUNHO`;
+- versões `PUBLICADA` e `ARQUIVADA` são somente leitura também para faixas;
+- alterar faixas depois da publicação exige criar uma nova versão;
+- uma configuração válida precisa cobrir integralmente 0,00–100,00 sem lacunas nem sobreposições;
+- o backend, e não apenas o frontend, valida essa cobertura;
+- o código técnico da faixa é preservado quando já existe e pode ser gerado automaticamente para novas faixas;
+- o rótulo persistido no resultado serve como snapshot interpretativo do cálculo realizado.
+
+Essa decisão mantém a imutabilidade histórica já adotada para versões publicadas e evita que a mesma aplicação passe a ter interpretação diferente depois de concluída.
