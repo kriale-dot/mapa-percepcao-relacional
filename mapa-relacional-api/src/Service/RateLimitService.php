@@ -112,7 +112,7 @@ final class RateLimitService
         $stmt = $pdo->prepare(
             'SELECT
                 contador,
-                janela_expira_em,
+                janela_expira_em <= NOW() AS expirada,
                 GREATEST(
                     0,
                     TIMESTAMPDIFF(
@@ -135,7 +135,7 @@ final class RateLimitService
 
         if (
             $row === false
-            || strtotime((string) $row['janela_expira_em']) <= time()
+            || (bool) $row['expirada']
         ) {
             return [
                 'allowed' => true,
