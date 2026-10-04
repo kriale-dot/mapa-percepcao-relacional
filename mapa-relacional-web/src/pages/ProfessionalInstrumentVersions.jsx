@@ -329,6 +329,18 @@ export default function ProfessionalInstrumentVersions({ instrumentId }) {
                   </div>
 
                   <div className="flex shrink-0 flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/profissional/instrumentos/${instrumentId}/versoes/${version.id}/secoes`,
+                        )
+                      }
+                      className="rounded-xl border border-[#A8C8D0] px-4 py-2 text-sm font-semibold"
+                    >
+                      Seções
+                    </button>
+
                     {version.status === 'RASCUNHO' ? (
                       <>
                         <button
