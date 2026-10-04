@@ -361,6 +361,7 @@ final class ResultService
                 'status' => (string) $application['status'],
                 'instrumento_versao_id' =>
                     (int) $application['instrumento_versao_id'],
+                'instrumento_id' => (int) $application['instrumento_id'],
                 'instrumento_nome' => (string) $application['instrumento_nome'],
                 'numero_versao' => (string) $application['numero_versao'],
                 'participante_a' => [
@@ -406,6 +407,7 @@ final class ResultService
                 a.id,
                 a.status,
                 a.instrumento_versao_id,
+                i.id AS instrumento_id,
                 i.nome AS instrumento_nome,
                 v.numero_versao,
                 pa.id AS participante_a_id,
