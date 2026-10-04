@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 concluída — estrutura completa e versionada de instrumentos  
-**Etapa atual:** Etapa 5.1 concluída — CRUD de pessoas  
-**Próximo passo:** iniciar a Etapa 5.2 — vínculos entre pessoas
+**Etapa atual:** Etapa 5.2 em validação — vínculos entre pessoas  
+**Próximo passo:** validar localmente criação, edição, inativação e exclusão de vínculos sem aplicações
 
 ## 1. Situação atual
 
@@ -1146,3 +1146,85 @@ Não houve necessidade de migration nova nesta etapa, pois a tabela `pessoas` j�
 **Etapa 5.1 concluída.**
 
 **Próxima subetapa:** Etapa 5.2 — vínculos entre pessoas.
+
+## 27. Etapa 5.2 — vínculos entre pessoas
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/RelationshipController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalRelationships.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Rotas protegidas adicionadas:
+
+```text
+GET    /api/profissional/vinculos
+POST   /api/profissional/vinculos
+GET    /api/profissional/vinculos/{id}
+PUT    /api/profissional/vinculos/{id}
+DELETE /api/profissional/vinculos/{id}
+```
+
+Regras implementadas:
+
+- vínculo pertence ao profissional autenticado;
+- vínculo possui exatamente duas pessoas;
+- backend impede `pessoa_a_id = pessoa_b_id`;
+- ambas as pessoas precisam pertencer ao profissional autenticado;
+- lados A/B permanecem estáveis após a criação;
+- tipo do vínculo é obrigatório e textual;
+- `OUTRO` exige descrição personalizada;
+- descrição do tipo e duração textual são opcionais nos demais casos;
+- estados permitidos: `ATIVO` e `INATIVO`;
+- listagem informa o total de aplicações relacionadas;
+- exclusão física é bloqueada quando já existem aplicações;
+- vínculo com histórico deve ser preservado e pode ser marcado como inativo.
+
+No frontend foi criada:
+
+```text
+/profissional/vinculos
+```
+
+A área profissional agora possui o card `Vínculos`.
+
+### Validação local pendente
+
+Após `git pull`, executar na API:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+No frontend:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. garantir que existam pelo menos duas pessoas cadastradas;
+2. abrir `Vínculos` pela área profissional;
+3. criar um vínculo selecionando pessoas diferentes para A e B;
+4. preencher tipo e duração;
+5. tentar criar um vínculo usando a mesma pessoa nos lados A e B e confirmar rejeição;
+6. criar um vínculo com tipo `OUTRO` sem descrição e confirmar rejeição;
+7. completar a descrição do tipo `OUTRO` e confirmar criação;
+8. editar tipo, descrição, duração e status;
+9. confirmar que as pessoas A/B permanecem fixas durante a edição;
+10. marcar um vínculo como `INATIVO` e confirmar persistência após recarregar;
+11. criar um vínculo de teste sem aplicações e excluí-lo.
+
+Não há migration nova nesta etapa; a tabela `vinculos` já existe na migration base.
+
+**Próximo passo previsto:** revisar e fechar a Etapa 5 — pessoas e vínculos; depois iniciar o módulo de aplicações.
