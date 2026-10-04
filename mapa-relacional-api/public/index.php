@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Config\Database;
 use App\Config\LoggerFactory;
 use App\Controller\AlternativeController;
+use App\Controller\ApplicationController;
 use App\Controller\AuthController;
 use App\Controller\HealthController;
 use App\Controller\InstrumentController;
@@ -47,6 +48,7 @@ $errorMiddleware = $app->addErrorMiddleware(
 
 $healthController = new HealthController();
 $alternativeController = new AlternativeController();
+$applicationController = new ApplicationController();
 $authController = new AuthController();
 $professionalController = new ProfessionalController();
 $instrumentController = new InstrumentController();
@@ -62,6 +64,7 @@ $app->post('/api/auth/login', [$authController, 'login']);
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $alternativeController,
+    $applicationController,
     $authController,
     $professionalController,
     $instrumentController,
@@ -87,6 +90,11 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->get('/vinculos/{id:[0-9]+}', [$relationshipController, 'show']);
     $group->put('/vinculos/{id:[0-9]+}', [$relationshipController, 'update']);
     $group->delete('/vinculos/{id:[0-9]+}', [$relationshipController, 'delete']);
+
+    $group->get('/aplicacoes/opcoes', [$applicationController, 'options']);
+    $group->get('/aplicacoes', [$applicationController, 'index']);
+    $group->post('/aplicacoes', [$applicationController, 'create']);
+    $group->get('/aplicacoes/{id:[0-9]+}', [$applicationController, 'show']);
 
     $group->get('/instrumentos', [$instrumentController, 'index']);
     $group->post('/instrumentos', [$instrumentController, 'create']);
