@@ -108,6 +108,23 @@ export function saveParticipantResponse(token, itemId, answer) {
   )
 }
 
+export function markParticipantItemNotApplicable(token, itemId, reason = null) {
+  return request(
+    `/api/public/acessos/${token}/itens/${itemId}/nao-se-aplica`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ motivo: reason }),
+    },
+  )
+}
+
+export function completeParticipantEvaluation(token) {
+  return request(`/api/public/acessos/${token}/concluir`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  })
+}
+
 export function loginProfessional(email, senha) {
   return request('/api/auth/login', {
     method: 'POST',
