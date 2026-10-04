@@ -394,24 +394,38 @@ export default function ProfessionalSections({ instrumentId, versionId }) {
                     </p>
                   </div>
 
-                  {isDraft ? (
-                    <div className="flex shrink-0 flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => beginEdit(section)}
-                        className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(section)}
-                        className="rounded-xl border border-[#D8B078]/60 px-4 py-2 text-sm font-semibold"
-                      >
-                        Excluir
-                      </button>
-                    </div>
-                  ) : null}
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${section.id}/itens`,
+                        )
+                      }
+                      className="rounded-xl border border-[#A8C8D0] px-4 py-2 text-sm font-semibold"
+                    >
+                      Itens
+                    </button>
+
+                    {isDraft ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => beginEdit(section)}
+                          className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(section)}
+                          className="rounded-xl border border-[#D8B078]/60 px-4 py-2 text-sm font-semibold"
+                        >
+                          Excluir
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
               </article>
             ))}
