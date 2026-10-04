@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 7 em desenvolvimento — comparação das percepções e resultados  
-**Etapa atual:** Etapa 7.1 em validação — cálculo e painel profissional de resultados  
-**Próximo passo:** aplicar migrations 004/005 e validar cálculo automático, percentuais, faixas e comparações item a item
+**Etapa atual:** Etapa 7.2 em validação — configuração profissional das faixas por versão  
+**Próximo passo:** validar edição das faixas em rascunho, bloqueio após publicação e leitura das faixas no painel de resultados
 
 ## 1. Situação atual
 
@@ -2021,3 +2021,112 @@ Validar preferencialmente com uma aplicação nova:
 O `composer check-domain` agora exige as migrations 004 e 005 e as três novas tabelas.
 
 **Próximo passo previsto após validação:** Etapa 7.2 — configuração profissional das faixas por versão e refinamentos da apresentação dos resultados, antes da devolutiva/comentário profissional.
+
+## 35. Etapa 7.2 — configuração profissional das faixas
+
+Implementação criada no GitHub em 2026-10-04.
+
+A Etapa 7.1 permanece implementada; o usuário solicitou continuar diretamente para a 7.2 sem registrar um checkpoint separado de validação da 7.1.
+
+### Backend
+
+Novo controlador:
+
+```text
+mapa-relacional-api/src/Controller/ResultBandController.php
+```
+
+Rotas protegidas:
+
+```text
+GET /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/faixas-resultados
+PUT /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/faixas-resultados
+```
+
+Regras:
+
+- consulta permitida em qualquer estado da versão pertencente ao profissional;
+- edição somente em `RASCUNHO`;
+- entre 1 e 10 faixas por versão;
+- rótulo obrigatório;
+- limites percentuais entre 0 e 100;
+- primeira faixa começa em 0,00;
+- última termina em 100,00;
+- faixas cobrem todo o intervalo sem lacunas nem sobreposições;
+- próxima faixa começa 0,01 ponto percentual após a anterior;
+- substituição das faixas ocorre em transação;
+- códigos técnicos precisam ser únicos e são gerados automaticamente para novas faixas sem código.
+
+Nenhuma migration nova foi necessária, pois `resultado_faixas` já foi criada na migration 004.
+
+### Frontend
+
+Nova página:
+
+```text
+/profissional/instrumentos/{instrumentId}/versoes/{versionId}/faixas-resultados
+```
+
+Arquivo:
+
+```text
+mapa-relacional-web/src/pages/ProfessionalResultBands.jsx
+```
+
+Na lista de versões foi adicionado o botão `Faixas de resultado`.
+
+Em versões em rascunho, o profissional pode:
+
+- alterar o nome de uma faixa;
+- alterar limites mínimo e máximo;
+- adicionar faixa;
+- remover faixa;
+- salvar a configuração completa.
+
+Em versões publicadas ou arquivadas, a página fica somente para leitura e orienta que uma nova versão deve ser criada para alterar a interpretação.
+
+O painel de resultados também passou a mostrar a versão do instrumento e oferece o botão `Ver faixas`, levando à configuração congelada usada por aquela aplicação.
+
+### Validação local pendente — Etapa 7.2
+
+Se as migrations 004 e 005 ainda não tiverem sido aplicadas neste banco, executar primeiro:
+
+```powershell
+cd mapa-relacional-api
+composer migrate
+```
+
+Depois:
+
+```powershell
+composer check-domain
+composer check
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar com uma versão em `RASCUNHO`:
+
+1. entrar em Profissional → Instrumentos → Versões;
+2. clicar em `Faixas de resultado`;
+3. confirmar que aparecem as faixas-base;
+4. alterar um rótulo;
+5. alterar limites mantendo cobertura contínua de 0 a 100;
+6. salvar;
+7. recarregar a página e confirmar persistência;
+8. testar uma configuração com lacuna e confirmar que o backend rejeita;
+9. testar uma sobreposição e confirmar rejeição;
+10. adicionar uma nova faixa, ajustar os limites e salvar;
+11. publicar a versão;
+12. abrir novamente `Faixas de resultado` e confirmar modo somente leitura;
+13. tentar alteração direta via interface e confirmar que não há controles de gravação;
+14. em uma aplicação concluída, abrir `Ver resultados` → `Ver faixas` e confirmar que são exibidas as faixas da versão usada naquela aplicação.
+
+**Próximo passo previsto após validação:** Etapa 8 — comentário profissional, devolutiva e regra de disponibilização dos resultados aos participantes.
