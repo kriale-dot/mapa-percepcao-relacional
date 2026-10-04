@@ -272,3 +272,19 @@ Regras:
 - a opção “Não se aplica” é configurada individualmente por item;
 - versões publicadas e arquivadas exibem itens somente para leitura;
 - um item com alternativas ou respostas vinculadas não pode ser excluído fisicamente.
+
+## D-022 — Alternativas preservam rastreabilidade histórica
+**Data:** 2026-10-04  
+**Status:** vigente
+
+As alternativas de itens fechados seguem as mesmas regras de versionamento da estrutura do instrumento.
+
+Regras:
+
+- alternativa possui valor, rótulo, ordem e status ativo;
+- `valor` deve ser único dentro do item;
+- a ordem pode ser calculada automaticamente na criação;
+- somente versões em `RASCUNHO` permitem criação, edição ou exclusão;
+- versões `PUBLICADA` e `ARQUIVADA` mantêm alternativas somente para leitura;
+- uma alternativa com respostas vinculadas não pode ser excluída fisicamente;
+- a proteção contra exclusão prevalece na aplicação mesmo com a FK de `respostas.alternativa_id` definida como `ON DELETE SET NULL`, para evitar perda de rastreabilidade.
