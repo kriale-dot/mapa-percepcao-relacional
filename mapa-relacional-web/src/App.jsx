@@ -3,6 +3,7 @@ import ProfessionalProfile from './pages/ProfessionalProfile'
 import ProfessionalPassword from './pages/ProfessionalPassword'
 import ProfessionalInstruments from './pages/ProfessionalInstruments'
 import ProfessionalInstrumentVersions from './pages/ProfessionalInstrumentVersions'
+import ProfessionalResultBands from './pages/ProfessionalResultBands'
 import ProfessionalSections from './pages/ProfessionalSections'
 import ProfessionalItems from './pages/ProfessionalItems'
 import ProfessionalAlternatives from './pages/ProfessionalAlternatives'
@@ -119,6 +120,19 @@ function App() {
     return (
       <ProfessionalInstrumentVersions
         instrumentId={Number(versionsMatch[1])}
+      />
+    )
+  }
+
+  const resultBandsMatch = path.match(
+    /^\/profissional\/instrumentos\/([1-9][0-9]*)\/versoes\/([1-9][0-9]*)\/faixas-resultados$/,
+  )
+
+  if (resultBandsMatch) {
+    return (
+      <ProfessionalResultBands
+        instrumentId={Number(resultBandsMatch[1])}
+        versionId={Number(resultBandsMatch[2])}
       />
     )
   }
