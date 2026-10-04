@@ -11,6 +11,8 @@ import ProfessionalPeople from './pages/ProfessionalPeople'
 import ProfessionalRelationships from './pages/ProfessionalRelationships'
 import ProfessionalApplications from './pages/ProfessionalApplications'
 import ProfessionalApplicationResults from './pages/ProfessionalApplicationResults'
+import ProfessionalApplicationDetail from './pages/ProfessionalApplicationDetail'
+import ProfessionalDashboard from './pages/ProfessionalDashboard'
 import PublicEvaluations from './pages/PublicEvaluations'
 import PublicEvaluationStart from './pages/PublicEvaluationStart'
 import PublicParticipantAccess from './pages/PublicParticipantAccess'
@@ -85,6 +87,10 @@ function App() {
     return <ProfessionalLogin />
   }
 
+  if (path === '/profissional') {
+    return <ProfessionalDashboard />
+  }
+
   if (path === '/profissional/perfil') {
     return <ProfessionalProfile />
   }
@@ -117,6 +123,18 @@ function App() {
     return (
       <ProfessionalApplicationResults
         applicationId={Number(applicationResultsMatch[1])}
+      />
+    )
+  }
+
+  const applicationDetailMatch = path.match(
+    /^\/profissional\/avaliacoes\/([1-9][0-9]*)$/,
+  )
+
+  if (applicationDetailMatch) {
+    return (
+      <ProfessionalApplicationDetail
+        applicationId={Number(applicationDetailMatch[1])}
       />
     )
   }
