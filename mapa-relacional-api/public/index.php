@@ -16,6 +16,7 @@ use App\Controller\PersonController;
 use App\Controller\ProfessionalController;
 use App\Controller\PublicEvaluationController;
 use App\Controller\RelationshipController;
+use App\Controller\ResultBandController;
 use App\Controller\SectionController;
 use App\Middleware\CorsMiddleware;
 use App\Service\AccessTokenService;
@@ -77,6 +78,7 @@ $sectionController = new SectionController();
 $itemController = new ItemController();
 $personController = new PersonController();
 $relationshipController = new RelationshipController();
+$resultBandController = new ResultBandController();
 
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
@@ -126,7 +128,8 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $sectionController,
     $itemController,
     $personController,
-    $relationshipController
+    $relationshipController,
+    $resultBandController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->put('/senha', [$authController, 'changePassword']);
@@ -187,6 +190,15 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->delete(
         '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}',
         [$instrumentVersionController, 'delete']
+    );
+
+    $group->get(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/faixas-resultados',
+        [$resultBandController, 'index']
+    );
+    $group->put(
+        '/instrumentos/{instrumentId:[0-9]+}/versoes/{versionId:[0-9]+}/faixas-resultados',
+        [$resultBandController, 'replace']
     );
 
     $group->get(
