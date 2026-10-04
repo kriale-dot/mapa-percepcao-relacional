@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** estrutura de autenticação profissional criada e validada localmente com sucesso  
-**Etapa atual:** Etapa 4.1 em validação — CRUD de instrumentos  
-**Próximo passo:** validar localmente o CRUD de instrumentos; depois iniciar versões do instrumento
+**Etapa atual:** Etapa 4.1 concluída — CRUD de instrumentos  
+**Próximo passo:** iniciar a Etapa 4.2 — versões do instrumento
 
 ## 1. Situação atual
 
@@ -746,32 +746,22 @@ No frontend foi criada:
 
 A área profissional agora permite abrir o módulo pelo card `Instrumentos`.
 
-### Validação local pendente
+### Validação local concluída
 
-Após `git pull`, executar na API:
+Em 2026-10-03 a Etapa 4.1 foi validada com sucesso no ambiente local.
 
-```powershell
-cd mapa-relacional-api
-composer check
-composer serve
-```
+Foram confirmados:
 
-No frontend:
+- acesso ao módulo `Instrumentos` pela área profissional;
+- criação de instrumento em rascunho;
+- exibição correta na listagem;
+- edição de nome, descrição e status;
+- persistência dos dados após recarregar a página;
+- exclusão de instrumento sem versões;
+- manutenção da proteção por sessão profissional.
 
-```powershell
-cd ..\mapa-relacional-web
-npm run build
-npm run dev
-```
+Durante a validação ocorreu `ERR_CONNECTION_REFUSED` ao tentar excluir um instrumento, causado pela API local não estar em execução. Após iniciar novamente `composer serve`, a exclusão funcionou normalmente.
 
-Validar:
+**Etapa 4.1 concluída.**
 
-1. abrir `Instrumentos` pela área profissional;
-2. criar um instrumento em rascunho;
-3. confirmar que aparece na listagem;
-4. editar nome, descrição e status;
-5. recarregar a página e confirmar persistência;
-6. excluir um instrumento que ainda não possui versões;
-7. confirmar que a sessão continua protegida.
-
-**Próxima subetapa prevista:** Etapa 4.2 — versões do instrumento.
+**Próxima subetapa:** Etapa 4.2 — versões do instrumento.
