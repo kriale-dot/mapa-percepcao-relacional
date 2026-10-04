@@ -151,6 +151,7 @@ try {
         'resultados',
         'devolutivas',
         'auditoria_eventos',
+        'rate_limites',
     ];
 
     $database = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
@@ -189,6 +190,7 @@ try {
         '005_ajustar_faixas_percentuais.sql',
         '006_devolutivas.sql',
         '007_auditoria.sql',
+        '008_rate_limites.sql',
     ];
 
     $missingMigrations = array_values(
