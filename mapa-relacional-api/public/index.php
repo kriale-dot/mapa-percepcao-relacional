@@ -83,6 +83,14 @@ $app->get(
     '/api/public/acessos/{token}',
     [$participantAccessController, 'show']
 );
+$app->post(
+    '/api/public/acessos/{token}/identificacao',
+    [$participantAccessController, 'identify']
+);
+$app->get(
+    '/api/public/acessos/{token}/questionario',
+    [$participantAccessController, 'questionnaire']
+);
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $alternativeController,
