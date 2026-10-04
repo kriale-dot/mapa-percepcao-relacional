@@ -326,6 +326,32 @@ Se o SMTP falhar durante a criação pública, a transação é revertida e a in
 
 O profissional visualiza automaticamente essas aplicações em sua área autenticada, acompanha o preenchimento, consulta os resultados e pode usar os dados de contato para abordagem posterior.
 
+### Identificação inicial do participante
+
+Ao abrir seu link individual válido, o participante confirma os dados de identificação antes de acessar o questionário.
+
+Nesta etapa, o participante informa/confirma:
+
+- nome;
+- idade;
+- gênero.
+
+O **tempo de união** pertence ao contexto da aplicação e é exibido ao participante a partir do snapshot já registrado na criação pública; ele não precisa ser redigitado individualmente.
+
+Depois da identificação:
+
+- `nome_snapshot`, `idade_snapshot` e `genero_snapshot` são gravados em `aplicacao_participantes`;
+- o participante passa de `PENDENTE` para `EM_ANDAMENTO`;
+- `iniciou_em` do participante é preenchido apenas na primeira vez;
+- a aplicação passa de `PRONTA` para `EM_ANDAMENTO` no primeiro participante que inicia;
+- `aplicacoes.iniciada_em` é preservado como o primeiro início da aplicação.
+
+O gênero permanece um campo textual nesta fase porque o material-base exige o dado, mas não define uma lista fechada de opções. Nenhuma enumeração adicional é presumida pela plataforma nesta etapa.
+
+Depois da identificação, o sistema carrega somente seções, itens e alternativas ativos da versão vinculada à aplicação. Itens já excluídos globalmente por “Não se aplica” não entram no questionário retornado.
+
+A Etapa 6.3 apenas confirma a identificação e carrega a estrutura individual do questionário. O salvamento progressivo das duas perspectivas por item será implementado na subetapa seguinte.
+
 A criação manual pela área profissional continua disponível apenas como modo assistido/administrativo, não como requisito para que uma avaliação pública exista.
 
 ### Instrumentos
