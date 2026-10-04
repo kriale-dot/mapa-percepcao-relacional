@@ -10,7 +10,8 @@
     "slim/psr7": "^1.7",
     "vlucas/phpdotenv": "^5.6",
     "monolog/monolog": "^3.8",
-    "firebase/php-jwt": "^6.10"
+    "firebase/php-jwt": "^6.10",
+    "phpmailer/phpmailer": "^6.9"
   },
   "autoload": {
     "psr-4": {
@@ -42,7 +43,10 @@
       "php -l src/Controller/PersonController.php",
       "php -l src/Controller/RelationshipController.php",
       "php -l src/Controller/ApplicationController.php",
-      "php -l src/Controller/PublicEvaluationController.php"
+      "php -l src/Controller/PublicEvaluationController.php",
+      "php -l src/Service/AccessTokenService.php",
+      "php -l src/Service/MailService.php",
+      "php -l src/Controller/ParticipantAccessController.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
