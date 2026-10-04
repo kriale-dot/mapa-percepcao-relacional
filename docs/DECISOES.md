@@ -210,3 +210,13 @@ Regras:
 - o JWT contém uma impressão digital SHA-256 do hash vigente da senha;
 - o middleware compara essa impressão com o hash atual do banco, invalidando tokens antigos após uma troca de senha;
 - após alterar a senha, o frontend remove o JWT local e exige novo login.
+
+## D-018 — Ciclo de vida inicial dos instrumentos
+**Data:** 2026-10-03  
+**Status:** vigente
+
+Na V1, os instrumentos pertencem ao profissional autenticado e usam os estados `RASCUNHO`, `ATIVO` e `ARQUIVADO`.
+
+A exclusão física de um instrumento somente é permitida quando ele ainda não possui nenhuma versão. Se já houver versão vinculada, a API recusa a exclusão para preservar a estrutura histórica; nesse caso, o instrumento deve ser arquivado.
+
+Todas as consultas e alterações de instrumentos devem ser filtradas por `profissional_id`, impedindo acesso cruzado entre profissionais.
