@@ -831,12 +831,12 @@ npm run dev
 Validar:
 
 1. abrir um instrumento e clicar em `Versões`;
-2. criar a versão `1.0`;
-3. editar o número enquanto estiver em rascunho;
-4. criar um segundo rascunho e excluí-lo;
-5. publicar a versão `1.0` e confirmar o estado `PUBLICADA`;
+2. criar a versão `1.0` e mantê-la em `RASCUNHO` para a próxima etapa;
+3. editar o número de um rascunho e confirmar a alteração;
+4. criar um segundo rascunho de teste e excluí-lo;
+5. criar uma versão descartável, por exemplo `teste-publicacao`, e publicá-la;
 6. confirmar que a versão publicada não oferece edição/exclusão;
-7. arquivar a versão publicada e confirmar o estado `ARQUIVADA`;
+7. arquivar essa versão de teste e confirmar o estado `ARQUIVADA`;
 8. recarregar a página e confirmar persistência;
 9. retornar ao catálogo e confirmar que o total de versões foi atualizado.
 
