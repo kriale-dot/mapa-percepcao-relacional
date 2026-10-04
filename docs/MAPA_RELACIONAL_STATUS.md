@@ -6,9 +6,9 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** Etapa 7 em desenvolvimento — comparação das percepções e resultados  
-**Etapa atual:** Etapa 7.2 em validação — configuração profissional das faixas por versão  
-**Próximo passo:** validar edição das faixas em rascunho, bloqueio após publicação e leitura das faixas no painel de resultados
+**Marco atual:** Etapa 8 em desenvolvimento — devolutiva profissional e liberação de resultados  
+**Etapa atual:** Etapa 8 implementada — validação pulada por decisão do usuário  
+**Próximo passo:** aplicar a migration 006 e seguir para o painel profissional/dashboard, mantendo Etapas 7.2 e 8 sem validação formal
 
 ## 1. Situação atual
 
@@ -2130,3 +2130,140 @@ Validar com uma versão em `RASCUNHO`:
 14. em uma aplicação concluída, abrir `Ver resultados` → `Ver faixas` e confirmar que são exibidas as faixas da versão usada naquela aplicação.
 
 **Próximo passo previsto após validação:** Etapa 8 — comentário profissional, devolutiva e regra de disponibilização dos resultados aos participantes.
+
+## 36. Etapa 8 — devolutiva profissional e liberação dos resultados
+
+Implementação criada no GitHub em 2026-10-04.
+
+Por solicitação explícita do usuário, os testes da Etapa 7.2 foram pulados e a Etapa 8 foi implementada diretamente. Portanto, **não considerar 7.2 nem 8 formalmente validadas**, embora o código esteja implementado.
+
+### Banco de dados
+
+Nova migration:
+
+```text
+006_devolutivas.sql
+```
+
+Nova tabela:
+
+```text
+devolutivas
+```
+
+Campos principais:
+
+- `aplicacao_id`;
+- `profissional_id`;
+- `sintese`;
+- `observacoes`;
+- `comentario_profissional`;
+- `status` (`RASCUNHO` / `LIBERADA`);
+- `token_hash`;
+- `liberada_em`;
+- `enviado_em`.
+
+### Backend profissional
+
+Novo controlador:
+
+```text
+src/Controller/FeedbackController.php
+```
+
+Rotas protegidas:
+
+```text
+GET  /api/profissional/aplicacoes/{id}/devolutiva
+PUT  /api/profissional/aplicacoes/{id}/devolutiva
+POST /api/profissional/aplicacoes/{id}/devolutiva/liberar
+```
+
+Regras:
+
+- somente aplicações `CONCLUIDA` recebem devolutiva;
+- o profissional pode salvar rascunho com síntese, observações e comentário;
+- cálculo técnico e comentário permanecem separados;
+- ao liberar, resultados técnicos são garantidos/calculados se necessário;
+- é gerado token seguro exclusivo para a devolutiva;
+- somente SHA-256 do token é persistido;
+- o link é enviado por SMTP Brevo ao e-mail de contato da aplicação;
+- em falha de e-mail, a devolutiva não passa para `LIBERADA`;
+- depois da liberação, o conteúdo fica imutável na V1.
+
+### Resultado público
+
+Nova rota da API:
+
+```text
+GET /api/public/resultados/{token}
+```
+
+Nova rota do frontend:
+
+```text
+/resultado/{token}
+```
+
+Nova página:
+
+```text
+mapa-relacional-web/src/pages/PublicResult.jsx
+```
+
+O resultado público apresenta:
+
+- participantes;
+- tipo de vínculo;
+- tempo de união;
+- resultados A→B × B→B e B→A × A→A;
+- percentuais e faixas;
+- resultados por seção;
+- síntese;
+- observações;
+- comentário profissional;
+- itens “Não se aplica”.
+
+Por privacidade, não são expostas respostas individuais brutas nem comparações item a item.
+
+### E-mail
+
+`MailService` recebeu o método de envio da devolutiva. O e-mail informa que o resultado foi liberado e contém um único link seguro para a devolutiva do par relacional.
+
+### Frontend profissional
+
+O painel `Ver resultados` recebeu a seção `Devolutiva profissional`.
+
+Enquanto em rascunho, o profissional pode:
+
+- editar síntese;
+- editar observações;
+- editar comentário profissional;
+- salvar rascunho;
+- liberar e enviar por e-mail.
+
+Depois da liberação, os campos ficam somente para leitura.
+
+### Validação
+
+**Pulada por decisão explícita do usuário.**
+
+Não registrar os seguintes itens como testados:
+
+- migration 006 aplicada localmente;
+- gravação de rascunho;
+- bloqueio de edição pós-liberação;
+- envio do e-mail de devolutiva;
+- abertura do link público;
+- privacidade dos dados públicos.
+
+Para continuar localmente, a migration precisa ser aplicada:
+
+```powershell
+cd mapa-relacional-api
+composer migrate
+```
+
+O `composer check-domain` agora exige `006_devolutivas.sql` e a tabela `devolutivas`.
+
+**Próximo passo sugerido:** Etapa 9 — dashboard profissional e refinamento da lista/detalhe das aplicações.
