@@ -84,7 +84,7 @@ O modelo agora contempla explicitamente:
 - dois acessos individuais, um por participante;
 - tokens/códigos armazenados somente em hash;
 - identificação do participante no preenchimento;
-- duração do vínculo como snapshot da aplicação;
+- tempo de união como snapshot da aplicação;
 - duas perspectivas por item: sobre si e sobre o outro;
 - exclusão global do item quando marcado “Não se aplica”;
 - item excluído fora do cálculo e oculto do outro participante quando ainda não respondido;
@@ -1179,7 +1179,7 @@ Regras implementadas:
 - lados A/B permanecem estáveis após a criação;
 - tipo do vínculo é obrigatório e textual;
 - `OUTRO` exige descrição personalizada;
-- descrição do tipo e duração textual são opcionais nos demais casos;
+- descrição do tipo de vínculo e tempo de união textual são opcionais nos demais casos;
 - estados permitidos: `ATIVO` e `INATIVO`;
 - listagem informa o total de aplicações relacionadas;
 - exclusão física é bloqueada quando já existem aplicações;
@@ -1201,7 +1201,7 @@ Foram confirmados:
 
 - acesso ao módulo `Vínculos` pela área profissional;
 - criação de vínculo entre duas pessoas distintas;
-- preenchimento de tipo e duração;
+- preenchimento de tipo de vínculo e tempo de união;
 - rejeição da mesma pessoa nos lados A e B;
 - validação de `OUTRO` exigindo descrição personalizada;
 - edição de tipo, descrição, duração e status;
@@ -1251,7 +1251,7 @@ Objetivos iniciais:
 - selecionar uma versão específica do instrumento;
 - vincular um vínculo existente quando aplicável;
 - registrar e-mail de contato;
-- preservar tipo e duração do vínculo como snapshot;
+- preservar tipo de vínculo e tempo de união do vínculo como snapshot;
 - criar exatamente dois participantes operacionais, lados A e B;
 - preservar dados da aplicação independentemente de alterações futuras nos cadastros permanentes;
 - iniciar o ciclo de estados da aplicação em `RASCUNHO`.
@@ -1287,7 +1287,7 @@ Regras implementadas:
 - vínculo é opcional;
 - quando informado, o vínculo precisa estar `ATIVO` e pertencer ao profissional;
 - e-mail de contato é obrigatório e validado;
-- com vínculo, tipo e duração são copiados como snapshot;
+- com vínculo, tipo de vínculo e tempo de união são copiados como snapshot;
 - sem vínculo, tipo é informado manualmente e duração permanece opcional;
 - aplicação nasce com status `RASCUNHO`;
 - exatamente dois participantes são criados, lados `A` e `B`;
@@ -1332,7 +1332,7 @@ Validar:
 5. confirmar status `RASCUNHO`;
 6. confirmar que aparecem exatamente os participantes A e B com status `PENDENTE`;
 7. confirmar que os nomes correspondem aos lados do vínculo;
-8. confirmar que tipo e duração aparecem como snapshot;
+8. confirmar que tipo de vínculo e tempo de união aparecem como snapshot;
 9. editar depois o tipo ou duração no cadastro do vínculo e confirmar que a aplicação já criada mantém o snapshot anterior;
 10. criar uma segunda avaliação sem vínculo prévio, informando tipo manual e e-mail;
 11. confirmar que ela também possui A e B, mas com identificação pendente;
@@ -1358,7 +1358,7 @@ Refatoração necessária:
 2. exibir apenas avaliações elegíveis baseadas em versões publicadas;
 3. permitir que o visitante informe participante A e participante B;
 4. coletar e-mail de contato;
-5. coletar tipo e duração do vínculo;
+5. coletar tipo de vínculo e tempo de união do vínculo;
 6. criar a aplicação associada automaticamente ao profissional dono do instrumento;
 7. criar os dois participantes A/B usando snapshots, sem exigir registros prévios em `pessoas` ou `vinculos`;
 8. fazer a nova aplicação aparecer automaticamente em `/profissional/avaliacoes`;
