@@ -368,6 +368,27 @@ export function deleteInstrumentVersion(instrumentId, versionId) {
   )
 }
 
+export function getResultBands(instrumentId, versionId) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/faixas-resultados`,
+    {
+      method: 'GET',
+      auth: true,
+    },
+  )
+}
+
+export function updateResultBands(instrumentId, versionId, bands) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/faixas-resultados`,
+    {
+      method: 'PUT',
+      auth: true,
+      body: JSON.stringify({ faixas: bands }),
+    },
+  )
+}
+
 export function listSections(instrumentId, versionId) {
   return request(
     `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes`,
