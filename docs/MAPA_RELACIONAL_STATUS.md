@@ -1685,3 +1685,15 @@ Correções aplicadas:
 - a mesma proteção foi adicionada à resposta de identificação e ao carregamento do questionário.
 
 Essa correção evita o erro JavaScript genérico e permitirá identificar claramente se houver uma resposta vazia ou inválida originada no backend.
+
+### Correção — resposta HTTP 200 com corpo não-JSON
+
+Na validação da Etapa 6.3, o link individual retornou HTTP 200, mas o frontend identificou corpo não-JSON.
+
+Como a API deve responder exclusivamente JSON, o bootstrap foi ajustado para não imprimir warnings/notices PHP no corpo HTTP. Erros PHP passam a ser registrados em:
+
+```text
+mapa-relacional-api/storage/logs/php-error.log
+```
+
+Em desenvolvimento, caso a API ainda retorne conteúdo não-JSON, o frontend mostra até os primeiros 500 caracteres do corpo recebido para permitir diagnóstico imediato sem depender apenas do erro genérico.
