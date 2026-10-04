@@ -290,6 +290,29 @@ Depois da criação, os lados A/B não são trocados pela edição comum do vín
 
 Um mesmo vínculo pode ser utilizado em múltiplas aplicações ao longo do tempo. A exclusão física é permitida somente enquanto não houver aplicações associadas; depois disso, o vínculo deve ser preservado e pode ser marcado como `INATIVO`.
 
+### Aplicações — núcleo inicial
+
+O módulo profissional de avaliações é acessado em `/profissional/avaliacoes` e utiliza rotas protegidas sob `/api/profissional/aplicacoes`.
+
+Na criação de uma nova aplicação:
+
+- a aplicação pertence ao profissional autenticado;
+- somente uma versão `PUBLICADA` do instrumento pode ser escolhida;
+- a aplicação nasce em `RASCUNHO`;
+- um vínculo existente é opcional;
+- o e-mail de contato é obrigatório;
+- tipo de vínculo e duração são preservados como snapshot;
+- exatamente dois registros de `aplicacao_participantes` são criados atomicamente, um lado `A` e um lado `B`;
+- os participantes nascem com status `PENDENTE`.
+
+Quando existe vínculo selecionado, os lados A/B e os nomes atuais das duas pessoas são copiados para os participantes da aplicação, enquanto `tipo` e `duracao_texto` são copiados para os campos snapshot da aplicação.
+
+Quando não existe vínculo cadastrado, a aplicação ainda cria os dois slots A/B com `pessoa_id = NULL`; o tipo do vínculo é informado no momento da criação e os dados de identificação dos participantes ficam pendentes para o fluxo de acesso/identificação.
+
+`idade_snapshot` e `genero_snapshot` não são preenchidos administrativamente nesta etapa. Eles permanecem disponíveis para registrar os dados informados pelo participante no fluxo de identificação, conforme RF-052.
+
+A criação da aplicação e dos dois participantes ocorre dentro de uma única transação do banco para evitar aplicações incompletas.
+
 ### Instrumentos
 
 O gerenciamento inicial de instrumentos da V1 é acessado em `/profissional/instrumentos` e utiliza rotas protegidas sob `/api/profissional/instrumentos`.
