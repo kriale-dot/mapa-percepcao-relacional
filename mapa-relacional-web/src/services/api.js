@@ -75,4 +75,34 @@ export function changeProfessionalPassword(senhaAtual, novaSenha) {
   })
 }
 
+export function listInstruments() {
+  return request('/api/profissional/instrumentos', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function createInstrument(instrument) {
+  return request('/api/profissional/instrumentos', {
+    method: 'POST',
+    auth: true,
+    body: JSON.stringify(instrument),
+  })
+}
+
+export function updateInstrument(id, instrument) {
+  return request(`/api/profissional/instrumentos/${id}`, {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify(instrument),
+  })
+}
+
+export function deleteInstrument(id) {
+  return request(`/api/profissional/instrumentos/${id}`, {
+    method: 'DELETE',
+    auth: true,
+  })
+}
+
 export { API_URL }
