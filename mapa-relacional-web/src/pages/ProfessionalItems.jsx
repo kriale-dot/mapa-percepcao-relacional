@@ -446,24 +446,38 @@ export default function ProfessionalItems({
                     </p>
                   </div>
 
-                  {isDraft ? (
-                    <div className="flex shrink-0 flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => beginEdit(item)}
-                        className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(item)}
-                        className="rounded-xl border border-[#D8B078]/60 px-4 py-2 text-sm font-semibold"
-                      >
-                        Excluir
-                      </button>
-                    </div>
-                  ) : null}
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(
+                          `/profissional/instrumentos/${instrumentId}/versoes/${versionId}/secoes/${sectionId}/itens/${item.id}/alternativas`,
+                        )
+                      }
+                      className="rounded-xl border border-[#A8C8D0] px-4 py-2 text-sm font-semibold"
+                    >
+                      Alternativas
+                    </button>
+
+                    {isDraft ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => beginEdit(item)}
+                          className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(item)}
+                          className="rounded-xl border border-[#D8B078]/60 px-4 py-2 text-sm font-semibold"
+                        >
+                          Excluir
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
                 </div>
               </article>
             ))}
