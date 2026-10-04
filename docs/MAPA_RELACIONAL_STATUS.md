@@ -6,9 +6,9 @@
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
-**Marco atual:** Etapa 4 em desenvolvimento — instrumentos e versionamento  
-**Etapa atual:** Etapa 4.5 concluída — alternativas dos itens  
-**Próximo passo:** revisar e fechar a Etapa 4 — estrutura completa de instrumentos
+**Marco atual:** Etapa 4 concluída — estrutura completa e versionada de instrumentos  
+**Etapa atual:** Etapa 4 concluída — instrumentos, versões, seções, itens e alternativas  
+**Próximo passo:** iniciar a Etapa 5.1 — CRUD de pessoas
 
 ## 1. Situação atual
 
@@ -1035,3 +1035,48 @@ Não houve necessidade de migration nova nesta etapa, pois a tabela `alternativa
 **Etapa 4.5 concluída.**
 
 **Próximo passo:** revisar e fechar a Etapa 4 — estrutura completa de instrumentos.
+
+## 25. Fechamento da Etapa 4
+
+Revisão final realizada em 2026-10-04 com base nos requisitos RF-030 a RF-044 e no modelo de domínio V1.
+
+A Etapa 4 foi concluída com os seguintes blocos funcionais validados:
+
+- instrumentos com nome, descrição, status e isolamento por profissional;
+- versões com estados `RASCUNHO`, `PUBLICADA` e `ARQUIVADA`;
+- imutabilidade estrutural a partir da publicação;
+- seções com título, descrição, ordem e estado ativo/inativo;
+- itens com código, texto, tipo de resposta extensível, ordem, “Não se aplica” e estado ativo/inativo;
+- alternativas com valor, rótulo, ordem e estado ativo/inativo;
+- ordenação automática quando a ordem é omitida na criação;
+- preservação histórica por bloqueio de exclusões quando há dependências;
+- modo somente leitura para estrutura de versões publicadas/arquivadas;
+- validação de propriedade em toda a cadeia profissional → instrumento → versão → seção → item.
+
+Correspondência com requisitos:
+
+- `RF-030` — atendido;
+- `RF-031` — versionamento do instrumento atendido; o vínculo da aplicação a uma versão específica será exercitado no módulo de aplicações;
+- `RF-032` — atendido;
+- `RF-033` — atendido com regra mais conservadora: imutabilidade começa na publicação;
+- `RF-040` — atendido;
+- `RF-041` — atendido;
+- `RF-042` — atendido;
+- `RF-043` — atendido por `tipo_resposta` textual extensível;
+- `RF-044` — atendido no cadastro do item; o efeito de “Não se aplica” sobre respostas e denominadores será implementado no fluxo de aplicação/cálculo.
+
+Todos os sub-blocos 4.1 a 4.5 foram validados localmente pelo usuário.
+
+### Próxima etapa
+
+A próxima etapa será **Etapa 5 — Pessoas e vínculos**, necessária antes da criação completa de aplicações.
+
+A sequência prevista é:
+
+1. **Etapa 5.1 — CRUD de pessoas** — RF-020 e RF-021;
+2. **Etapa 5.2 — CRUD de vínculos** — RF-022 a RF-025;
+3. depois avançar para o módulo de aplicações — RF-050 em diante.
+
+As tabelas `pessoas` e `vinculos` já existem na migration base; portanto, a Etapa 5 deve começar pela API e frontend, sem presumir migration nova.
+
+**Etapa 4 oficialmente concluída.**
