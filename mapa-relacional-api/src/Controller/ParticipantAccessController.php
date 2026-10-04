@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Config\Database;
 use App\Service\AccessTokenService;
+use App\Service\AuditService;
 use App\Service\ResultService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
@@ -15,7 +16,8 @@ final class ParticipantAccessController
 {
     public function __construct(
         private readonly AccessTokenService $tokenService,
-        private readonly ResultService $resultService
+        private readonly ResultService $resultService,
+        private readonly AuditService $auditService
     ) {
     }
 
@@ -628,35 +630,61 @@ final class ParticipantAccessController
         }
 
         $pdo = Database::connect();
+        $pdo->beginTransaction();
 
-        $stmt = $pdo->prepare(
-            'INSERT IGNORE INTO aplicacao_itens_excluidos (
-                aplicacao_id,
-                item_id,
-                marcado_por_participante_id,
-                motivo
-             ) VALUES (
-                :aplicacao_id,
-                :item_id,
-                :participante_id,
-                :motivo
-             )'
-        );
-        $stmt->execute([
-            'aplicacao_id' => (int) $access['aplicacao_id'],
-            'item_id' => $itemId,
-            'participante_id' => (int) $access['participante_id'],
-            'motivo' => $reason,
-        ]);
+        try {
+            $stmt = $pdo->prepare(
+                'INSERT IGNORE INTO aplicacao_itens_excluidos (
+                    aplicacao_id,
+                    item_id,
+                    marcado_por_participante_id,
+                    motivo
+                 ) VALUES (
+                    :aplicacao_id,
+                    :item_id,
+                    :participante_id,
+                    :motivo
+                 )'
+            );
+            $stmt->execute([
+                'aplicacao_id' => (int) $access['aplicacao_id'],
+                'item_id' => $itemId,
+                'participante_id' => (int) $access['participante_id'],
+                'motivo' => $reason,
+            ]);
 
-        $touch = $pdo->prepare(
-            'UPDATE acessos_aplicacao
-                SET ultimo_acesso_em = NOW()
-              WHERE id = :id'
-        );
-        $touch->execute([
-            'id' => (int) $access['acesso_id'],
-        ]);
+            $touch = $pdo->prepare(
+                'UPDATE acessos_aplicacao
+                    SET ultimo_acesso_em = NOW()
+                  WHERE id = :id'
+            );
+            $touch->execute([
+                'id' => (int) $access['acesso_id'],
+            ]);
+
+            $this->auditService->record(
+                'PARTICIPANTE',
+                (int) $access['participante_id'],
+                'ITEM_NAO_SE_APLICA',
+                'APLICACAO',
+                (int) $access['aplicacao_id'],
+                [
+                    'item_id' => $itemId,
+                    'lado' => (string) $access['lado'],
+                ],
+                $request,
+                null,
+                $pdo
+            );
+
+            $pdo->commit();
+        } catch (\Throwable $error) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $error;
+        }
 
         return $this->json($response, [
             'message' => 'Item marcado como Nao se aplica para esta avaliacao.',
@@ -756,6 +784,21 @@ final class ParticipantAccessController
                     $pdo
                 );
             }
+
+            $this->auditService->record(
+                'PARTICIPANTE',
+                (int) $access['participante_id'],
+                'PARTICIPACAO_CONCLUIDA',
+                'APLICACAO',
+                (int) $access['aplicacao_id'],
+                [
+                    'lado' => (string) $access['lado'],
+                    'aplicacao_concluida' => $applicationCompleted,
+                ],
+                $request,
+                null,
+                $pdo
+            );
 
             $pdo->commit();
         } catch (\Throwable $error) {
