@@ -546,3 +546,30 @@ Ao terminar uma etapa relevante, atualize o STATUS.
 O `CONTEXT` explica como o sistema deve funcionar.
 O `STATUS` informa exatamente onde o desenvolvimento está naquele momento.
 O `DECISOES` registra decisões estruturais e funcionais relevantes.
+
+### Não se aplica e conclusão individual
+
+Na Etapa 6.5, itens configurados com `permite_nao_se_aplica = 1` podem ser excluídos da aplicação pelo participante.
+
+Ao confirmar **“Não se aplica”**:
+
+- é criado um registro em `aplicacao_itens_excluidos`;
+- a exclusão vale para a aplicação inteira;
+- o item deixa de ser retornado para A e B;
+- respostas já existentes do item são preservadas para rastreabilidade;
+- o item não entra no progresso exigido para conclusão;
+- o item não deverá entrar nos cálculos comparativos/resultados.
+
+A exclusão é tratada como decisão global e irreversível nesta V1. A interface exige confirmação antes de registrar a exclusão. Em caso de tentativa duplicada, o primeiro registro de quem marcou permanece preservado.
+
+A conclusão individual só é permitida quando todas as duas perspectivas dos itens ainda válidos tiverem sido respondidas. Ao concluir:
+
+- participante passa para `CONCLUIDO`;
+- `aplicacao_participantes.concluiu_em` é registrado;
+- o acesso passa para `CONCLUIDO`;
+- `acessos_aplicacao.concluido_em` é registrado;
+- o link deixa de permitir novas alterações;
+- se apenas um concluiu, a aplicação permanece `EM_ANDAMENTO`;
+- quando A e B concluem, a aplicação passa para `CONCLUIDA` e recebe `concluida_em`.
+
+Depois da conclusão dos dois participantes, a aplicação fica pronta para a etapa de comparação e resultados.
