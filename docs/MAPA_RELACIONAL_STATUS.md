@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 concluída — estrutura completa e versionada de instrumentos  
-**Etapa atual:** Etapa 5 concluída — pessoas e vínculos  
-**Próximo passo:** iniciar a Etapa 6.1 — criação de aplicações com versão e participantes A/B
+**Etapa atual:** Etapa 6.1 em validação — criação de aplicações com participantes A/B  
+**Próximo passo:** validar localmente criação de aplicações, snapshots e os dois participantes operacionais
 
 ## 1. Situação atual
 
@@ -1257,3 +1257,87 @@ Objetivos iniciais:
 - iniciar o ciclo de estados da aplicação em `RASCUNHO`.
 
 As tabelas `aplicacoes` e `aplicacao_participantes` já existem na migration base. A próxima implementação deve primeiro usar essa estrutura existente antes de considerar qualquer migration adicional.
+
+## 29. Etapa 6.1 — criação de aplicações com participantes A/B
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/ApplicationController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalApplications.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Rotas protegidas adicionadas:
+
+```text
+GET  /api/profissional/aplicacoes
+GET  /api/profissional/aplicacoes/opcoes
+POST /api/profissional/aplicacoes
+GET  /api/profissional/aplicacoes/{id}
+```
+
+Regras implementadas:
+
+- somente versões `PUBLICADA` aparecem como opção para nova aplicação;
+- backend também rejeita versão que não esteja publicada ou não pertença ao profissional;
+- vínculo é opcional;
+- quando informado, o vínculo precisa estar `ATIVO` e pertencer ao profissional;
+- e-mail de contato é obrigatório e validado;
+- com vínculo, tipo e duração são copiados como snapshot;
+- sem vínculo, tipo é informado manualmente e duração permanece opcional;
+- aplicação nasce com status `RASCUNHO`;
+- exatamente dois participantes são criados, lados `A` e `B`;
+- os dois participantes nascem com status `PENDENTE`;
+- com vínculo, `pessoa_id` e `nome_snapshot` são preenchidos a partir dos lados do vínculo;
+- sem vínculo, os dois slots são criados com `pessoa_id = NULL`;
+- `idade_snapshot` e `genero_snapshot` permanecem pendentes para identificação do participante;
+- aplicação + participantes são gravados dentro de uma única transação.
+
+No frontend, o card `Avaliações` agora abre:
+
+```text
+/profissional/avaliacoes
+```
+
+A tela lista as aplicações existentes, mostra versão utilizada, snapshot do vínculo e os estados dos participantes A e B.
+
+### Validação local pendente
+
+Após `git pull`, executar na API:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+No frontend:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. abrir `Avaliações` pela área profissional;
+2. confirmar que somente versões publicadas aparecem no seletor;
+3. selecionar uma versão publicada e um vínculo ativo;
+4. informar um e-mail válido e criar a avaliação;
+5. confirmar status `RASCUNHO`;
+6. confirmar que aparecem exatamente os participantes A e B com status `PENDENTE`;
+7. confirmar que os nomes correspondem aos lados do vínculo;
+8. confirmar que tipo e duração aparecem como snapshot;
+9. editar depois o tipo ou duração no cadastro do vínculo e confirmar que a aplicação já criada mantém o snapshot anterior;
+10. criar uma segunda avaliação sem vínculo prévio, informando tipo manual e e-mail;
+11. confirmar que ela também possui A e B, mas com identificação pendente;
+12. recarregar a página e confirmar persistência.
+
+Não há migration nova nesta etapa; `aplicacoes` e `aplicacao_participantes` já existem na migration base.
+
+**Próxima subetapa prevista:** Etapa 6.2 — preparação dos acessos individuais seguros para A e B.
