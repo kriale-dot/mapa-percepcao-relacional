@@ -352,6 +352,31 @@ Depois da identificação, o sistema carrega somente seções, itens e alternati
 
 A Etapa 6.3 apenas confirma a identificação e carrega a estrutura individual do questionário. O salvamento progressivo das duas perspectivas por item será implementado na subetapa seguinte.
 
+### Respostas individuais e persistência progressiva
+
+Na Etapa 6.4, cada participante responde separadamente às duas perspectivas de cada item:
+
+- `SOBRE_MIM`: o alvo da resposta é o próprio participante;
+- `SOBRE_OUTRO`: o alvo é o outro participante da mesma aplicação.
+
+O frontend nunca envia `respondente_id` nem `alvo_id`. O backend deriva ambos a partir do token individual, evitando que um participante tente gravar respostas em nome do outro.
+
+Cada perspectiva é salva progressivamente usando a chave única já existente em `respostas`:
+
+```text
+aplicacao_id + respondente_id + alvo_id + item_id
+```
+
+Uma resposta posterior para a mesma perspectiva/item atualiza o registro existente em vez de criar duplicata.
+
+Para itens com alternativas ativas, somente uma alternativa ativa pertencente ao próprio item é aceita. Para itens sem alternativas, a API aceita exatamente um valor textual ou numérico.
+
+Ao recarregar o link, o questionário retorna apenas as respostas do participante autenticado pelo token. As respostas do outro participante nunca são incluídas na resposta da API.
+
+O questionário informa progresso em quantidade de perspectivas respondidas e percentual. Como cada item possui duas perspectivas, o total esperado é `itens válidos × 2`.
+
+A regra global de **“Não se aplica”** e a conclusão individual permanecem para a próxima subetapa.
+
 A criação manual pela área profissional continua disponível apenas como modo assistido/administrativo, não como requisito para que uma avaliação pública exista.
 
 ### Instrumentos
