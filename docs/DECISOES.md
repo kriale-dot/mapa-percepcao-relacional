@@ -495,3 +495,41 @@ Depois da conclusão:
 - a aplicação só passa para `CONCLUIDA` quando os dois participantes estiverem concluídos.
 
 A conclusão não apaga respostas nem itens excluídos.
+
+## D-034 — Resultado técnico é calculado por sentido e versionado
+**Data:** 2026-10-04  
+**Status:** vigente
+
+A Etapa 7 calcula dois resultados independentes:
+
+- `A_SOBRE_B`: compara A→B com B→B;
+- `B_SOBRE_A`: compara B→A com A→A.
+
+Não haverá consolidação global automática enquanto uma regra específica não for aprovada.
+
+A comparação usa o conteúdo efetivamente persistido:
+
+- mesma `alternativa_id` = coincidência em itens fechados;
+- mesmo valor numérico = coincidência em itens numéricos;
+- texto igual após `trim` = coincidência em itens textuais;
+- ausência de uma resposta ou formato incompatível = não comparável.
+
+Itens marcados como “Não se aplica” não geram comparação e ficam fora do denominador.
+
+A fórmula oficial permanece:
+
+```text
+percentual = coincidências / comparações válidas × 100
+```
+
+O algoritmo inicial é identificado como `1.0`.
+
+As faixas são vinculadas à versão do instrumento, não codificadas apenas no frontend. Para acomodar percentuais decimais sem lacunas, a interpretação técnica dos intervalos 0–33 / 34–66 / 67–100 é:
+
+- `0,00–33,99` = Ruim;
+- `34,00–66,99` = Regular;
+- `67,00–100,00` = Bom.
+
+Novas versões do instrumento recebem essas faixas-base automaticamente e podem evoluir futuramente sem alterar resultados históricos já calculados.
+
+Ao concluir o segundo participante, o cálculo ocorre automaticamente e é persistido. Aplicações antigas concluídas podem ser recalculadas explicitamente pela área profissional.
