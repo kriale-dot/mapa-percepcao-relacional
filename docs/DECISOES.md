@@ -341,3 +341,26 @@ O vínculo é opcional na criação. Quando informado, deve estar ativo e perten
 Sem vínculo prévio, são criados dois slots A/B sem `pessoa_id`, permitindo que a identificação seja completada posteriormente pelo fluxo do participante.
 
 O nome atual da pessoa vinculada pode preencher `nome_snapshot` no momento da criação. `idade_snapshot` e `genero_snapshot` permanecem nulos até o fluxo de identificação do participante.
+
+## D-026 — Autoatendimento público é o fluxo principal
+**Data:** 2026-10-04  
+**Status:** vigente
+
+O fluxo principal de entrada em uma Avaliação de Percepção Relacional é o autoatendimento público, e não a criação prévia pelo profissional.
+
+Regras:
+
+- o visitante escolhe uma avaliação disponibilizada publicamente;
+- informa os participantes A e B, e-mail de contato, tipo do vínculo e duração quando aplicável;
+- a aplicação é criada sem exigir autenticação profissional;
+- a aplicação é associada automaticamente ao profissional responsável pelo instrumento escolhido;
+- o profissional não precisa conhecer previamente os participantes nem liberar individualmente a avaliação;
+- a aplicação aparece automaticamente na área profissional para acompanhamento, consulta de resultados e contato posterior;
+- o autoatendimento não cria automaticamente registros permanentes em `pessoas` ou `vinculos`;
+- no fluxo público, `vinculo_id` pode permanecer nulo e os participantes podem permanecer com `pessoa_id = NULL`, usando os campos snapshot como registro histórico;
+- os nomes informados pelo visitante são gravados em `nome_snapshot` nos lados A e B;
+- tipo e duração são gravados como snapshot da aplicação;
+- somente versões publicadas podem receber novas aplicações públicas;
+- a criação manual pela área profissional permanece como modo assistido secundário.
+
+D-025 continua vigente quanto à versão publicada, criação atômica da aplicação e existência obrigatória dos lados A/B; D-026 redefine **quem inicia normalmente a aplicação**.
