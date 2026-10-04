@@ -66,10 +66,14 @@ if (!is_dir($backupDir) && !@mkdir($backupDir, 0775, true)) {
     exit(1);
 }
 
-if (!is_writable($backupDir)) {
+if (!canWriteDirectory($backupDir)) {
     fwrite(
         STDERR,
-        "[ERRO] storage/backups nao e gravavel.\n"
+        "[ERRO] Nao foi possivel gravar em storage/backups.\n"
+    );
+    fwrite(
+        STDERR,
+        "Caminho testado: {$backupDir}\n"
     );
     exit(1);
 }
@@ -168,6 +172,35 @@ echo "Arquivo: {$path}\n";
 echo "Tamanho: {$size} bytes\n";
 echo "SHA-256: {$hash}\n";
 
+
+/**
+ * Testa gravacao real no diretorio.
+ *
+ * No Windows, is_writable() pode retornar falso mesmo quando a pasta
+ * permite gravacao. O teste abaixo cria e remove um arquivo temporario.
+ */
+function canWriteDirectory(string $directory): bool
+{
+    if (!is_dir($directory)) {
+        return false;
+    }
+
+    $probe = rtrim($directory, '/\\')
+        . DIRECTORY_SEPARATOR
+        . '.write-test-'
+        . bin2hex(random_bytes(8))
+        . '.tmp';
+
+    $written = @file_put_contents($probe, 'ok');
+
+    if ($written === false) {
+        return false;
+    }
+
+    @unlink($probe);
+
+    return true;
+}
 
 /**
  * Localiza o executavel mysqldump no PATH, no valor configurado
