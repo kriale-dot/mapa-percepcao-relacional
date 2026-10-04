@@ -11,12 +11,15 @@ use App\Controller\HealthController;
 use App\Controller\InstrumentController;
 use App\Controller\InstrumentVersionController;
 use App\Controller\ItemController;
+use App\Controller\ParticipantAccessController;
 use App\Controller\PersonController;
 use App\Controller\ProfessionalController;
 use App\Controller\PublicEvaluationController;
 use App\Controller\RelationshipController;
 use App\Controller\SectionController;
 use App\Middleware\CorsMiddleware;
+use App\Service\AccessTokenService;
+use App\Service\MailService;
 use App\Middleware\ProfessionalAuthMiddleware;
 use Dotenv\Dotenv;
 use Slim\Factory\AppFactory;
@@ -48,11 +51,14 @@ $errorMiddleware = $app->addErrorMiddleware(
 );
 
 $healthController = new HealthController();
+$accessTokenService = new AccessTokenService();
+$mailService = new MailService();
 $alternativeController = new AlternativeController();
 $applicationController = new ApplicationController();
 $authController = new AuthController();
 $professionalController = new ProfessionalController();
-$publicEvaluationController = new PublicEvaluationController();
+$publicEvaluationController = new PublicEvaluationController($accessTokenService, $mailService);
+$participantAccessController = new ParticipantAccessController($accessTokenService);
 $instrumentController = new InstrumentController();
 $instrumentVersionController = new InstrumentVersionController();
 $sectionController = new SectionController();
@@ -72,6 +78,10 @@ $app->get(
 $app->post(
     '/api/public/avaliacoes/{versionId:[0-9]+}/iniciar',
     [$publicEvaluationController, 'create']
+);
+$app->get(
+    '/api/public/acessos/{token}',
+    [$participantAccessController, 'show']
 );
 
 $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
