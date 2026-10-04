@@ -421,3 +421,26 @@ Regras:
 - somente após o SMTP confirmar o envio são preenchidos os campos `enviado_em` e a aplicação passa para `PRONTA`;
 - falha de SMTP durante o autoatendimento reverte a criação da aplicação e dos acessos para evitar registro sem entrega dos links;
 - credenciais Brevo ficam apenas no arquivo `.env`, nunca no Git.
+
+## D-031 — Identificação inicial antes do questionário
+**Data:** 2026-10-04  
+**Status:** vigente
+
+O participante precisa concluir sua identificação antes de receber a estrutura do questionário.
+
+Regras:
+
+- nome, idade e gênero são registrados no snapshot do próprio participante da aplicação;
+- o nome inicialmente informado pelo visitante pode ser confirmado/corrigido pelo próprio participante;
+- idade é obrigatória e validada como número inteiro entre 1 e 120;
+- gênero é obrigatório e textual, com até 30 caracteres;
+- não será criada uma enumeração de gênero nesta etapa, pois o material-base não define opções fechadas;
+- o **tempo de união** é contexto da aplicação, não um campo individual a ser redigitado por A e B;
+- ao concluir a identificação, o participante passa para `EM_ANDAMENTO`;
+- a aplicação passa de `PRONTA` para `EM_ANDAMENTO` no primeiro início;
+- `iniciou_em` é preenchido com `COALESCE` para preservar o primeiro início;
+- o questionário só pode ser carregado depois da identificação;
+- apenas seções, itens e alternativas ativos são carregados;
+- itens excluídos globalmente da aplicação por “Não se aplica” não são retornados.
+
+A persistência das respostas A→A/A→B ou B→B/B→A fica para a subetapa seguinte.
