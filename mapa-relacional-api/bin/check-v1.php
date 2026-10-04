@@ -133,6 +133,28 @@ $check(
     'storage/backups gravavel'
 );
 
+$backupFiles = glob($backupDir . '/mapa-relacional-*.sql') ?: [];
+$latestBackupAt = 0;
+
+foreach ($backupFiles as $backupFile) {
+    if (!is_file($backupFile) || filesize($backupFile) <= 0) {
+        continue;
+    }
+
+    $mtime = filemtime($backupFile);
+
+    if ($mtime !== false) {
+        $latestBackupAt = max($latestBackupAt, $mtime);
+    }
+}
+
+$check(
+    $latestBackupAt > 0
+        && $latestBackupAt >= time() - 86400,
+    'Backup SQL valido criado nas ultimas 24 horas',
+    true
+);
+
 try {
     $pdo = Database::connect();
     $pdo->query('SELECT 1')->fetchColumn();
