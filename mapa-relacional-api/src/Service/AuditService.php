@@ -7,6 +7,7 @@ namespace App\Service;
 use App\Config\Database;
 use PDO;
 use Psr\Http\Message\ServerRequestInterface;
+use Throwable;
 
 final class AuditService
 {
@@ -68,6 +69,44 @@ final class AuditService
             'ip' => $this->clientIp($request),
             'user_agent' => $this->userAgent($request),
         ]);
+    }
+
+    /**
+     * @param array<string,mixed> $context
+     */
+    public function recordSafe(
+        string $actorType,
+        ?int $actorId,
+        string $action,
+        ?string $entityType,
+        ?int $entityId,
+        array $context,
+        ServerRequestInterface $request,
+        ?int $professionalId = null,
+        ?PDO $pdo = null
+    ): bool {
+        try {
+            $this->record(
+                $actorType,
+                $actorId,
+                $action,
+                $entityType,
+                $entityId,
+                $context,
+                $request,
+                $professionalId,
+                $pdo
+            );
+
+            return true;
+        } catch (Throwable $error) {
+            error_log(
+                'Falha de auditoria em ' . $action . ': '
+                . $error->getMessage()
+            );
+
+            return false;
+        }
     }
 
     /**
