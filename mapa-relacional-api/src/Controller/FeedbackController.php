@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Config\Database;
 use App\Service\AccessTokenService;
+use App\Service\AuditService;
 use App\Service\MailService;
 use App\Service\ResultService;
 use PDO;
@@ -18,7 +19,8 @@ final class FeedbackController
     public function __construct(
         private readonly AccessTokenService $tokenService,
         private readonly MailService $mailService,
-        private readonly ResultService $resultService
+        private readonly ResultService $resultService,
+        private readonly AuditService $auditService
     ) {
     }
 
@@ -157,6 +159,18 @@ final class FeedbackController
             'u_observacoes' => $observations,
             'u_comentario_profissional' => $comment,
         ]);
+
+        $this->auditService->record(
+            'PROFISSIONAL',
+            $professionalId,
+            'DEVOLUTIVA_RASCUNHO_SALVA',
+            'APLICACAO',
+            $applicationId,
+            [],
+            $request,
+            $professionalId,
+            $pdo
+        );
 
         return $this->json($response, [
             'message' => 'Devolutiva salva como rascunho.',
@@ -304,6 +318,18 @@ final class FeedbackController
             'aplicacao_id' => $applicationId,
             'draft_status' => 'RASCUNHO',
         ]);
+
+        $this->auditService->record(
+            'PROFISSIONAL',
+            $professionalId,
+            'DEVOLUTIVA_LIBERADA',
+            'APLICACAO',
+            $applicationId,
+            ['email_enviado' => true],
+            $request,
+            $professionalId,
+            $pdo
+        );
 
         return $this->json($response, [
             'message' => 'Devolutiva liberada e enviada para o e-mail cadastrado.',
