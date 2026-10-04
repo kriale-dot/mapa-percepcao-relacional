@@ -662,7 +662,7 @@ final class ParticipantAccessController
                 'id' => (int) $access['acesso_id'],
             ]);
 
-            $this->auditService->record(
+            $this->auditService->recordSafe(
                 'PARTICIPANTE',
                 (int) $access['participante_id'],
                 'ITEM_NAO_SE_APLICA',
@@ -785,7 +785,7 @@ final class ParticipantAccessController
                 );
             }
 
-            $this->auditService->record(
+            $this->auditService->recordSafe(
                 'PARTICIPANTE',
                 (int) $access['participante_id'],
                 'PARTICIPACAO_CONCLUIDA',
