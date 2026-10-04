@@ -91,7 +91,16 @@ final class AuditService
         foreach ($context as $key => $value) {
             $normalizedKey = strtolower((string) $key);
 
-            if (in_array($normalizedKey, $blockedKeys, true)) {
+            $containsSensitiveFragment = false;
+
+            foreach ($blockedKeys as $blockedKey) {
+                if (str_contains($normalizedKey, $blockedKey)) {
+                    $containsSensitiveFragment = true;
+                    break;
+                }
+            }
+
+            if ($containsSensitiveFragment) {
                 continue;
             }
 
