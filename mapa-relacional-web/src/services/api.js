@@ -60,6 +60,19 @@ export function getParticipantAccess(token) {
   })
 }
 
+export function identifyParticipant(token, identification) {
+  return request(`/api/public/acessos/${token}/identificacao`, {
+    method: 'POST',
+    body: JSON.stringify(identification),
+  })
+}
+
+export function getParticipantQuestionnaire(token) {
+  return request(`/api/public/acessos/${token}/questionario`, {
+    method: 'GET',
+  })
+}
+
 export function loginProfessional(email, senha) {
   return request('/api/auth/login', {
     method: 'POST',
