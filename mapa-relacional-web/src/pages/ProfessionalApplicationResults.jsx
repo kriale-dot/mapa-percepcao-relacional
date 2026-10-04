@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   calculateApplicationResults,
+  getApplicationFeedback,
   getApplicationResults,
+  releaseApplicationFeedback,
+  saveApplicationFeedback,
 } from '../services/api'
 import { clearAuthToken, getAuthToken } from '../services/auth'
 
@@ -72,6 +75,15 @@ export default function ProfessionalApplicationResults({ applicationId }) {
   const [result, setResult] = useState(null)
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
+  const [feedback, setFeedback] = useState(null)
+  const [feedbackContext, setFeedbackContext] = useState(null)
+  const [feedbackForm, setFeedbackForm] = useState({
+    sintese: '',
+    observacoes: '',
+    comentario_profissional: '',
+  })
+  const [feedbackStatus, setFeedbackStatus] = useState('ready')
+  const [feedbackMessage, setFeedbackMessage] = useState('')
 
   useEffect(() => {
     if (!getAuthToken()) {
@@ -87,8 +99,20 @@ export default function ProfessionalApplicationResults({ applicationId }) {
     setMessage('')
 
     try {
-      const response = await getApplicationResults(applicationId)
-      setResult(response.resultado)
+      const [resultsResponse, feedbackResponse] = await Promise.all([
+        getApplicationResults(applicationId),
+        getApplicationFeedback(applicationId),
+      ])
+
+      setResult(resultsResponse.resultado)
+      setFeedback(feedbackResponse.devolutiva)
+      setFeedbackContext(feedbackResponse.aplicacao)
+      setFeedbackForm({
+        sintese: feedbackResponse.devolutiva?.sintese || '',
+        observacoes: feedbackResponse.devolutiva?.observacoes || '',
+        comentario_profissional:
+          feedbackResponse.devolutiva?.comentario_profissional || '',
+      })
       setStatus('ready')
     } catch (error) {
       if (error.status === 401) {
@@ -119,6 +143,76 @@ export default function ProfessionalApplicationResults({ applicationId }) {
 
       setStatus('error')
       setMessage(error.message || 'Não foi possível calcular os resultados.')
+    }
+  }
+
+  function updateFeedbackField(field, value) {
+    setFeedbackForm((current) => ({
+      ...current,
+      [field]: value,
+    }))
+  }
+
+  async function handleSaveFeedback() {
+    setFeedbackStatus('saving')
+    setFeedbackMessage('')
+
+    try {
+      const response = await saveApplicationFeedback(
+        applicationId,
+        feedbackForm,
+      )
+      setFeedback(response.devolutiva)
+      setFeedbackStatus('ready')
+      setFeedbackMessage('Devolutiva salva como rascunho.')
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setFeedbackStatus('ready')
+      setFeedbackMessage(
+        error.message || 'Não foi possível salvar a devolutiva.',
+      )
+    }
+  }
+
+  async function handleReleaseFeedback() {
+    const confirmed = window.confirm(
+      'Liberar a devolutiva? O link será enviado para o e-mail cadastrado e o texto ficará congelado para preservar o histórico.',
+    )
+
+    if (!confirmed) return
+
+    setFeedbackStatus('releasing')
+    setFeedbackMessage('')
+
+    try {
+      const saved = await saveApplicationFeedback(
+        applicationId,
+        feedbackForm,
+      )
+      setFeedback(saved.devolutiva)
+
+      const released = await releaseApplicationFeedback(applicationId)
+      setFeedback(released.devolutiva)
+      setFeedbackStatus('ready')
+      setFeedbackMessage(
+        'Devolutiva liberada e enviada para o e-mail cadastrado.',
+      )
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setFeedbackStatus('ready')
+      setFeedbackMessage(
+        error.message || 'Não foi possível liberar a devolutiva.',
+      )
     }
   }
 
@@ -441,6 +535,125 @@ export default function ProfessionalApplicationResults({ applicationId }) {
                 </div>
               </section>
             ) : null}
+
+            <section className="mt-7 rounded-3xl border border-[#A8C8B8]/45 bg-white p-7 shadow-sm">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
+                Devolutiva profissional
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold">
+                Preparar conteúdo para os participantes
+              </h2>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-[#385048]/65">
+                O cálculo técnico permanece separado da interpretação
+                profissional. Ao liberar, um link seguro será enviado ao
+                e-mail cadastrado
+                {feedbackContext?.email_contato
+                  ? ` (${feedbackContext.email_contato})`
+                  : ''}.
+              </p>
+
+              {feedback?.status === 'LIBERADA' ? (
+                <div className="mt-6 rounded-2xl bg-[#A8C8B8]/16 p-5 text-sm leading-6">
+                  <p className="font-semibold">Devolutiva liberada</p>
+                  <p className="mt-2 text-[#385048]/70">
+                    O conteúdo está congelado e o link foi enviado ao e-mail
+                    cadastrado.
+                    {feedback.liberada_em
+                      ? ` Liberação: ${feedback.liberada_em}.`
+                      : ''}
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-6 rounded-2xl bg-[#D8B078]/12 p-5 text-sm leading-6">
+                  A devolutiva está em rascunho. Salve quantas vezes precisar
+                  antes de liberar aos participantes.
+                </div>
+              )}
+
+              <div className="mt-6 space-y-5">
+                <label className="block">
+                  <span className="text-sm font-medium">Síntese</span>
+                  <textarea
+                    rows="4"
+                    maxLength="5000"
+                    disabled={feedback?.status === 'LIBERADA'}
+                    value={feedbackForm.sintese}
+                    onChange={(event) =>
+                      updateFeedbackField('sintese', event.target.value)
+                    }
+                    className="mt-2 w-full resize-y rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none disabled:opacity-70"
+                    placeholder="Síntese geral da avaliação para os participantes."
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-medium">Observações</span>
+                  <textarea
+                    rows="5"
+                    maxLength="10000"
+                    disabled={feedback?.status === 'LIBERADA'}
+                    value={feedbackForm.observacoes}
+                    onChange={(event) =>
+                      updateFeedbackField('observacoes', event.target.value)
+                    }
+                    className="mt-2 w-full resize-y rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none disabled:opacity-70"
+                    placeholder="Pontos de atenção, contexto e orientações que acompanham o resultado."
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-medium">
+                    Comentário profissional
+                  </span>
+                  <textarea
+                    rows="6"
+                    maxLength="10000"
+                    disabled={feedback?.status === 'LIBERADA'}
+                    value={feedbackForm.comentario_profissional}
+                    onChange={(event) =>
+                      updateFeedbackField(
+                        'comentario_profissional',
+                        event.target.value,
+                      )
+                    }
+                    className="mt-2 w-full resize-y rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none disabled:opacity-70"
+                    placeholder="Comentário profissional que será apresentado junto ao resultado."
+                  />
+                </label>
+              </div>
+
+              {feedbackMessage ? (
+                <div className="mt-5 rounded-2xl bg-[#A8C8D0]/14 px-5 py-4 text-sm">
+                  {feedbackMessage}
+                </div>
+              ) : null}
+
+              {feedback?.status !== 'LIBERADA' ? (
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    disabled={feedbackStatus !== 'ready'}
+                    onClick={handleSaveFeedback}
+                    className="rounded-xl border border-[#385048]/20 px-5 py-3 text-sm font-semibold disabled:opacity-50"
+                  >
+                    {feedbackStatus === 'saving'
+                      ? 'Salvando...'
+                      : 'Salvar rascunho'}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={feedbackStatus !== 'ready'}
+                    onClick={handleReleaseFeedback}
+                    className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white shadow-sm disabled:opacity-50"
+                  >
+                    {feedbackStatus === 'releasing'
+                      ? 'Liberando e enviando...'
+                      : 'Liberar e enviar por e-mail'}
+                  </button>
+                </div>
+              ) : null}
+            </section>
 
             <div className="mt-7 rounded-2xl bg-[#A8C8D0]/14 p-5 text-sm leading-6">
               Algoritmo de comparação: versão{' '}
