@@ -469,3 +469,29 @@ Regras complementares:
 - progresso = perspectivas válidas respondidas / (itens válidos × 2).
 
 A regra “Não se aplica” e a conclusão individual serão tratadas separadamente para manter a validação incremental.
+
+## D-033 — Não se aplica é global e conclusão bloqueia edição
+**Data:** 2026-10-04  
+**Status:** vigente
+
+A opção **“Não se aplica”** atua sobre a aplicação inteira, não apenas sobre a resposta de um participante.
+
+Regras:
+
+- somente itens com `permite_nao_se_aplica = 1` podem ser excluídos;
+- a exclusão é registrada em `aplicacao_itens_excluidos`;
+- o primeiro participante que marca fica preservado como autor da exclusão;
+- respostas já existentes são mantidas para auditoria;
+- o item deixa de ser exibido para os dois participantes;
+- o item deixa de compor o denominador de progresso e, futuramente, de comparação;
+- na V1 a exclusão é irreversível depois da confirmação, evitando inconsistência com participante já concluído.
+
+A conclusão individual exige 100% das perspectivas ainda válidas respondidas.
+
+Depois da conclusão:
+
+- participante e acesso passam para `CONCLUIDO`;
+- o token não permite novas alterações;
+- a aplicação só passa para `CONCLUIDA` quando os dois participantes estiverem concluídos.
+
+A conclusão não apaga respostas nem itens excluídos.
