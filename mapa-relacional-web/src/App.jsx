@@ -3,6 +3,7 @@ import ProfessionalProfile from './pages/ProfessionalProfile'
 import ProfessionalPassword from './pages/ProfessionalPassword'
 import ProfessionalInstruments from './pages/ProfessionalInstruments'
 import ProfessionalInstrumentVersions from './pages/ProfessionalInstrumentVersions'
+import ProfessionalSections from './pages/ProfessionalSections'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -61,6 +62,19 @@ function App() {
     return (
       <ProfessionalInstrumentVersions
         instrumentId={Number(versionsMatch[1])}
+      />
+    )
+  }
+
+  const sectionsMatch = path.match(
+    /^\/profissional\/instrumentos\/([1-9][0-9]*)\/versoes\/([1-9][0-9]*)\/secoes$/,
+  )
+
+  if (sectionsMatch) {
+    return (
+      <ProfessionalSections
+        instrumentId={Number(sectionsMatch[1])}
+        versionId={Number(sectionsMatch[2])}
       />
     )
   }
