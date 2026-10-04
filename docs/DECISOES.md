@@ -304,3 +304,21 @@ Regras:
 - a exclusão física é permitida somente quando a pessoa não possui vínculos nem aplicações associadas;
 - quando já existir histórico, a pessoa deve ser preservada e pode ser marcada como `INATIVO`;
 - todas as consultas e alterações são filtradas por `profissional_id`.
+
+## D-024 — Vínculos preservam os lados A/B
+**Data:** 2026-10-04  
+**Status:** vigente
+
+O vínculo representa exatamente duas pessoas e preserva uma ordem operacional estável entre lado A e lado B.
+
+Regras:
+
+- `pessoa_a_id` e `pessoa_b_id` são obrigatórios e devem ser diferentes;
+- ambas as pessoas devem pertencer ao profissional autenticado;
+- os lados A/B são definidos na criação e não são trocados pela edição comum do vínculo;
+- tipo de vínculo é textual e flexível;
+- quando o tipo for `OUTRO`, a descrição personalizada é obrigatória;
+- duração textual é opcional;
+- estados adotados: `ATIVO` e `INATIVO`;
+- um mesmo vínculo pode ser utilizado em múltiplas aplicações;
+- vínculo com aplicações associadas não pode ser excluído fisicamente e deve ser preservado por inativação.
