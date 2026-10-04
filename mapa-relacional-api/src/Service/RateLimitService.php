@@ -155,6 +155,24 @@ final class RateLimitService
         ];
     }
 
+    public function clear(
+        string $scope,
+        string $key,
+        ?PDO $pdo = null
+    ): void {
+        $pdo ??= Database::connect();
+
+        $stmt = $pdo->prepare(
+            'DELETE FROM rate_limites
+             WHERE escopo = :escopo
+               AND chave_hash = :chave_hash'
+        );
+        $stmt->execute([
+            'escopo' => substr(trim($scope), 0, 60),
+            'chave_hash' => hash('sha256', $key),
+        ]);
+    }
+
     public function requestKey(
         ServerRequestInterface $request,
         ?string $secondary = null
