@@ -738,3 +738,86 @@ A página de detalhe de uma aplicação mostra:
 - atalhos para o painel completo de resultados.
 
 O autoatendimento público continua independente dos cadastros permanentes de `pessoas` e `vinculos`, por isso o detalhe profissional deve funcionar também quando `vinculo_id` e `pessoa_id` forem nulos.
+
+### Segurança, auditoria e preparação da V1
+
+A Etapa 10 introduz endurecimento operacional antes do deploy.
+
+#### Mensagens complementares
+
+A V1 permanece baseada em e-mail SMTP Brevo.
+
+O profissional pode reenviar:
+
+- o acesso individual de A ou B, desde que o participante ainda não tenha concluído;
+- a devolutiva, desde que já esteja `LIBERADA`.
+
+Como tokens brutos nunca são persistidos, um reenvio sempre gera **novo token** e substitui o hash vigente. Consequentemente, o link anterior deixa de funcionar.
+
+Participação concluída não pode ser reaberta por reenvio.
+
+#### Auditoria
+
+A tabela `auditoria_eventos` registra ações relevantes com:
+
+- `profissional_id`;
+- tipo e ID do ator;
+- ação;
+- entidade e ID;
+- contexto JSON não sensível;
+- IP;
+- user agent;
+- data/hora.
+
+O serviço de auditoria remove chaves cujo nome contenha referências a senha, password, token, JWT, authorization ou credenciais SMTP.
+
+Eventos iniciais incluem:
+
+- login profissional bem-sucedido;
+- alteração de senha;
+- atualização de perfil;
+- criação/publicação/arquivamento de versão;
+- criação pública de aplicação;
+- marcação “Não se aplica”;
+- conclusão de participante;
+- salvamento/liberação de devolutiva;
+- reenvio de acesso;
+- reenvio de devolutiva.
+
+A consulta fica disponível em `/profissional/auditoria` e é sempre limitada ao profissional autenticado.
+
+#### Rate limit
+
+A V1 usa rate limit persistido em banco para dois pontos expostos:
+
+- tentativas inválidas de login;
+- criação pública de avaliações.
+
+O login é limitado tanto por IP quanto por conta/e-mail. O autoatendimento público é limitado tanto por IP quanto pelo e-mail informado.
+
+Os limites são configuráveis por `.env`.
+
+#### Cabeçalhos de segurança
+
+A API envia:
+
+- `X-Content-Type-Options: nosniff`;
+- `X-Frame-Options: DENY`;
+- `Referrer-Policy: no-referrer`;
+- `Cache-Control: no-store`.
+
+O CORS continua restrito ao `FRONTEND_URL`.
+
+#### Checklist V1 e backup
+
+Foi criado `composer check-v1`, que verifica configuração de produção, URLs, HTTPS, JWT, extensões PHP, SMTP, diretórios, banco, migrations e tabelas.
+
+Foi criado `composer backup-db`, baseado em `mysqldump`, que grava backup SQL fora do Git e informa SHA-256 do arquivo.
+
+O guia operacional está em:
+
+```text
+docs/PRODUCAO_V1.md
+```
+
+Antes de produção, um backup precisa ser criado e uma restauração em banco separado precisa ser validada.
