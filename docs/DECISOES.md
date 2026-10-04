@@ -390,3 +390,13 @@ Quando houver mais de uma versão publicada do mesmo instrumento, o catálogo p�
 O visitante não vê número de versão na experiência pública; essa informação permanece técnica e histórica.
 
 A criação pública não exige registros prévios em `pessoas` ou `vinculos`. Os nomes dos participantes são armazenados em `nome_snapshot`, o tipo de vínculo e o **tempo de união** são preservados nos campos snapshot da aplicação, e `vinculo_id`/`pessoa_id` podem permanecer nulos.
+
+## D-029 — Confirmação de envio dos acessos somente após envio real
+**Data:** 2026-10-04  
+**Status:** vigente
+
+Depois que a avaliação pública for iniciada, o sistema deverá gerar dois acessos individuais, um para cada participante, e enviar os respectivos links ao e-mail cadastrado.
+
+A tela de confirmação deverá informar explicitamente que os links de acesso dos participantes foram enviados para o e-mail cadastrado.
+
+Essa mensagem só pode ser exibida após confirmação real de sucesso no envio pelo backend. Se o envio ainda não tiver ocorrido ou falhar, a interface deve apresentar uma mensagem correspondente e nunca afirmar que o e-mail foi enviado.
