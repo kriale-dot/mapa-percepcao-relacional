@@ -265,6 +265,31 @@ A edição do cadastro da pessoa altera apenas os dados administrativos atuais. 
 
 A exclusão física só é permitida enquanto a pessoa não possui vínculos nem aplicações associadas. Quando já houver histórico, a pessoa deve ser preservada e pode ser marcada como `INATIVO`.
 
+### Vínculos
+
+O gerenciamento de vínculos da V1 é acessado em `/profissional/vinculos` e utiliza rotas protegidas sob `/api/profissional/vinculos`.
+
+Cada vínculo pertence ao profissional autenticado e relaciona exatamente duas pessoas distintas, preservadas operacionalmente como lado A e lado B.
+
+Campos usados nesta etapa:
+
+- pessoa do lado A;
+- pessoa do lado B;
+- tipo do vínculo;
+- descrição opcional do tipo;
+- duração textual opcional;
+- status.
+
+Os estados adotados são `ATIVO` e `INATIVO`.
+
+O tipo é textual e permanece flexível. Quando `tipo = OUTRO`, a descrição personalizada é obrigatória.
+
+A validação de pessoas distintas ocorre no backend. As duas pessoas também devem pertencer ao mesmo profissional autenticado.
+
+Depois da criação, os lados A/B não são trocados pela edição comum do vínculo, preservando a estabilidade operacional definida no modelo de domínio.
+
+Um mesmo vínculo pode ser utilizado em múltiplas aplicações ao longo do tempo. A exclusão física é permitida somente enquanto não houver aplicações associadas; depois disso, o vínculo deve ser preservado e pode ser marcado como `INATIVO`.
+
 ### Instrumentos
 
 O gerenciamento inicial de instrumentos da V1 é acessado em `/profissional/instrumentos` e utiliza rotas protegidas sob `/api/profissional/instrumentos`.
