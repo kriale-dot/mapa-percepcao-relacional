@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `0.2.0-dev`  
 **Marco atual:** Etapa 4 em desenvolvimento — instrumentos e versionamento  
-**Etapa atual:** Etapa 4.4 concluída — itens/perguntas das seções  
-**Próximo passo:** iniciar a Etapa 4.5 — alternativas dos itens
+**Etapa atual:** Etapa 4.5 em validação — alternativas dos itens  
+**Próximo passo:** validar localmente criação, edição, ordenação, ativação e exclusão de alternativas
 
 ## 1. Situação atual
 
@@ -968,3 +968,82 @@ Não houve necessidade de migration nova nesta etapa, pois a tabela `itens` já 
 **Etapa 4.4 concluída.**
 
 **Próxima subetapa:** Etapa 4.5 — alternativas dos itens.
+
+## 24. Etapa 4.5 — alternativas dos itens
+
+Implementação criada no GitHub em 2026-10-04.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/AlternativeController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalAlternatives.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalItems.jsx`;
+- `mapa-relacional-web/src/App.jsx`.
+
+Rotas protegidas adicionadas:
+
+```text
+GET    /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens/{itemId}/alternativas
+POST   /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens/{itemId}/alternativas
+PUT    /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens/{itemId}/alternativas/{alternativeId}
+DELETE /api/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens/{itemId}/alternativas/{alternativeId}
+```
+
+Regras implementadas:
+
+- somente versões em `RASCUNHO` permitem alteração das alternativas;
+- valor obrigatório e único dentro do item;
+- rótulo obrigatório;
+- ordem inteira igual ou maior que zero;
+- ordem omitida na criação posiciona a alternativa automaticamente ao final;
+- alternativa pode ser ativa ou inativa;
+- listagem ordenada por `ordem` e depois por ID;
+- exclusão bloqueada quando a alternativa possui respostas vinculadas;
+- versões publicadas/arquivadas exibem alternativas somente para leitura;
+- toda operação valida profissional → instrumento → versão → seção → item.
+
+No frontend foi criada a rota:
+
+```text
+/profissional/instrumentos/{instrumentId}/versoes/{versionId}/secoes/{sectionId}/itens/{itemId}/alternativas
+```
+
+Cada item agora possui o botão `Alternativas`.
+
+### Validação local pendente
+
+Após `git pull`, executar na API:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+No frontend:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Na versão `1.0` em `RASCUNHO`, selecionar um item de resposta fechada e validar:
+
+1. abrir `Alternativas`;
+2. criar pelo menos três alternativas, por exemplo valores `1`, `2`, `3`;
+3. preencher rótulos, por exemplo `Nunca`, `Às vezes`, `Frequentemente`;
+4. deixar a ordem vazia em uma criação e confirmar posicionamento automático;
+5. editar valor, rótulo, ordem e estado ativo/inativo;
+6. tentar repetir o mesmo valor dentro do item e confirmar rejeição;
+7. confirmar que a listagem acompanha a ordem configurada;
+8. criar uma alternativa de teste e excluí-la;
+9. recarregar a página e confirmar persistência;
+10. abrir alternativas de um item pertencente a versão publicada/arquivada e confirmar modo somente leitura.
+
+Não há migration nova nesta etapa; a tabela `alternativas` já existe na estrutura base.
+
+**Próxima subetapa prevista:** revisar e fechar a Etapa 4 — estrutura completa de instrumentos.
