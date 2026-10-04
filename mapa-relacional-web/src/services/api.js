@@ -98,11 +98,84 @@ export function updateInstrument(id, instrument) {
   })
 }
 
+export function getInstrument(id) {
+  return request(`/api/profissional/instrumentos/${id}`, {
+    method: 'GET',
+    auth: true,
+  })
+}
+
 export function deleteInstrument(id) {
   return request(`/api/profissional/instrumentos/${id}`, {
     method: 'DELETE',
     auth: true,
   })
+}
+
+export function listInstrumentVersions(instrumentId) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes`,
+    {
+      method: 'GET',
+      auth: true,
+    },
+  )
+}
+
+export function createInstrumentVersion(instrumentId, numeroVersao) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes`,
+    {
+      method: 'POST',
+      auth: true,
+      body: JSON.stringify({ numero_versao: numeroVersao }),
+    },
+  )
+}
+
+export function updateInstrumentVersion(
+  instrumentId,
+  versionId,
+  numeroVersao,
+) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}`,
+    {
+      method: 'PUT',
+      auth: true,
+      body: JSON.stringify({ numero_versao: numeroVersao }),
+    },
+  )
+}
+
+export function publishInstrumentVersion(instrumentId, versionId) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/publicar`,
+    {
+      method: 'POST',
+      auth: true,
+    },
+  )
+}
+
+export function archiveInstrumentVersion(instrumentId, versionId) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}/arquivar`,
+    {
+      method: 'POST',
+      auth: true,
+    },
+  )
+}
+
+export function deleteInstrumentVersion(instrumentId, versionId) {
+  return request(
+    `/api/profissional/instrumentos/${instrumentId}/versoes/${versionId}`,
+    {
+      method: 'DELETE',
+      auth: true,
+    },
+  )
 }
 
 export { API_URL }
