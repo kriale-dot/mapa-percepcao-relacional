@@ -318,6 +318,48 @@ export function releaseApplicationFeedback(id) {
   )
 }
 
+export function resendParticipantAccess(id, side) {
+  return request(
+    `/api/profissional/aplicacoes/${id}/acessos/${side}/reenviar`,
+    {
+      method: 'POST',
+      auth: true,
+      body: JSON.stringify({}),
+    },
+  )
+}
+
+export function resendApplicationFeedback(id) {
+  return request(
+    `/api/profissional/aplicacoes/${id}/devolutiva/reenviar`,
+    {
+      method: 'POST',
+      auth: true,
+      body: JSON.stringify({}),
+    },
+  )
+}
+
+export function listAuditEvents(filters = {}) {
+  const params = new URLSearchParams()
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== '' && value !== null && value !== undefined) {
+      params.set(key, String(value))
+    }
+  })
+
+  const query = params.toString()
+
+  return request(
+    `/api/profissional/auditoria${query ? `?${query}` : ''}`,
+    {
+      method: 'GET',
+      auth: true,
+    },
+  )
+}
+
 export function getPublicResult(token) {
   return request(`/api/public/resultados/${token}`, {
     method: 'GET',
