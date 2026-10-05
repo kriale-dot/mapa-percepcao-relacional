@@ -2967,3 +2967,39 @@ composer check
 Depois, para uma Avaliação Conjugal já inserida anteriormente, executar novamente o seed atualizado para substituir as faixas antigas pelas três faixas oficiais.
 
 Validar com um casal de teste em que seja possível prever manualmente os acertos individuais e o score geral.
+### Ajuste do perfil — exclusão de fotografia e logotipo
+
+Em 2026-10-05, o perfil profissional foi ajustado para permitir a exclusão individual das imagens já cadastradas.
+
+Implementado:
+
+- botão `Excluir fotografia` quando existe fotografia cadastrada;
+- botão `Excluir logotipo` quando existe logotipo cadastrado;
+- confirmação antes da exclusão;
+- exclusão imediata, sem depender do botão `Salvar perfil`;
+- endpoint `DELETE /api/profissional/perfil/imagem/{tipo}`, com `tipo` igual a `foto` ou `logo`;
+- limpeza do campo correspondente no banco de dados;
+- remoção do arquivo físico local quando ele não é mais referenciado;
+- proteção para não apagar o arquivo físico quando a mesma URL ainda é usada pela outra imagem do perfil ou por um bloco do site;
+- evento `PERFIL_IMAGEM_EXCLUIDA` na auditoria.
+
+Arquivos alterados:
+
+- `mapa-relacional-api/src/Controller/ProfessionalController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalProfile.jsx`.
+
+Nenhuma migration nova foi necessária.
+
+Validação complementar:
+
+1. abrir `/profissional/perfil`;
+2. confirmar que os botões de exclusão aparecem somente quando há imagem;
+3. excluir apenas a fotografia e confirmar que o logotipo permanece;
+4. excluir apenas o logotipo e confirmar que a fotografia permanece;
+5. testar o caso em que fotografia e logotipo usam a mesma URL e confirmar que a primeira exclusão não quebra a imagem restante;
+6. confirmar que a imagem removida deixa de aparecer no site público;
+7. recarregar o perfil e confirmar persistência da exclusão;
+8. executar `npm run build` no frontend;
+9. executar `composer check` e `composer check-v1` na API.
