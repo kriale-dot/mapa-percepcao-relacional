@@ -2884,3 +2884,87 @@ Validação complementar da Etapa 11:
 8. recarregar o editor e confirmar persistência;
 9. abrir `/` e confirmar a imagem;
 10. executar `composer check-v1` e confirmar `public/uploads gravavel` e `Extensao fileinfo carregada`.
+
+### Correção funcional — score geral do casal
+
+Em 2026-10-05, a especificação do cálculo foi completada.
+
+A implementação anterior possuía os dois scores direcionais, mas faltava o **score geral**.
+
+Nova regra:
+
+```text
+Score A:
+A→B × B→B
+
+Score B:
+B→A × A→A
+
+Score geral por item:
+1 ponto somente quando
+(A→B = B→B) E (B→A = A→A)
+```
+
+Nova migration:
+
+```text
+010_resultado_geral.sql
+```
+
+Nova tabela:
+
+```text
+resultados_gerais
+```
+
+Campos principais:
+
+- `aplicacao_id`;
+- `itens_validos`;
+- `acertos_gerais`;
+- `percentual`;
+- `faixa_id`;
+- `faixa`;
+- `algoritmo_versao`;
+- `calculado_em`.
+
+O algoritmo passa para:
+
+```text
+2.0
+```
+
+O questionário também passa a apresentar explicitamente as duas perguntas:
+
+- “O que eu penso disso?”
+- para casal: “O que eu acredito que meu cônjuge pensa disso?”
+- para outros vínculos: “O que eu acredito que a outra pessoa pensa disso?”
+
+A devolutiva profissional e a página pública passam a mostrar:
+
+- score individual de A;
+- score individual de B;
+- score geral;
+- percentual geral;
+- faixa geral;
+- barra de acerto.
+
+Cores das faixas:
+
+- Ruim: vermelho;
+- Regular: amarelo;
+- Bom: verde.
+
+O seed `seeds/avaliacao-conjugal.sql` foi corrigido para usar somente as três faixas oficiais, removendo a adaptação anterior de cinco faixas.
+
+Validação pendente:
+
+```powershell
+composer migrate
+composer check-domain
+composer check
+```
+
+Depois, para uma Avaliação Conjugal já inserida anteriormente, executar novamente o seed atualizado para substituir as faixas antigas pelas três faixas oficiais.
+
+Validar com um casal de teste em que seja possível prever manualmente os acertos individuais e o score geral.
