@@ -9,16 +9,19 @@
 -- 4. cria uma seção com 15 itens;
 -- 5. cria as alternativas Bom / Regular / Fraco em todos os itens;
 -- 6. permite "Não se aplica" apenas no item sobre filhos/cuidados;
--- 7. cria 5 faixas interpretativas compatíveis com a contagem original
---    quando os 15 itens são válidos.
+-- 7. configura as 3 faixas oficiais do score: Ruim, Regular e Bom.
 --
--- IMPORTANTE:
--- O material original determina que, se o casal não tiver filhos, a última
--- linha seja eliminada e se subtraia 1 dos intervalos de interpretação.
--- A plataforma atual recalcula percentuais pelo número de itens válidos.
--- Portanto, a regra dinâmica dos intervalos para 14 itens não é reproduzida
--- exatamente por estas faixas fixas. Os itens e as alternativas, porém,
--- correspondem ao material original.
+-- Regra de score implementada pela plataforma:
+-- - score de A: compara o que A acredita que B pensa com a resposta de B;
+-- - score de B: compara o que B acredita que A pensa com a resposta de A;
+-- - score geral: um item vale 1 ponto somente quando AS DUAS comparações
+--   daquele item coincidem.
+-- - percentual geral = acertos gerais / itens válidos × 100.
+-- - faixas: Ruim 0–33, Regular 34–66, Bom 67–100.
+--
+-- O item sobre filhos/cuidados permite "Não se aplica". Quando excluído,
+-- ele deixa de compor o denominador para os dois participantes e para o
+-- score geral.
 
 SET NAMES utf8mb4;
 
@@ -224,15 +227,15 @@ ON DUPLICATE KEY UPDATE
 -- 7. FAIXAS DE RESULTADO
 -- =========================================================
 --
--- A fonte trabalha com ACERTOS em 15 itens:
---   0-3   -> abaixo de 4
---   4-7   -> descoberta / reinvestimento
---   8-11  -> pontos de atenção
---   12-13 -> boa percepção
---   14-15 -> ótima percepção
+-- Faixas oficiais:
+-- 0,00–33,99  = Ruim
+-- 34,00–66,99 = Regular
+-- 67,00–100   = Bom
 --
--- Como a plataforma calcula percentual, os limites abaixo usam pontos
--- intermediários entre as porcentagens possíveis de cada contagem.
+-- Os limites contínuos evitam lacunas quando o percentual possui decimais.
+
+DELETE FROM resultado_faixas
+WHERE instrumento_versao_id = @versao_id;
 
 INSERT INTO resultado_faixas (
     instrumento_versao_id,
@@ -243,16 +246,9 @@ INSERT INTO resultado_faixas (
     ordem
 )
 VALUES
-    (@versao_id, 'MUITO_BAIXA', 'Percepção muito baixa', 0.00, 23.33, 1),
-    (@versao_id, 'DESCOBERTA', 'Em fase de descoberta', 23.34, 50.00, 2),
-    (@versao_id, 'ATENCAO', 'Percepção com pontos de atenção', 50.01, 76.66, 3),
-    (@versao_id, 'BOA', 'Boa percepção', 76.67, 89.99, 4),
-    (@versao_id, 'OTIMA', 'Ótima percepção', 90.00, 100.00, 5)
-ON DUPLICATE KEY UPDATE
-    rotulo = VALUES(rotulo),
-    minimo = VALUES(minimo),
-    maximo = VALUES(maximo),
-    ordem = VALUES(ordem);
+    (@versao_id, 'RUIM', 'Ruim', 0.00, 33.99, 1),
+    (@versao_id, 'REGULAR', 'Regular', 34.00, 66.99, 2),
+    (@versao_id, 'BOM', 'Bom', 67.00, 100.00, 3);
 
 COMMIT;
 
