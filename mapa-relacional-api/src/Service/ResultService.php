@@ -10,7 +10,7 @@ use RuntimeException;
 
 final class ResultService
 {
-    public const ALGORITHM_VERSION = '1.0';
+    public const ALGORITHM_VERSION = '2.0';
 
     /**
      * @return array<string,mixed>
@@ -108,6 +108,8 @@ final class ResultService
             ],
         ];
 
+        $comparisonsByItem = [];
+
         foreach ($items as $item) {
             $itemId = (int) $item['id'];
 
@@ -129,6 +131,8 @@ final class ResultService
                     $perceived,
                     $self
                 );
+
+                $comparisonsByItem[$itemId][$direction] = $comparison;
 
                 $insertComparison->execute([
                     'aplicacao_id' => $applicationId,
@@ -158,6 +162,104 @@ final class ResultService
                 }
             }
         }
+
+        $general = [
+            'itens_validos' => 0,
+            'acertos_gerais' => 0,
+        ];
+
+        foreach ($items as $item) {
+            $itemId = (int) $item['id'];
+            $comparisonA = $comparisonsByItem[$itemId]['A_SOBRE_B'] ?? null;
+            $comparisonB = $comparisonsByItem[$itemId]['B_SOBRE_A'] ?? null;
+
+            if (
+                $comparisonA === null
+                || $comparisonB === null
+                || !$comparisonA['comparavel']
+                || !$comparisonB['comparavel']
+            ) {
+                continue;
+            }
+
+            $general['itens_validos']++;
+
+            if (
+                $comparisonA['coincide'] === true
+                && $comparisonB['coincide'] === true
+            ) {
+                $general['acertos_gerais']++;
+            }
+        }
+
+        $generalPercentage = $general['itens_validos'] > 0
+            ? round(
+                (
+                    $general['acertos_gerais']
+                    / $general['itens_validos']
+                ) * 100,
+                2
+            )
+            : null;
+
+        $generalBand = $generalPercentage === null
+            ? null
+            : $this->findBand(
+                $pdo,
+                (int) $application['instrumento_versao_id'],
+                $generalPercentage
+            );
+
+        $general['percentual'] = $generalPercentage;
+        $general['faixa'] = $generalBand['rotulo'] ?? null;
+        $general['faixa_id'] = isset($generalBand['id'])
+            ? (int) $generalBand['id']
+            : null;
+
+        $upsertGeneral = $pdo->prepare(
+            'INSERT INTO resultados_gerais (
+                aplicacao_id,
+                itens_validos,
+                acertos_gerais,
+                percentual,
+                faixa_id,
+                faixa,
+                algoritmo_versao,
+                calculado_em
+             ) VALUES (
+                :aplicacao_id,
+                :itens_validos,
+                :acertos_gerais,
+                :percentual,
+                :faixa_id,
+                :faixa,
+                :algoritmo_versao,
+                NOW()
+             )
+             ON DUPLICATE KEY UPDATE
+                itens_validos = :u_itens_validos,
+                acertos_gerais = :u_acertos_gerais,
+                percentual = :u_percentual,
+                faixa_id = :u_faixa_id,
+                faixa = :u_faixa,
+                algoritmo_versao = :u_algoritmo_versao,
+                calculado_em = NOW()'
+        );
+        $upsertGeneral->execute([
+            'aplicacao_id' => $applicationId,
+            'itens_validos' => $general['itens_validos'],
+            'acertos_gerais' => $general['acertos_gerais'],
+            'percentual' => $generalPercentage,
+            'faixa_id' => $general['faixa_id'],
+            'faixa' => $general['faixa'],
+            'algoritmo_versao' => self::ALGORITHM_VERSION,
+            'u_itens_validos' => $general['itens_validos'],
+            'u_acertos_gerais' => $general['acertos_gerais'],
+            'u_percentual' => $generalPercentage,
+            'u_faixa_id' => $general['faixa_id'],
+            'u_faixa' => $general['faixa'],
+            'u_algoritmo_versao' => self::ALGORITHM_VERSION,
+        ]);
 
         foreach ($summary as $direction => &$result) {
             $valid = $result['comparacoes_validas'];
@@ -233,6 +335,7 @@ final class ResultService
             'aplicacao_id' => $applicationId,
             'algoritmo_versao' => self::ALGORITHM_VERSION,
             'resultados' => $summary,
+            'resultado_geral' => $general,
         ];
     }
 
@@ -269,6 +372,37 @@ final class ResultService
              ORDER BY FIELD(r.sentido, \'A_SOBRE_B\', \'B_SOBRE_A\')'
         );
         $resultsStmt->execute(['aplicacao_id' => $applicationId]);
+
+        $generalStmt = $pdo->prepare(
+            'SELECT
+                id,
+                itens_validos,
+                acertos_gerais,
+                percentual,
+                faixa,
+                algoritmo_versao,
+                calculado_em
+             FROM resultados_gerais
+             WHERE aplicacao_id = :aplicacao_id
+             LIMIT 1'
+        );
+        $generalStmt->execute(['aplicacao_id' => $applicationId]);
+
+        $generalResult = $generalStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($generalResult !== false) {
+            $generalResult['id'] = (int) $generalResult['id'];
+            $generalResult['itens_validos'] =
+                (int) $generalResult['itens_validos'];
+            $generalResult['acertos_gerais'] =
+                (int) $generalResult['acertos_gerais'];
+            $generalResult['percentual'] =
+                $generalResult['percentual'] === null
+                    ? null
+                    : (float) $generalResult['percentual'];
+        } else {
+            $generalResult = null;
+        }
 
         $comparisonStmt = $pdo->prepare(
             'SELECT
@@ -388,6 +522,7 @@ final class ResultService
                 },
                 $resultsStmt->fetchAll(PDO::FETCH_ASSOC)
             ),
+            'resultado_geral' => $generalResult,
             'comparacoes' => $comparisons,
             'itens_excluidos' => $excludedItems,
             'secoes' => $this->buildSectionResults(
