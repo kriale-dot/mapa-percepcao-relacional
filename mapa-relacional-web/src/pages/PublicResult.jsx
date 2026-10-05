@@ -8,23 +8,23 @@ function navigate(path) {
 
 function resultLabel(direction, feedback) {
   return direction === 'A_SOBRE_B'
-    ? `Percepção de ${feedback.participante_a} sobre ${feedback.participante_b}`
-    : `Percepção de ${feedback.participante_b} sobre ${feedback.participante_a}`
+    ? `Score de ${feedback.participante_a}`
+    : `Score de ${feedback.participante_b}`
 }
 
 function bandClasses(band) {
   const normalized = String(band || '').toLowerCase()
 
   if (normalized === 'bom') {
-    return 'bg-[#88B098]/22 border-[#88B098]/55'
+    return 'bg-green-50 border-green-300'
   }
 
   if (normalized === 'regular') {
-    return 'bg-[#D8B078]/18 border-[#D8B078]/55'
+    return 'bg-yellow-50 border-yellow-300'
   }
 
   if (normalized === 'ruim') {
-    return 'bg-[#C97C5D]/14 border-[#C97C5D]/45'
+    return 'bg-red-50 border-red-300'
   }
 
   return 'bg-[#A8C8D0]/15 border-[#A8C8D0]/45'
@@ -130,6 +130,65 @@ export default function PublicResult({ token }) {
           </div>
         </section>
 
+        {feedback.resultado_geral ? (
+          <section
+            className={[
+              'mt-7 rounded-3xl border p-7 shadow-sm',
+              bandClasses(feedback.resultado_geral.faixa),
+            ].join(' ')}
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#385048]/55">
+              Score geral do casal
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold">
+              {feedback.resultado_geral.acertos_gerais} de{' '}
+              {feedback.resultado_geral.itens_validos} acertos completos
+            </h2>
+
+            <div className="mt-5 flex flex-wrap items-end gap-3">
+              <span className="text-5xl font-semibold">
+                {feedback.resultado_geral.percentual == null
+                  ? '—'
+                  : `${Number(feedback.resultado_geral.percentual).toFixed(2)}%`}
+              </span>
+              {feedback.resultado_geral.faixa ? (
+                <span className="mb-1 rounded-full bg-white/80 px-3 py-1 text-sm font-semibold">
+                  {feedback.resultado_geral.faixa}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="mt-4 h-3 overflow-hidden rounded-full bg-black/10">
+              <div
+                className={[
+                  'h-full rounded-full',
+                  String(feedback.resultado_geral.faixa || '').toLowerCase() === 'bom'
+                    ? 'bg-green-500'
+                    : String(feedback.resultado_geral.faixa || '').toLowerCase() === 'regular'
+                      ? 'bg-yellow-400'
+                      : String(feedback.resultado_geral.faixa || '').toLowerCase() === 'ruim'
+                        ? 'bg-red-500'
+                        : 'bg-[#385048]',
+                ].join(' ')}
+                style={{
+                  width: `${Math.max(
+                    0,
+                    Math.min(
+                      100,
+                      Number(feedback.resultado_geral.percentual || 0),
+                    ),
+                  )}%`,
+                }}
+              />
+            </div>
+
+            <p className="mt-4 text-sm leading-6 text-[#385048]/70">
+              O score geral soma 1 ponto somente quando as duas percepções do
+              mesmo item coincidem entre os cônjuges.
+            </p>
+          </section>
+        ) : null}
+
         <div className="mt-7 grid gap-5 lg:grid-cols-2">
           {['A_SOBRE_B', 'B_SOBRE_A'].map((direction) => {
             const item = resultsByDirection[direction]
@@ -166,7 +225,16 @@ export default function PublicResult({ token }) {
 
                 <div className="mt-4 h-3 overflow-hidden rounded-full bg-white/55">
                   <div
-                    className="h-full rounded-full bg-[#385048]"
+                    className={[
+                      'h-full rounded-full',
+                      String(item?.faixa || '').toLowerCase() === 'bom'
+                        ? 'bg-green-500'
+                        : String(item?.faixa || '').toLowerCase() === 'regular'
+                          ? 'bg-yellow-400'
+                          : String(item?.faixa || '').toLowerCase() === 'ruim'
+                            ? 'bg-red-500'
+                            : 'bg-[#385048]',
+                    ].join(' ')}
                     style={{
                       width: `${Math.max(
                         0,
