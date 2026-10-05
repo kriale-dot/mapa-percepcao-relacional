@@ -32,6 +32,10 @@ function actionLabel(action) {
     DEVOLUTIVA_LIBERADA: 'Devolutiva liberada',
     DEVOLUTIVA_REENVIADA: 'Devolutiva reenviada',
     ACESSO_PARTICIPANTE_REENVIADO: 'Acesso de participante reenviado',
+    SITE_BLOCO_CRIADO: 'Bloco do site criado',
+    SITE_BLOCO_ATUALIZADO: 'Bloco do site atualizado',
+    SITE_BLOCO_EXCLUIDO: 'Bloco do site excluído',
+    SITE_BLOCO_REORDENADO: 'Bloco do site reordenado',
   }
 
   return labels[action] || action
