@@ -310,11 +310,13 @@ function InstitutionalBlock({ block, professional }) {
     return (
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="overflow-hidden rounded-3xl border border-[#A8C8B8]/40 bg-white shadow-sm">
-          <img
-            src={block.midia_url}
-            alt={block.texto_alternativo || block.titulo || ''}
-            className="max-h-[680px] w-full object-cover"
-          />
+          <div className="flex justify-center p-6 md:p-8">
+            <img
+              src={block.midia_url}
+              alt={block.texto_alternativo || block.titulo || ''}
+              className="h-auto w-auto max-w-full"
+            />
+          </div>
           {block.titulo || block.descricao || block.conteudo ? (
             <div className="p-6 md:p-8">
               <SectionHeading block={block} />
