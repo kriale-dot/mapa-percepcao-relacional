@@ -91,10 +91,16 @@ final class ParticipantAccessController
             );
         }
 
-        if ($gender === '' || strlen($gender) > 30) {
+        $allowedGenders = [
+            'Masculino',
+            'Feminino',
+            'Outro',
+        ];
+
+        if (!in_array($gender, $allowedGenders, true)) {
             return $this->validation(
                 $response,
-                'Informe o genero com no maximo 30 caracteres.'
+                'Selecione Masculino, Feminino ou Outro.'
             );
         }
 
