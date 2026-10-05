@@ -257,13 +257,18 @@ $pdo->beginTransaction();
 
 try {
     if ($applicationIds !== []) {
-        $counts['auditoria_aplicacoes'] = deleteByIds(
-            $pdo,
-            'auditoria_eventos',
-            'entidade_id',
+        [$auditAppIn, $auditAppParams] = placeholders(
             $applicationIds,
             'audit_app'
         );
+
+        $auditAppStmt = $pdo->prepare(
+            "DELETE FROM auditoria_eventos
+              WHERE entidade_tipo = 'APLICACAO'
+                AND entidade_id IN ({$auditAppIn})"
+        );
+        $auditAppStmt->execute($auditAppParams);
+        $counts['auditoria_aplicacoes'] = $auditAppStmt->rowCount();
 
         $counts['devolutivas'] = deleteByIds(
             $pdo,
