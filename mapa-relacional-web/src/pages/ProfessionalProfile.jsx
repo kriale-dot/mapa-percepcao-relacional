@@ -182,8 +182,8 @@ export default function ProfessionalProfile() {
               Informações profissionais
             </h1>
             <p className="mt-3 text-sm leading-6 text-[#385048]/70">
-              Estes dados poderão ser usados na área profissional e,
-              futuramente, no site institucional.
+              Estes dados são usados na área profissional e podem ser
+              exibidos no site institucional.
             </p>
           </div>
 
