@@ -16,6 +16,7 @@ final class SiteController
         'TITULO',
         'TEXTO',
         'IMAGEM',
+        'TEXTO_IMAGEM',
         'VIDEO',
         'AUDIO',
         'PERFIL',
@@ -728,7 +729,11 @@ final class SiteController
         }
 
         if (
-            in_array($type, ['IMAGEM', 'VIDEO', 'AUDIO'], true)
+            in_array(
+                $type,
+                ['IMAGEM', 'TEXTO_IMAGEM', 'VIDEO', 'AUDIO'],
+                true
+            )
             && $mediaUrl === null
         ) {
             return $this->validation(
