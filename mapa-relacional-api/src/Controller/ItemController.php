@@ -430,10 +430,16 @@ final class ItemController
             );
         }
 
-        if ($tipoResposta === '' || strlen($tipoResposta) > 40) {
+        $allowedResponseTypes = [
+            'ESCOLHA_UNICA',
+            'NUMERICO',
+            'TEXTO',
+        ];
+
+        if (!in_array($tipoResposta, $allowedResponseTypes, true)) {
             return $this->validation(
                 $response,
-                'Tipo de resposta e obrigatorio e deve ter no maximo 40 caracteres.'
+                'Tipo de resposta invalido. Selecione Escolha unica, Numerico ou Texto livre.'
             );
         }
 
