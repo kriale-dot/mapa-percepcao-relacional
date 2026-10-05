@@ -59,7 +59,8 @@
       "php -l src/Service/RateLimitService.php",
       "php -l bin/backup-db.php",
       "php -l src/Controller/SiteController.php",
-      "php -l bin/clean-db-keep-professionals.php"
+      "php -l bin/clean-db-keep-professionals.php",
+      "php -l bin/remove-extra-evaluations.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
@@ -67,6 +68,7 @@
     "check-smtp": "php bin/check-smtp.php",
     "check-v1": "php bin/check-v1.php",
     "backup-db": "php bin/backup-db.php",
-    "clean-db-keep-professionals": "php bin/clean-db-keep-professionals.php"
+    "clean-db-keep-professionals": "php bin/clean-db-keep-professionals.php",
+    "remove-extra-evaluations": "php bin/remove-extra-evaluations.php"
   }
 }
