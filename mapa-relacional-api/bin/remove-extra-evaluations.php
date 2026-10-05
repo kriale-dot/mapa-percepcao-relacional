@@ -37,6 +37,7 @@ $keepName = 'Avaliação Conjugal';
 $targetNames = [
     'Amizade',
     'Avaliação e amizade',
+    'Avaliação de amizade',
 ];
 
 $keepStmt = $pdo->prepare(
