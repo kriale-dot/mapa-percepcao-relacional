@@ -30,12 +30,13 @@ composer migrate
 composer check-domain
 ```
 
-A V1 exige as migrations 001 a 008, incluindo:
+A V1 exige as migrations 001 a 009, incluindo:
 
 - resultados e comparações;
 - devolutivas;
 - auditoria;
-- rate limit.
+- rate limit;
+- site institucional configurável.
 
 ## 3. Configuração de ambiente
 
@@ -174,22 +175,25 @@ O checklist verifica, entre outros:
 
 Confirmar pelo menos um fluxo completo:
 
-1. visitante escolhe uma avaliação pública;
-2. informa participantes, e-mail, tipo de vínculo e tempo de união;
-3. Brevo envia os dois acessos;
-4. A e B abrem seus links;
-5. ambos se identificam;
-6. respostas são salvas e retomadas;
-7. “Não se aplica” funciona globalmente;
-8. A e B concluem;
-9. resultados são calculados;
-10. profissional consulta resultados;
-11. profissional prepara e libera devolutiva;
-12. e-mail da devolutiva é recebido;
-13. link público abre somente o conteúdo liberado;
-14. auditoria registra os eventos relevantes;
-15. reenvio de acesso invalida o link anterior;
-16. reenvio da devolutiva invalida o link anterior.
+1. visitante abre o site institucional público e vê os blocos configurados;
+2. visitante escolhe uma avaliação pública;
+3. informa participantes, e-mail, tipo de vínculo e tempo de união;
+4. Brevo envia os dois acessos;
+5. A e B abrem seus links;
+6. ambos se identificam;
+7. respostas são salvas e retomadas;
+8. “Não se aplica” funciona globalmente;
+9. A e B concluem;
+10. resultados são calculados;
+11. profissional consulta resultados;
+12. profissional prepara e libera devolutiva;
+13. e-mail da devolutiva é recebido;
+14. link público abre somente o conteúdo liberado;
+15. auditoria registra os eventos relevantes;
+16. reenvio de acesso invalida o link anterior;
+17. reenvio da devolutiva invalida o link anterior;
+18. editor do site permite criar, editar, ocultar e reordenar blocos;
+19. site institucional responde adequadamente em desktop, tablet e smartphone.
 
 ## 11. Observação de escopo
 
