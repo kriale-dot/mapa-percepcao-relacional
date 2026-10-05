@@ -14,10 +14,12 @@ import ProfessionalApplicationResults from './pages/ProfessionalApplicationResul
 import ProfessionalApplicationDetail from './pages/ProfessionalApplicationDetail'
 import ProfessionalDashboard from './pages/ProfessionalDashboard'
 import ProfessionalAudit from './pages/ProfessionalAudit'
+import ProfessionalSiteEditor from './pages/ProfessionalSiteEditor'
 import PublicEvaluations from './pages/PublicEvaluations'
 import PublicEvaluationStart from './pages/PublicEvaluationStart'
 import PublicParticipantAccess from './pages/PublicParticipantAccess'
 import PublicResult from './pages/PublicResult'
+import PublicInstitutionalSite from './pages/PublicInstitutionalSite'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -94,6 +96,10 @@ function App() {
 
   if (path === '/profissional/auditoria') {
     return <ProfessionalAudit />
+  }
+
+  if (path === '/profissional/site') {
+    return <ProfessionalSiteEditor />
   }
 
   if (path === '/profissional/perfil') {
@@ -215,7 +221,7 @@ function App() {
     return <ProfessionalArea />
   }
 
-  return <PublicHome />
+  return <PublicInstitutionalSite />
 }
 
 function PublicHome() {
