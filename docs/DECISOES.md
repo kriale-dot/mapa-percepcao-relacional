@@ -183,7 +183,7 @@ As rotas iniciais do frontend são `/profissional/login` e `/profissional`.
 
 ## D-016 — Perfil profissional da V1
 **Data:** 2026-10-03  
-**Status:** vigente
+**Status:** parcialmente substituída por D-044
 
 O perfil profissional é mantido no próprio registro de `profissionais`. A migration `003_profissional_perfil.sql` acrescenta `descricao`, `atuacao`, `foto_url`, `logo_url` e `dados_contato`.
 
@@ -692,3 +692,38 @@ Consequências:
 - somente após validar o editor e a renderização pública responsiva poderá ocorrer novo fechamento formal da V1.
 
 O requisito não será deslocado para V2 porque já fazia parte do escopo original.
+
+## D-044 — Imagens institucionais usam upload, não digitação manual de URL
+**Data:** 2026-10-05  
+**Status:** vigente
+
+A decisão inicial de usar URL manual para fotografia, logotipo e imagens do site foi substituída.
+
+Na interface da V1:
+
+- fotografia do profissional é enviada por upload;
+- logotipo é enviado por upload;
+- bloco do tipo `IMAGEM` usa upload;
+- não é necessário o usuário informar URL para essas imagens;
+- vídeo e áudio continuam aceitando URL nesta etapa.
+
+O backend salva os arquivos em:
+
+```text
+mapa-relacional-api/public/uploads/site/{profissional_id}/
+```
+
+e persiste nas colunas já existentes somente a URL pública gerada pelo sistema. Por isso não foi necessária nova migration.
+
+Regras do upload de imagem:
+
+- formatos permitidos: JPG, PNG e WEBP;
+- limite padrão: 5 MB, configurável por `SITE_IMAGE_MAX_MB`;
+- o tipo real do arquivo é validado por `fileinfo`, não apenas pela extensão informada pelo navegador;
+- nomes de arquivo são aleatórios;
+- arquivos enviados não entram no Git;
+- a pasta de uploads bloqueia execução de scripts por configuração Apache;
+- `composer check-v1` verifica `fileinfo` e permissão real de gravação em `public/uploads`;
+- o envio é registrado na auditoria sem armazenar o conteúdo do arquivo.
+
+D-044 substitui especificamente a parte de D-016 que dizia que fotografia e logotipo seriam mantidos apenas por URL manual.
