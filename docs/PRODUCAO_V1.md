@@ -143,6 +143,24 @@ Os backups estão ignorados pelo Git e não devem ser versionados.
 
 Além de criar o backup, fazer periodicamente um teste de restauração em banco separado antes de considerar a política de backup validada.
 
+## 8.1 Uploads do site institucional
+
+O servidor precisa permitir gravação em:
+
+```text
+mapa-relacional-api/public/uploads/
+```
+
+Configuração padrão:
+
+```text
+SITE_IMAGE_MAX_MB=5
+```
+
+A extensão PHP `fileinfo` deve estar habilitada.
+
+Os arquivos enviados pelo usuário ficam fora do Git. Em produção, a pasta de uploads deve fazer parte da estratégia de backup de arquivos, separadamente do backup SQL do banco.
+
 ## 9. Checklist automatizado
 
 Executar:
