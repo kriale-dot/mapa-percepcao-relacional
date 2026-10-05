@@ -849,3 +849,29 @@ A V1 passa a operar em regime de congelamento funcional:
 A homologação final ainda deve cobrir o fluxo completo em ambiente de produção/homologação, especialmente as áreas que foram implementadas sem rodada formal completa de testes antes do avanço.
 
 Após o fechamento, qualquer expansão funcional deve ser tratada como planejamento de V2.
+
+### Site institucional configurável — correção de escopo
+
+O site institucional é requisito obrigatório da V1, não item de V2.
+
+A raiz pública `/` deve representar o site institucional do profissional, e não uma home técnica ou estática.
+
+O profissional administra o conteúdo em `/profissional/site` por blocos independentes.
+
+Os blocos podem representar título, texto, imagem, vídeo, áudio, perfil profissional, apresentação, chamada para ação, link/botão ou seção de avaliações.
+
+O site público usa os dados mantidos em `profissionais` para identidade profissional:
+
+- nome;
+- descrição;
+- atuação;
+- fotografia;
+- logotipo;
+- telefone/e-mail;
+- dados de contato.
+
+Somente blocos `ATIVO` e visíveis são exibidos publicamente, sempre respeitando a ordem configurada.
+
+A identidade visual oficial permanece a paleta do projeto e o layout deve ser responsivo para desktop, tablet e smartphone.
+
+A identificação desta lacuna invalidou o fechamento formal anterior da V1. O projeto voltou temporariamente a `1.0.0-rc.1` até a validação da Etapa 11.
