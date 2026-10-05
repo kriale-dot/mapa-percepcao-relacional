@@ -2937,8 +2937,7 @@ O algoritmo passa para:
 O questionário também passa a apresentar explicitamente as duas perguntas:
 
 - “O que eu penso disso?”
-- para casal: “O que eu acredito que meu cônjuge pensa disso?”
-- para outros vínculos: “O que eu acredito que a outra pessoa pensa disso?”
+- “O que eu acredito que o outro pensa disso?”
 
 A devolutiva profissional e a página pública passam a mostrar:
 
