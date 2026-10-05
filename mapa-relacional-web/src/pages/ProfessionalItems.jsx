@@ -14,7 +14,6 @@ function navigate(path) {
 }
 
 const emptyForm = {
-  codigo: '',
   texto: '',
   tipo_resposta: '',
   ordem: '',
@@ -84,7 +83,6 @@ export default function ProfessionalItems({
 
     setEditingId(item.id)
     setForm({
-      codigo: item.codigo || '',
       texto: item.texto || '',
       tipo_resposta: item.tipo_resposta || '',
       ordem: String(item.ordem),
@@ -114,7 +112,6 @@ export default function ProfessionalItems({
     setMessage('')
 
     const payload = {
-      codigo: form.codigo,
       texto: form.texto,
       tipo_resposta: form.tipo_resposta,
       permite_nao_se_aplica: form.permite_nao_se_aplica,
@@ -249,16 +246,16 @@ export default function ProfessionalItems({
                 <span className="text-sm font-medium">Código</span>
                 <input
                   type="text"
-                  required
-                  maxLength="80"
-                  value={form.codigo}
-                  onChange={(event) =>
-                    updateField('codigo', event.target.value)
+                  readOnly
+                  value={
+                    editingId
+                      ? items.find((item) => item.id === editingId)?.codigo || ''
+                      : 'Gerado automaticamente ao salvar'
                   }
-                  className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20"
+                  className="mt-2 w-full cursor-not-allowed rounded-xl border border-[#385048]/15 bg-[#385048]/5 px-4 py-3 text-[#385048]/65 outline-none"
                 />
                 <span className="mt-2 block text-xs text-[#385048]/55">
-                  O código deve ser único dentro desta seção.
+                  O sistema gera um código único automaticamente, como ITEM_001.
                 </span>
               </label>
 
