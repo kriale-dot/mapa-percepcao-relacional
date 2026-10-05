@@ -36,6 +36,7 @@ function actionLabel(action) {
     SITE_BLOCO_ATUALIZADO: 'Bloco do site atualizado',
     SITE_BLOCO_EXCLUIDO: 'Bloco do site excluído',
     SITE_BLOCO_REORDENADO: 'Bloco do site reordenado',
+    SITE_IMAGEM_ENVIADA: 'Imagem do site enviada',
   }
 
   return labels[action] || action
