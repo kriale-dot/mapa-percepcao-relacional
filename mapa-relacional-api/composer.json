@@ -57,7 +57,8 @@
       "php -l bin/check-v1.php",
       "php -l src/Controller/AuditController.php",
       "php -l src/Service/RateLimitService.php",
-      "php -l bin/backup-db.php"
+      "php -l bin/backup-db.php",
+      "php -l src/Controller/SiteController.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
