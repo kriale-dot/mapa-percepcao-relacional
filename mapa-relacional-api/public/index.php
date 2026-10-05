@@ -179,6 +179,10 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->put('/senha', [$authController, 'changePassword']);
     $group->get('/perfil', [$professionalController, 'profile']);
     $group->put('/perfil', [$professionalController, 'updateProfile']);
+    $group->delete(
+        '/perfil/imagem/{tipo:foto|logo}',
+        [$professionalController, 'deleteProfileImage']
+    );
 
     $group->post('/site/upload-imagem', [$siteController, 'uploadImage']);
     $group->get('/site/blocos', [$siteController, 'index']);
