@@ -1,3 +1,5 @@
+> **STATUS: RETRATADO EM 2026-10-05** — este fechamento foi considerado prematuro porque o site institucional configurável, requisito explícito da V1, ainda não estava implementado. A V1 foi reaberta como `1.0.0-rc.1`. Este documento permanece apenas como registro histórico e deverá ser substituído por um novo fechamento após a validação da Etapa 11.
+
 # Fechamento formal da V1
 
 **Produto:** Avaliação de Percepção Relacional  
@@ -8,7 +10,7 @@
 
 ## 1. Estado formal
 
-A V1 está **formalmente encerrada em escopo e desenvolvimento funcional**.
+Este fechamento está **retratado** e não representa mais o estado atual do projeto.
 
 Isso significa que:
 
