@@ -18,6 +18,7 @@ const typeLabels = {
   TITULO: 'Título',
   TEXTO: 'Texto',
   IMAGEM: 'Imagem',
+  TEXTO_IMAGEM: 'Título + texto + imagem',
   VIDEO: 'Vídeo',
   AUDIO: 'Áudio',
   PERFIL: 'Identificação profissional',
@@ -427,9 +428,15 @@ function BlockFields({
   onImageUpload,
   uploading = false,
 }) {
-  const isImage = block.tipo === 'IMAGEM'
+  const isImage = ['IMAGEM', 'TEXTO_IMAGEM'].includes(block.tipo)
   const externalMediaType = ['VIDEO', 'AUDIO'].includes(block.tipo)
-  const hasLink = ['IMAGEM', 'CTA', 'LINK', 'AVALIACAO'].includes(block.tipo)
+  const hasLink = [
+    'IMAGEM',
+    'TEXTO_IMAGEM',
+    'CTA',
+    'LINK',
+    'AVALIACAO',
+  ].includes(block.tipo)
 
   return (
     <div className="mt-5 grid gap-4">
@@ -606,7 +613,7 @@ function BlockFields({
             />
           </label>
 
-          {block.tipo !== 'IMAGEM' ? (
+          {!['IMAGEM', 'TEXTO_IMAGEM'].includes(block.tipo) ? (
             <label className="block">
               <span className="text-sm font-medium">Texto do botão/link</span>
               <input
