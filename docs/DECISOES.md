@@ -498,7 +498,7 @@ A conclusão não apaga respostas nem itens excluídos.
 
 ## D-034 — Resultado técnico é calculado por sentido e versionado
 **Data:** 2026-10-04  
-**Status:** vigente
+**Status:** parcialmente substituída por D-045
 
 A Etapa 7 calcula dois resultados independentes:
 
@@ -727,3 +727,57 @@ Regras do upload de imagem:
 - o envio é registrado na auditoria sem armazenar o conteúdo do arquivo.
 
 D-044 substitui especificamente a parte de D-016 que dizia que fotografia e logotipo seriam mantidos apenas por URL manual.
+
+## D-045 — Score geral exige coincidência nos dois sentidos do mesmo item
+**Data:** 2026-10-05  
+**Status:** vigente
+
+A regra de resultado geral foi definida e substitui a parte de D-034 que mantinha a consolidação global em aberto.
+
+Cada participante continua recebendo um score individual:
+
+```text
+Score de A = A→B comparado com B→B
+Score de B = B→A comparado com A→A
+```
+
+Para cada item válido:
+
+- se A acertar a percepção de B, A recebe um acerto individual;
+- se B acertar a percepção de A, B recebe um acerto individual;
+- o score geral recebe **1 ponto somente se ambos acertarem naquele mesmo item**.
+
+Formalmente:
+
+```text
+acerto_geral_item =
+    (A→B = B→B)
+    AND
+    (B→A = A→A)
+```
+
+O percentual geral é:
+
+```text
+acertos_gerais / itens_validos × 100
+```
+
+Itens excluídos por “Não se aplica” não entram no denominador.
+
+A classificação oficial é:
+
+- Ruim: 0–33;
+- Regular: 34–66;
+- Bom: 67–100.
+
+Para percentuais com duas casas decimais, os limites técnicos são 0–33,99; 34–66,99; 67–100.
+
+As cores obrigatórias da barra são:
+
+- Ruim: vermelho;
+- Regular: amarelo;
+- Bom: verde.
+
+O algoritmo de cálculo passa de `1.0` para `2.0`.
+
+O score geral é persistido em `resultados_gerais`, separado dos dois registros direcionais de `resultados`.
