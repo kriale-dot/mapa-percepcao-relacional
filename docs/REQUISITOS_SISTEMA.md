@@ -507,12 +507,14 @@ O participante deverá acessar somente a aplicação correspondente ao seu token
 
 O participante deverá informar os dados de identificação exigidos pelo instrumento/aplicação.
 
-### RF-071 — Duas perspectivas por item
+### RF-071 — Duas perguntas por item
 
-Para cada item, o participante deverá responder as duas perspectivas previstas pelo instrumento:
+Para cada item, cada participante deverá responder duas perguntas:
 
-- resposta sobre si;
-- resposta sobre a outra pessoa.
+- **O que eu penso disso?**
+- **O que eu acredito que meu cônjuge/outra pessoa pensa disso?**
+
+As duas respostas pertencem ao participante que está preenchendo. O outro participante responde o mesmo item de forma independente.
 
 ### RF-072 — Persistência progressiva
 
@@ -616,11 +618,36 @@ O sistema deverá permitir resultado separado para:
 - A sobre B;
 - B sobre A.
 
-### RF-102 — Resultado global
+### RF-102 — Score geral
 
-O sistema poderá apresentar consolidação global conforme a regra aprovada para o instrumento.
+Além dos scores individuais de A e B, o sistema deverá calcular um **score geral do par**.
 
-A regra exata de consolidação global deverá permanecer explicitamente definida no backend.
+Para cada item válido existem duas comparações:
+
+```text
+A acredita que B pensa × resposta real de B
+B acredita que A pensa × resposta real de A
+```
+
+Cada comparação coincidente soma um acerto ao score individual correspondente.
+
+O **score geral do item** será 1 somente quando as duas comparações do mesmo item coincidirem.
+
+```text
+score geral do item = 1
+somente se:
+A→B = B→B
+E
+B→A = A→A
+```
+
+O percentual geral será:
+
+```text
+acertos gerais / itens válidos × 100
+```
+
+Itens marcados como “Não se aplica” ficam fora do denominador.
 
 ### RF-103 — Faixas atuais
 
@@ -638,13 +665,13 @@ Essas faixas deverão ser configuráveis/versionáveis antes da versão de produ
 
 O resultado deverá poder ser apresentado graficamente por barra percentual.
 
-Referência visual atual:
+Apresentação visual obrigatória:
 
-- até 33: vermelho;
-- 34 a 66: amarelo;
-- 67 a 100: verde.
+- Ruim (0–33): vermelho;
+- Regular (34–66): amarelo;
+- Bom (67–100): verde.
 
-A paleta final da interface poderá adaptar a apresentação visual sem alterar o significado da faixa.
+Como o cálculo pode possuir duas casas decimais, os limites técnicos contínuos são 0–33,99; 34–66,99; 67–100.
 
 ### RF-105 — Resultado por seção
 
