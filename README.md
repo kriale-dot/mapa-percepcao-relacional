@@ -32,7 +32,8 @@ mapa-percepcao-relacional/
 │   ├── DECISOES.md
 │   ├── REQUISITOS_SISTEMA.md
 │   ├── MODELO_DOMINIO_V1.md
-│   └── PRODUCAO_V1.md
+│   ├── PRODUCAO_V1.md
+│   └── FECHAMENTO_V1.md
 │
 ├── deploy/
 ├── README.md
@@ -76,7 +77,15 @@ Ao concluir uma etapa relevante, atualize o STATUS.
 
 ## Estado atual
 
-Consulte `docs/MAPA_RELACIONAL_STATUS.md`.
+**Versão oficial:** `1.0.0`
+
+A V1 está formalmente encerrada em escopo e desenvolvimento funcional. O próximo marco é o deploy e a homologação.
+
+Consulte:
+
+- `docs/MAPA_RELACIONAL_STATUS.md`;
+- `docs/FECHAMENTO_V1.md`;
+- `docs/PRODUCAO_V1.md`.
 
 
 ## Operação da V1
