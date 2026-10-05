@@ -512,7 +512,7 @@ O participante deverá informar os dados de identificação exigidos pelo instru
 Para cada item, cada participante deverá responder duas perguntas:
 
 - **O que eu penso disso?**
-- **O que eu acredito que meu cônjuge/outra pessoa pensa disso?**
+- **O que eu acredito que o outro pensa disso?**
 
 As duas respostas pertencem ao participante que está preenchendo. O outro participante responde o mesmo item de forma independente.
 
