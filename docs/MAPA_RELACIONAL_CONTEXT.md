@@ -875,3 +875,28 @@ Somente blocos `ATIVO` e visíveis são exibidos publicamente, sempre respeitand
 A identidade visual oficial permanece a paleta do projeto e o layout deve ser responsivo para desktop, tablet e smartphone.
 
 A identificação desta lacuna invalidou o fechamento formal anterior da V1. O projeto voltou temporariamente a `1.0.0-rc.1` até a validação da Etapa 11.
+
+#### Upload de imagens institucionais
+
+Fotografia, logotipo e blocos do tipo `IMAGEM` não exigem mais que o profissional informe uma URL manualmente.
+
+O frontend envia o arquivo por `multipart/form-data` para:
+
+```text
+POST /api/profissional/site/upload-imagem
+```
+
+O backend:
+
+- valida autenticação profissional;
+- aceita JPG, PNG e WEBP;
+- valida MIME real com `fileinfo`;
+- aplica limite configurável por `SITE_IMAGE_MAX_MB` (5 MB por padrão);
+- gera nome aleatório;
+- grava em `public/uploads/site/{profissional_id}/`;
+- devolve a URL pública;
+- registra o envio na auditoria.
+
+A URL gerada continua sendo armazenada em `foto_url`, `logo_url` ou `site_blocos.midia_url`, preservando a estrutura atual do banco sem migration adicional.
+
+Vídeo e áudio continuam por URL na V1.
