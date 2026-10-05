@@ -572,10 +572,9 @@ export default function PublicParticipantAccess({ token }) {
               Responda nas duas perspectivas
             </h1>
             <p className="mt-4 leading-7 text-[#385048]/70">
-              Em cada item, responda duas perguntas: “O que eu penso disso?” e
-              “O que eu acredito que o outro pensa disso?”. Suas respostas são
-              salvas progressivamente e podem ser retomadas por este mesmo
-              link.
+              Em cada item, responda duas perguntas: “O que eu penso?” e
+              “O que acho que o outro pensa?”. Suas respostas são salvas
+              progressivamente e podem ser retomadas por este mesmo link.
             </p>
 
             <div className="mt-6">
@@ -669,12 +668,12 @@ export default function PublicParticipantAccess({ token }) {
                         {renderAnswerControl(
                           item,
                           'sobre_mim',
-                          'O que eu penso disso?'
+                          'O que eu penso?'
                         )}
                         {renderAnswerControl(
                           item,
                           'sobre_outro',
-                          'O que eu acredito que o outro pensa disso?'
+                          'O que acho que o outro pensa?'
                         )}
                       </div>
                     </article>
