@@ -654,3 +654,23 @@ Antes da liberação:
 - executar ao menos um fluxo funcional completo em ambiente de produção/homologação.
 
 O documento operacional oficial é `docs/PRODUCAO_V1.md`.
+
+## D-042 — V1.0.0 entra em congelamento funcional
+**Data:** 2026-10-05  
+**Status:** vigente
+
+A V1 foi formalmente encerrada em escopo e desenvolvimento funcional com a versão `1.0.0`.
+
+A partir deste marco:
+
+- novas funcionalidades não entram na V1;
+- novas regras de negócio não entram na V1;
+- novos canais, módulos, papéis ou formas de cálculo ficam para V2;
+- correções de bug, segurança, integridade, compatibilidade e deploy continuam permitidas;
+- o fechamento da V1 não substitui a homologação final em ambiente real.
+
+As migrations oficiais da V1 são `001` a `008`.
+
+O documento de referência do encerramento é `docs/FECHAMENTO_V1.md`.
+
+A versão `1.0.0` representa **escopo fechado e código funcionalmente completo**, enquanto o estado “em produção” somente será atribuído depois do checklist de homologação e deploy.
