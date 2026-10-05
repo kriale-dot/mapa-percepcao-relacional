@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Config\Database;
 use Dotenv\Dotenv;
-use PDO;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
@@ -54,7 +53,7 @@ $tableStmt->execute(['database' => $database]);
 
 $allTables = array_map(
     'strval',
-    $tableStmt->fetchAll(PDO::FETCH_COLUMN)
+    $tableStmt->fetchAll(\PDO::FETCH_COLUMN)
 );
 
 $tablesToClean = array_values(
@@ -97,15 +96,31 @@ $confirmation = trim(
     (string) ($_ENV['CLEAN_DATABASE_CONFIRM'] ?? '')
 );
 
-if ($confirmation === '') {
-    echo "Digite LIMPAR para confirmar: ";
+if (
+    $confirmation === ''
+    && isset($argv[1])
+    && is_string($argv[1])
+) {
+    $confirmation = trim($argv[1]);
+}
 
-    $input = fgets(STDIN);
-    $confirmation = $input === false ? '' : trim($input);
+if ($confirmation === '') {
+    if (defined('STDIN') && is_resource(STDIN)) {
+        echo "Digite LIMPAR para confirmar: ";
+
+        $input = fgets(STDIN);
+        $confirmation = $input === false ? '' : trim($input);
+    } else {
+        echo "Nao foi possivel ler a confirmacao interativa.\n";
+        echo "Execute: composer clean-db-keep-professionals -- LIMPAR\n";
+        exit(1);
+    }
 }
 
 if ($confirmation !== 'LIMPAR') {
     echo "Operacao cancelada.\n";
+    echo "Para confirmar pelo Composer, execute:\n";
+    echo "composer clean-db-keep-professionals -- LIMPAR\n";
     exit(0);
 }
 
