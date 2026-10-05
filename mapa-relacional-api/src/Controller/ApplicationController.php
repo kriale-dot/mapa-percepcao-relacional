@@ -320,10 +320,42 @@ final class ApplicationController
             $resultsStmt->fetchAll(PDO::FETCH_ASSOC)
         );
 
+        $generalStmt = $pdo->prepare(
+            'SELECT
+                itens_validos,
+                acertos_gerais,
+                percentual,
+                faixa,
+                algoritmo_versao,
+                calculado_em
+             FROM resultados_gerais
+             WHERE aplicacao_id = :aplicacao_id
+             LIMIT 1'
+        );
+        $generalStmt->execute([
+            'aplicacao_id' => $id,
+        ]);
+
+        $generalResult = $generalStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($generalResult !== false) {
+            $generalResult['itens_validos'] =
+                (int) $generalResult['itens_validos'];
+            $generalResult['acertos_gerais'] =
+                (int) $generalResult['acertos_gerais'];
+            $generalResult['percentual'] =
+                $generalResult['percentual'] === null
+                    ? null
+                    : (float) $generalResult['percentual'];
+        } else {
+            $generalResult = null;
+        }
+
         return $this->json($response, [
             'aplicacao' => $application,
             'itens_excluidos' => $excludedStmt->fetchAll(PDO::FETCH_ASSOC),
             'resultados' => $results,
+            'resultado_geral' => $generalResult,
         ]);
     }
 
