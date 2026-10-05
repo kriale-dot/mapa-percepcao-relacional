@@ -58,13 +58,15 @@
       "php -l src/Controller/AuditController.php",
       "php -l src/Service/RateLimitService.php",
       "php -l bin/backup-db.php",
-      "php -l src/Controller/SiteController.php"
+      "php -l src/Controller/SiteController.php",
+      "php -l bin/clean-db-keep-professionals.php"
     ],
     "check-domain": "php bin/check-domain.php",
     "setup-professional": "php bin/setup-professional.php",
     "check-professional": "php bin/check-professional.php",
     "check-smtp": "php bin/check-smtp.php",
     "check-v1": "php bin/check-v1.php",
-    "backup-db": "php bin/backup-db.php"
+    "backup-db": "php bin/backup-db.php",
+    "clean-db-keep-professionals": "php bin/clean-db-keep-professionals.php"
   }
 }
