@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   getProfessionalProfile,
   updateProfessionalProfile,
+  uploadSiteImage,
 } from '../services/api'
 import { clearAuthToken, getAuthToken } from '../services/auth'
 
@@ -26,6 +27,7 @@ export default function ProfessionalProfile() {
   const [profile, setProfile] = useState(emptyProfile)
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
+  const [uploadingField, setUploadingField] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -68,6 +70,37 @@ export default function ProfessionalProfile() {
       ...current,
       [field]: value,
     }))
+  }
+
+  async function handleImageUpload(field, file) {
+    if (!file) return
+
+    setUploadingField(field)
+    setMessage('')
+
+    try {
+      const result = await uploadSiteImage(file)
+      const url = result.imagem?.url
+
+      if (!url) {
+        throw new Error('A API não retornou a imagem enviada.')
+      }
+
+      updateField(field, url)
+      setMessage(
+        'Imagem enviada. Clique em Salvar perfil para confirmar a alteração.',
+      )
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setMessage(error.message || 'Não foi possível enviar a imagem.')
+    } finally {
+      setUploadingField(null)
+    }
   }
 
   async function handleSubmit(event) {
@@ -236,17 +269,17 @@ export default function ProfessionalProfile() {
           </div>
 
           <div className="mt-5 grid gap-5 md:grid-cols-2">
-            <Field
-              label="URL da fotografia"
-              type="url"
+            <ImageUploadField
+              label="Fotografia"
               value={profile.foto_url || ''}
-              onChange={(value) => updateField('foto_url', value)}
+              uploading={uploadingField === 'foto_url'}
+              onUpload={(file) => handleImageUpload('foto_url', file)}
             />
-            <Field
-              label="URL do logotipo"
-              type="url"
+            <ImageUploadField
+              label="Logotipo"
               value={profile.logo_url || ''}
-              onChange={(value) => updateField('logo_url', value)}
+              uploading={uploadingField === 'logo_url'}
+              onUpload={(file) => handleImageUpload('logo_url', file)}
             />
           </div>
 
@@ -259,7 +292,7 @@ export default function ProfessionalProfile() {
           <div className="mt-7 flex justify-end">
             <button
               type="submit"
-              disabled={status === 'saving'}
+              disabled={status === 'saving' || uploadingField !== null}
               className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
             >
               {status === 'saving' ? 'Salvando...' : 'Salvar perfil'}
@@ -291,6 +324,51 @@ function Field({
         className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none transition focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20 disabled:cursor-not-allowed disabled:bg-[#A8C8B8]/10"
       />
     </label>
+  )
+}
+
+function ImageUploadField({
+  label,
+  value,
+  uploading,
+  onUpload,
+}) {
+  return (
+    <div className="rounded-2xl border border-[#385048]/15 bg-[#FEFDFB] p-4">
+      <span className="text-sm font-medium">{label}</span>
+
+      {value ? (
+        <img
+          src={value}
+          alt={label}
+          className="mt-3 h-40 w-full rounded-xl border border-[#A8C8B8]/40 object-contain"
+        />
+      ) : (
+        <div className="mt-3 flex h-40 items-center justify-center rounded-xl border border-dashed border-[#A8C8B8] text-sm text-[#385048]/50">
+          Nenhuma imagem enviada
+        </div>
+      )}
+
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        disabled={uploading}
+        onChange={(event) =>
+          onUpload(event.target.files?.[0] || null)
+        }
+        className="mt-4 block w-full text-sm"
+      />
+
+      <p className="mt-2 text-xs leading-5 text-[#385048]/55">
+        JPG, PNG ou WEBP. Limite padrão: 5 MB.
+      </p>
+
+      {uploading ? (
+        <p className="mt-2 text-sm font-semibold">
+          Enviando imagem...
+        </p>
+      ) : null}
+    </div>
   )
 }
 
