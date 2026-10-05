@@ -462,32 +462,57 @@ function SectionHeading({ block, fallback = '', light = false }) {
 
 function DefaultInstitutional({ professional }) {
   return (
-    <>
-      <section className="mx-auto max-w-6xl px-6 py-20">
-        <div className="max-w-4xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
-            {professional.nome}
+    <section className="mx-auto grid max-w-6xl gap-10 px-6 py-20 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+      <div className="flex justify-center lg:justify-start">
+        {professional.foto_url ? (
+          <img
+            src={professional.foto_url}
+            alt={professional.nome}
+            className="aspect-square w-full max-w-sm rounded-3xl object-cover shadow-sm"
+          />
+        ) : professional.logo_url ? (
+          <div className="flex aspect-square w-full max-w-sm items-center justify-center rounded-3xl border border-[#A8C8B8]/45 bg-white p-10 shadow-sm">
+            <img
+              src={professional.logo_url}
+              alt={`Logotipo de ${professional.nome}`}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
+        ) : (
+          <div className="flex aspect-square w-full max-w-sm items-center justify-center rounded-3xl bg-[#A8C8B8]/20 text-6xl font-semibold">
+            {professional.nome?.trim()?.charAt(0) || 'P'}
+          </div>
+        )}
+      </div>
+
+      <div className="max-w-4xl">
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
+          {professional.nome}
+        </p>
+        <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
+          Avaliação de Percepção Relacional
+        </h1>
+        <p className="mt-5 text-lg leading-8 text-[#385048]/72">
+          Instrumento de percepção mútua e conhecimento interpessoal.
+        </p>
+        {professional.descricao ? (
+          <p className="mt-6 whitespace-pre-wrap text-base leading-8 text-[#385048]/70">
+            {professional.descricao}
           </p>
-          <h1 className="mt-4 text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
-            Avaliação de Percepção Relacional
-          </h1>
-          <p className="mt-5 text-lg leading-8 text-[#385048]/72">
-            Instrumento de percepção mútua e conhecimento interpessoal.
+        ) : null}
+        {professional.atuacao ? (
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-[#385048]/65">
+            {professional.atuacao}
           </p>
-          {professional.descricao ? (
-            <p className="mt-6 whitespace-pre-wrap text-base leading-8 text-[#385048]/70">
-              {professional.descricao}
-            </p>
-          ) : null}
-          <button
-            type="button"
-            onClick={() => navigate('/avaliacoes')}
-            className="mt-7 rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white"
-          >
-            Fazer uma avaliação
-          </button>
-        </div>
-      </section>
-    </>
+        ) : null}
+        <button
+          type="button"
+          onClick={() => navigate('/avaliacoes')}
+          className="mt-7 rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white"
+        >
+          Fazer uma avaliação
+        </button>
+      </div>
+    </section>
   )
 }
