@@ -5,10 +5,10 @@
 **Data do checkpoint:** 2026-10-05  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
-**Versão:** `1.0.0`  
-**Marco atual:** V1.0.0 formalmente encerrada em escopo e desenvolvimento funcional  
-**Etapa atual:** V1.0.0 fechada — deploy e homologação pendentes  
-**Próximo passo:** preparar deploy/homologação da V1.0.0 e executar o fluxo completo de aceitação em ambiente de produção ou homologação
+**Versão:** `1.0.0-rc.1`  
+**Marco atual:** V1 reaberta para correção de escopo obrigatório — site institucional  
+**Etapa atual:** Etapa 11 em validação — site institucional público configurável  
+**Próximo passo:** aplicar migration 009, validar editor por blocos e site público responsivo e somente então refazer o fechamento formal da V1
 
 ## 1. Situação atual
 
@@ -2702,3 +2702,150 @@ A partir deste marco, a V1 aceita somente:
 Novas funcionalidades deverão ser planejadas para V2.
 
 **Próximo marco:** deploy e homologação da V1.0.0.
+
+## 40. Correção de escopo — site institucional
+
+Em 2026-10-05, após o fechamento formal da V1, foi identificado um erro de escopo: o documento original e o documento de requisitos exigiam um **site institucional configurável pelo profissional**, mas a implementação existente continha apenas uma home pública estática.
+
+O fechamento da V1.0.0 foi, portanto, **retratado**. O projeto voltou ao estado de release candidate `1.0.0-rc.1`.
+
+O requisito original exige que o profissional possa montar blocos de conteúdo com texto, links, imagens e vídeos, além de utilizar sua fotografia ou logotipo e manter responsividade em telas grandes, tablets e smartphones.
+
+### Implementação corretiva — Etapa 11
+
+Nova migration:
+
+```text
+009_site_institucional.sql
+```
+
+Nova tabela:
+
+```text
+site_blocos
+```
+
+Tipos de bloco suportados:
+
+- `TITULO`;
+- `TEXTO`;
+- `IMAGEM`;
+- `VIDEO`;
+- `AUDIO`;
+- `PERFIL`;
+- `APRESENTACAO`;
+- `CTA`;
+- `LINK`;
+- `AVALIACAO`.
+
+Cada bloco pode possuir, conforme o tipo:
+
+- título;
+- descrição;
+- conteúdo;
+- URL de mídia;
+- texto alternativo;
+- link;
+- texto do link;
+- ordem;
+- visibilidade;
+- status ativo/inativo.
+
+Novo backend:
+
+```text
+src/Controller/SiteController.php
+```
+
+Rotas:
+
+```text
+GET    /api/public/site
+GET    /api/profissional/site/blocos
+POST   /api/profissional/site/blocos
+PUT    /api/profissional/site/blocos/{id}
+DELETE /api/profissional/site/blocos/{id}
+POST   /api/profissional/site/blocos/{id}/mover
+```
+
+Novo frontend profissional:
+
+```text
+/profissional/site
+mapa-relacional-web/src/pages/ProfessionalSiteEditor.jsx
+```
+
+Recursos:
+
+- criação de blocos;
+- edição;
+- ativação/inativação;
+- visibilidade;
+- reordenação;
+- exclusão;
+- textos;
+- imagens;
+- vídeos;
+- áudio;
+- links;
+- CTA;
+- uso automático dos dados do perfil profissional.
+
+Novo frontend público:
+
+```text
+mapa-relacional-web/src/pages/PublicInstitutionalSite.jsx
+```
+
+A rota raiz `/` agora carrega o site institucional configurado no banco, usando:
+
+- nome profissional;
+- fotografia;
+- logotipo;
+- descrição;
+- atuação;
+- contatos;
+- blocos ativos e visíveis.
+
+O site mantém a identidade visual oficial e é responsivo.
+
+### Validação pendente
+
+Executar:
+
+```powershell
+cd mapa-relacional-api
+composer migrate
+composer check-domain
+composer check
+composer check-v1
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd ..\mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. abrir `/profissional/site`;
+2. confirmar os blocos iniciais;
+3. editar um bloco de texto;
+4. criar um bloco de imagem;
+5. criar um bloco de vídeo;
+6. criar um bloco de link/CTA;
+7. mover blocos para cima e para baixo;
+8. ocultar um bloco e confirmar que não aparece no público;
+9. inativar um bloco e confirmar que não aparece no público;
+10. abrir `/` em desktop;
+11. abrir `/` em largura de tablet;
+12. abrir `/` em largura de smartphone;
+13. confirmar fotografia/logotipo e dados do perfil;
+14. confirmar botão para avaliações;
+15. confirmar que o conteúdo configurado persiste após recarregar.
+
+**Somente depois desta validação o fechamento formal da V1 poderá ser refeito.**
