@@ -38,6 +38,7 @@ $requiredTables = [
     'devolutivas',
     'auditoria_eventos',
     'rate_limites',
+    'site_blocos',
 ];
 
 $stmt = $pdo->prepare(
@@ -79,6 +80,7 @@ $requiredMigrations = [
     '006_devolutivas.sql',
     '007_auditoria.sql',
     '008_rate_limites.sql',
+    '009_site_institucional.sql',
 ];
 
 $migrationStmt = $pdo->query(
