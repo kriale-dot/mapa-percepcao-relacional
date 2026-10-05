@@ -35,6 +35,7 @@ $requiredTables = [
     'resultado_faixas',
     'comparacoes',
     'resultados',
+    'resultados_gerais',
     'devolutivas',
     'auditoria_eventos',
     'rate_limites',
@@ -81,6 +82,7 @@ $requiredMigrations = [
     '007_auditoria.sql',
     '008_rate_limites.sql',
     '009_site_institucional.sql',
+    '010_resultado_geral.sql',
 ];
 
 $migrationStmt = $pdo->query(
