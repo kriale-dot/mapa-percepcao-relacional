@@ -2849,3 +2849,38 @@ Validar:
 15. confirmar que o conteúdo configurado persiste após recarregar.
 
 **Somente depois desta validação o fechamento formal da V1 poderá ser refeito.**
+
+### Ajuste da Etapa 11 — upload de imagens
+
+Em 2026-10-05, o editor institucional foi ajustado para que imagens sejam enviadas pelo computador, em vez de exigir URL manual.
+
+Implementado:
+
+- endpoint `POST /api/profissional/site/upload-imagem`;
+- suporte `multipart/form-data` no cliente da API;
+- upload de imagem no bloco `IMAGEM`;
+- upload de fotografia no perfil profissional;
+- upload de logotipo no perfil profissional;
+- pré-visualização da imagem;
+- JPG, PNG e WEBP;
+- limite padrão de 5 MB;
+- diretório `public/uploads/site/{profissional_id}`;
+- arquivos enviados ignorados pelo Git;
+- proteção `.htaccess` contra execução de scripts;
+- verificação de `fileinfo` e escrita em `public/uploads` pelo `check-v1`;
+- evento `SITE_IMAGEM_ENVIADA` na auditoria.
+
+Nenhuma migration nova foi necessária.
+
+Validação complementar da Etapa 11:
+
+1. em `/profissional/perfil`, enviar uma fotografia;
+2. salvar o perfil e confirmar a fotografia no site público;
+3. enviar um logotipo, salvar e confirmar no cabeçalho público;
+4. em `/profissional/site`, criar bloco `IMAGEM`;
+5. selecionar arquivo JPG, PNG ou WEBP;
+6. confirmar a pré-visualização;
+7. salvar/criar o bloco;
+8. recarregar o editor e confirmar persistência;
+9. abrir `/` e confirmar a imagem;
+10. executar `composer check-v1` e confirmar `public/uploads gravavel` e `Extensao fileinfo carregada`.
