@@ -429,7 +429,7 @@ function BlockFields({
 }) {
   const isImage = block.tipo === 'IMAGEM'
   const externalMediaType = ['VIDEO', 'AUDIO'].includes(block.tipo)
-  const hasLink = ['CTA', 'LINK', 'AVALIACAO'].includes(block.tipo)
+  const hasLink = ['IMAGEM', 'CTA', 'LINK', 'AVALIACAO'].includes(block.tipo)
 
   return (
     <div className="mt-5 grid gap-4">
@@ -606,16 +606,22 @@ function BlockFields({
             />
           </label>
 
-          <label className="block">
-            <span className="text-sm font-medium">Texto do botão/link</span>
-            <input
-              type="text"
-              maxLength="120"
-              value={block.link_texto}
-              onChange={(event) => onChange('link_texto', event.target.value)}
-              className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none"
-            />
-          </label>
+          {block.tipo !== 'IMAGEM' ? (
+            <label className="block">
+              <span className="text-sm font-medium">Texto do botão/link</span>
+              <input
+                type="text"
+                maxLength="120"
+                value={block.link_texto}
+                onChange={(event) => onChange('link_texto', event.target.value)}
+                className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none"
+              />
+            </label>
+          ) : (
+            <div className="rounded-xl bg-[#A8C8B8]/12 px-4 py-3 text-xs leading-5 text-[#385048]/60">
+              Quando houver link, clicar na imagem abrirá esse endereço.
+            </div>
+          )}
         </div>
       ) : null}
     </div>
