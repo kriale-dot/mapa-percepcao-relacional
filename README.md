@@ -77,9 +77,9 @@ Ao concluir uma etapa relevante, atualize o STATUS.
 
 ## Estado atual
 
-**Versão oficial:** `1.0.0`
+**Versão atual:** `1.0.0-rc.1`
 
-A V1 está formalmente encerrada em escopo e desenvolvimento funcional. O próximo marco é o deploy e a homologação.
+A V1 foi reaberta para concluir o site institucional configurável, requisito obrigatório identificado após um fechamento prematuro. O próximo marco é validar essa correção e então refazer o fechamento formal.
 
 Consulte:
 
