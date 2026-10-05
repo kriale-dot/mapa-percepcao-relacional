@@ -601,7 +601,15 @@ O percentual por sentido é:
 coincidências / comparações válidas × 100
 ```
 
-Os resultados são persistidos separadamente para `A_SOBRE_B` e `B_SOBRE_A`. Não existe resultado global automático nesta etapa, porque a regra de consolidação global permanece aberta nos requisitos.
+Os resultados direcionais continuam persistidos separadamente para `A_SOBRE_B` e `B_SOBRE_A`.
+
+Além deles, a regra de consolidação geral foi definida posteriormente: para cada item válido, o score geral soma 1 ponto somente quando **as duas comparações direcionais do item coincidem**. O resultado geral é persistido em `resultados_gerais` e usa:
+
+```text
+percentual geral = acertos gerais / itens válidos × 100
+```
+
+A versão do algoritmo passa a ser `2.0`.
 
 As faixas de interpretação passam a ser registros versionados por `instrumento_versao_id` em `resultado_faixas`. As faixas-base continuam significando:
 
@@ -684,7 +692,8 @@ A página pública da devolutiva mostra:
 
 - nomes dos dois participantes;
 - tipo de vínculo e tempo de união;
-- os dois resultados direcionais;
+- score individual de cada participante;
+- score geral do casal/par;
 - percentuais e faixas;
 - resultados por seção;
 - síntese;
