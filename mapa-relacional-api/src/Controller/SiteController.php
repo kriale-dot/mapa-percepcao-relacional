@@ -98,6 +98,150 @@ final class SiteController
         ]);
     }
 
+    public function uploadImage(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    ): ResponseInterface {
+        $professionalId = $this->professionalId($request);
+
+        if ($professionalId === null) {
+            return $this->unauthorized($response);
+        }
+
+        $uploadedFiles = $request->getUploadedFiles();
+        $image = $uploadedFiles['imagem'] ?? null;
+
+        if ($image === null) {
+            return $this->validation(
+                $response,
+                'Selecione uma imagem para enviar.'
+            );
+        }
+
+        if ($image->getError() !== UPLOAD_ERR_OK) {
+            $message = match ($image->getError()) {
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE =>
+                    'A imagem excede o limite permitido pelo servidor.',
+                UPLOAD_ERR_PARTIAL =>
+                    'O envio da imagem foi interrompido. Tente novamente.',
+                UPLOAD_ERR_NO_FILE =>
+                    'Nenhuma imagem foi selecionada.',
+                default =>
+                    'Nao foi possivel receber a imagem enviada.',
+            };
+
+            return $this->validation($response, $message);
+        }
+
+        $maxMb = max(
+            1,
+            min(20, (int) ($_ENV['SITE_IMAGE_MAX_MB'] ?? 5))
+        );
+        $maxBytes = $maxMb * 1024 * 1024;
+        $size = $image->getSize();
+
+        if ($size === null || $size <= 0 || $size > $maxBytes) {
+            return $this->validation(
+                $response,
+                "A imagem deve ter no maximo {$maxMb} MB."
+            );
+        }
+
+        $stream = $image->getStream();
+        $stream->rewind();
+        $contents = $stream->getContents();
+
+        if ($contents === '' || strlen($contents) > $maxBytes) {
+            return $this->validation(
+                $response,
+                "A imagem deve ter no maximo {$maxMb} MB."
+            );
+        }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime = (string) $finfo->buffer($contents);
+
+        $extensions = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+        ];
+
+        if (!isset($extensions[$mime])) {
+            return $this->validation(
+                $response,
+                'Formato invalido. Envie JPG, PNG ou WEBP.'
+            );
+        }
+
+        $publicRoot = dirname(__DIR__, 2) . '/public';
+        $relativeDir = '/uploads/site/' . $professionalId;
+        $targetDir = $publicRoot . $relativeDir;
+
+        if (
+            !is_dir($targetDir)
+            && !@mkdir($targetDir, 0775, true)
+            && !is_dir($targetDir)
+        ) {
+            return $this->json($response, [
+                'error' => 'upload_directory_unavailable',
+                'message' => 'Nao foi possivel preparar a pasta de imagens.',
+            ], 500);
+        }
+
+        $filename = bin2hex(random_bytes(16))
+            . '.'
+            . $extensions[$mime];
+        $targetPath = $targetDir . '/' . $filename;
+
+        if (@file_put_contents($targetPath, $contents, LOCK_EX) === false) {
+            return $this->json($response, [
+                'error' => 'upload_write_failed',
+                'message' => 'Nao foi possivel salvar a imagem no servidor.',
+            ], 500);
+        }
+
+        $relativeUrl = $relativeDir . '/' . $filename;
+        $baseUrl = rtrim(
+            trim((string) ($_ENV['APP_URL'] ?? '')),
+            '/'
+        );
+
+        if (
+            $baseUrl === ''
+            || filter_var($baseUrl, FILTER_VALIDATE_URL) === false
+        ) {
+            $uri = $request->getUri();
+            $baseUrl = $uri->getScheme() . '://' . $uri->getAuthority();
+        }
+
+        $url = $baseUrl . $relativeUrl;
+
+        $this->auditService->recordSafe(
+            'PROFISSIONAL',
+            $professionalId,
+            'SITE_IMAGEM_ENVIADA',
+            'PROFISSIONAL',
+            $professionalId,
+            [
+                'mime' => $mime,
+                'tamanho_bytes' => strlen($contents),
+            ],
+            $request,
+            $professionalId
+        );
+
+        return $this->json($response, [
+            'message' => 'Imagem enviada com sucesso.',
+            'imagem' => [
+                'url' => $url,
+                'caminho' => $relativeUrl,
+                'mime' => $mime,
+                'tamanho_bytes' => strlen($contents),
+            ],
+        ], 201);
+    }
+
     public function index(
         ServerRequestInterface $request,
         ResponseInterface $response
