@@ -36,3 +36,8 @@ Thumbs.db
 # Test / coverage artifacts
 **/coverage/
 **/.phpunit.cache/
+
+# Uploaded institutional images
+**/public/uploads/*
+!**/public/uploads/.gitkeep
+!**/public/uploads/.htaccess
