@@ -222,15 +222,21 @@ final class FeedbackController
         $pdo = Database::connect();
 
         $resultCountStmt = $pdo->prepare(
-            'SELECT COUNT(*)
-             FROM resultados
-             WHERE aplicacao_id = :aplicacao_id'
+            'SELECT
+                (SELECT COUNT(*)
+                   FROM resultados
+                  WHERE aplicacao_id = :aplicacao_id_direcional)
+                +
+                (SELECT COUNT(*)
+                   FROM resultados_gerais
+                  WHERE aplicacao_id = :aplicacao_id_geral)'
         );
         $resultCountStmt->execute([
-            'aplicacao_id' => $applicationId,
+            'aplicacao_id_direcional' => $applicationId,
+            'aplicacao_id_geral' => $applicationId,
         ]);
 
-        if ((int) $resultCountStmt->fetchColumn() === 0) {
+        if ((int) $resultCountStmt->fetchColumn() < 3) {
             $pdo->beginTransaction();
 
             try {
