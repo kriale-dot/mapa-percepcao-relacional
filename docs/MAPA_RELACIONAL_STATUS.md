@@ -2,13 +2,13 @@
 
 > Documento de checkpoint. Atualizar ao final de cada etapa relevante, correção ou mudança de estado do projeto.
 
-**Data do checkpoint:** 2026-10-04  
+**Data do checkpoint:** 2026-10-05  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
-**Versão:** `0.2.0-dev`  
-**Marco atual:** Etapa 10 em desenvolvimento — segurança, auditoria e preparação da V1  
-**Etapa atual:** Etapa 10 validada localmente — fechamento formal da V1 pendente  
-**Próximo passo:** fechar formalmente a V1 e preparar o deploy, mantendo pendente apenas a validação funcional completa em ambiente de produção/homologação
+**Versão:** `1.0.0`  
+**Marco atual:** V1.0.0 formalmente encerrada em escopo e desenvolvimento funcional  
+**Etapa atual:** V1.0.0 fechada — deploy e homologação pendentes  
+**Próximo passo:** preparar deploy/homologação da V1.0.0 e executar o fluxo completo de aceitação em ambiente de produção ou homologação
 
 ## 1. Situação atual
 
@@ -2667,3 +2667,38 @@ O fechamento formal da V1 ainda deve distinguir:
 - validação técnica local concluída;
 - validações funcionais completas das Etapas 7.2, 8 e 9 que foram puladas ou não confirmadas explicitamente;
 - validação final em ambiente de produção/homologação ainda pendente.
+
+## 39. Fechamento formal da V1.0.0
+
+Em 2026-10-05, a V1 foi formalmente encerrada em **escopo e desenvolvimento funcional**.
+
+Documento oficial:
+
+```text
+docs/FECHAMENTO_V1.md
+```
+
+Estado:
+
+- versão oficial: `1.0.0`;
+- branch de referência: `main`;
+- migrations oficiais da V1: `001` a `008`;
+- desenvolvimento funcional da V1: **encerrado**;
+- Etapa 10: validada localmente;
+- deploy: pendente;
+- homologação ponta a ponta: pendente.
+
+Este fechamento não afirma que todas as funcionalidades foram homologadas em produção. As Etapas 7.2, 8 e 9 foram implementadas sem uma validação funcional completa formal antes do avanço, e devem ser cobertas pela homologação final.
+
+A partir deste marco, a V1 aceita somente:
+
+- correção de bug;
+- correção de segurança;
+- ajuste necessário ao deploy;
+- correção de migration/integridade;
+- compatibilidade;
+- correção textual ou visual sem nova regra de negócio.
+
+Novas funcionalidades deverão ser planejadas para V2.
+
+**Próximo marco:** deploy e homologação da V1.0.0.
