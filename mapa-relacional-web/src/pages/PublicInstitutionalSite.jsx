@@ -251,7 +251,7 @@ function InstitutionalBlock({ block, professional }) {
     return (
       <section className="bg-[#A8C8B8]/10">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="max-w-3xl">
+          <div className="mx-auto max-w-3xl">
             <SectionHeading block={block} fallback="Apresentação" />
             {professional.descricao ? (
               <p className="mt-5 whitespace-pre-wrap text-base leading-8 text-[#385048]/72">
@@ -277,7 +277,7 @@ function InstitutionalBlock({ block, professional }) {
   if (block.tipo === 'TITULO') {
     return (
       <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="max-w-4xl">
+        <div className="mx-auto max-w-4xl">
           <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
             {block.titulo || block.conteudo}
           </h1>
@@ -294,7 +294,7 @@ function InstitutionalBlock({ block, professional }) {
   if (block.tipo === 'TEXTO') {
     return (
       <section className="mx-auto max-w-6xl px-6 py-14">
-        <div className="max-w-4xl rounded-3xl border border-[#A8C8B8]/40 bg-white p-7 shadow-sm md:p-9">
+        <div className="mx-auto max-w-4xl rounded-3xl border border-[#A8C8B8]/40 bg-white p-7 shadow-sm md:p-9">
           <SectionHeading block={block} />
           {block.conteudo ? (
             <p className="mt-5 whitespace-pre-wrap text-base leading-8 text-[#385048]/72">
@@ -393,8 +393,8 @@ function InstitutionalBlock({ block, professional }) {
           <div
             className={
               emphasized
-                ? 'max-w-3xl'
-                : 'rounded-3xl border border-[#A8C8B8]/40 bg-white p-7 shadow-sm'
+                ? 'mx-auto max-w-3xl'
+                : 'mx-auto max-w-4xl rounded-3xl border border-[#A8C8B8]/40 bg-white p-7 shadow-sm'
             }
           >
             <SectionHeading block={block} light={emphasized} />
@@ -432,7 +432,7 @@ function InstitutionalBlock({ block, professional }) {
     return (
       <section className="bg-[#A8C8B8]/12">
         <div className="mx-auto max-w-6xl px-6 py-16">
-          <div className="max-w-3xl">
+          <div className="mx-auto max-w-3xl">
             <SectionHeading
               block={block}
               fallback="Avaliações disponíveis"
