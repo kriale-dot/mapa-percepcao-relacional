@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   getProfessionalProfile,
   updateProfessionalProfile,
+  deleteProfessionalProfileImage,
   uploadSiteImage,
 } from '../services/api'
 import { clearAuthToken, getAuthToken } from '../services/auth'
@@ -28,6 +29,7 @@ export default function ProfessionalProfile() {
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
   const [uploadingField, setUploadingField] = useState(null)
+  const [deletingField, setDeletingField] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -100,6 +102,47 @@ export default function ProfessionalProfile() {
       setMessage(error.message || 'Não foi possível enviar a imagem.')
     } finally {
       setUploadingField(null)
+    }
+  }
+
+  async function handleImageDelete(field) {
+    const image = field === 'foto_url'
+      ? {
+          type: 'foto',
+          confirm: 'Deseja realmente excluir esta fotografia do perfil?',
+          success: 'Fotografia excluída com sucesso.',
+        }
+      : {
+          type: 'logo',
+          confirm: 'Deseja realmente excluir este logotipo do perfil?',
+          success: 'Logotipo excluído com sucesso.',
+        }
+
+    if (!profile[field] || !window.confirm(image.confirm)) {
+      return
+    }
+
+    setDeletingField(field)
+    setMessage('')
+
+    try {
+      const result = await deleteProfessionalProfileImage(image.type)
+
+      setProfile({
+        ...emptyProfile,
+        ...result.profissional,
+      })
+      setMessage(image.success)
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setMessage(error.message || 'Não foi possível excluir a imagem.')
+    } finally {
+      setDeletingField(null)
     }
   }
 
@@ -273,13 +316,19 @@ export default function ProfessionalProfile() {
               label="Fotografia"
               value={profile.foto_url || ''}
               uploading={uploadingField === 'foto_url'}
+              deleting={deletingField === 'foto_url'}
+              deleteLabel="Excluir fotografia"
               onUpload={(file) => handleImageUpload('foto_url', file)}
+              onDelete={() => handleImageDelete('foto_url')}
             />
             <ImageUploadField
               label="Logotipo"
               value={profile.logo_url || ''}
               uploading={uploadingField === 'logo_url'}
+              deleting={deletingField === 'logo_url'}
+              deleteLabel="Excluir logotipo"
               onUpload={(file) => handleImageUpload('logo_url', file)}
+              onDelete={() => handleImageDelete('logo_url')}
             />
           </div>
 
@@ -292,7 +341,11 @@ export default function ProfessionalProfile() {
           <div className="mt-7 flex justify-end">
             <button
               type="submit"
-              disabled={status === 'saving' || uploadingField !== null}
+              disabled={
+                status === 'saving'
+                || uploadingField !== null
+                || deletingField !== null
+              }
               className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-60"
             >
               {status === 'saving' ? 'Salvando...' : 'Salvar perfil'}
@@ -331,7 +384,10 @@ function ImageUploadField({
   label,
   value,
   uploading,
+  deleting,
+  deleteLabel,
   onUpload,
+  onDelete,
 }) {
   return (
     <div className="rounded-2xl border border-[#385048]/15 bg-[#FEFDFB] p-4">
@@ -352,12 +408,23 @@ function ImageUploadField({
       <input
         type="file"
         accept="image/jpeg,image/png,image/webp"
-        disabled={uploading}
+        disabled={uploading || deleting}
         onChange={(event) =>
           onUpload(event.target.files?.[0] || null)
         }
         className="mt-4 block w-full text-sm"
       />
+
+      {value ? (
+        <button
+          type="button"
+          disabled={uploading || deleting}
+          onClick={onDelete}
+          className="mt-3 rounded-xl border border-[#A65D5D]/35 px-3 py-2 text-sm font-semibold text-[#8F4747] transition hover:bg-[#A65D5D]/8 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {deleting ? 'Excluindo...' : deleteLabel}
+        </button>
+      ) : null}
 
       <p className="mt-2 text-xs leading-5 text-[#385048]/55">
         JPG, PNG ou WEBP. Limite padrão: 5 MB.
