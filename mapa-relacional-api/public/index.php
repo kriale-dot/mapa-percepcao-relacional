@@ -180,6 +180,7 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->get('/perfil', [$professionalController, 'profile']);
     $group->put('/perfil', [$professionalController, 'updateProfile']);
 
+    $group->post('/site/upload-imagem', [$siteController, 'uploadImage']);
     $group->get('/site/blocos', [$siteController, 'index']);
     $group->post('/site/blocos', [$siteController, 'create']);
     $group->put('/site/blocos/{id:[0-9]+}', [$siteController, 'update']);
