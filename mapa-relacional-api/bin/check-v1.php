@@ -118,6 +118,10 @@ $check(
     extension_loaded('json'),
     'Extensao json carregada'
 );
+$check(
+    extension_loaded('fileinfo'),
+    'Extensao fileinfo carregada'
+);
 
 $check(
     trim((string) ($_ENV['SMTP_HOST'] ?? '')) !== '',
@@ -148,6 +152,17 @@ if (!is_dir($logDir)) {
 $check(
     canWriteDirectory($logDir),
     'storage/logs gravavel'
+);
+
+$uploadDir = $root . '/public/uploads';
+
+if (!is_dir($uploadDir)) {
+    @mkdir($uploadDir, 0775, true);
+}
+
+$check(
+    canWriteDirectory($uploadDir),
+    'public/uploads gravavel'
 );
 
 $backupDir = $root . '/storage/backups';
