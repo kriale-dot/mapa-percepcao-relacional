@@ -7,11 +7,14 @@ const API_URL = (
 async function request(path, options = {}) {
   const token = options.auth ? getAuthToken() : null
 
+  const isFormData =
+    typeof FormData !== 'undefined' && options.body instanceof FormData
+
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers: {
       Accept: 'application/json',
-      'Content-Type': 'application/json',
+      ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
@@ -160,6 +163,17 @@ export function updateProfessionalProfile(profile) {
   })
 }
 
+
+export function uploadSiteImage(file) {
+  const form = new FormData()
+  form.append('imagem', file)
+
+  return request('/api/profissional/site/upload-imagem', {
+    method: 'POST',
+    auth: true,
+    body: form,
+  })
+}
 
 export function listSiteBlocks() {
   return request('/api/profissional/site/blocos', {
