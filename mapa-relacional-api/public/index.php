@@ -21,6 +21,7 @@ use App\Controller\PublicEvaluationController;
 use App\Controller\RelationshipController;
 use App\Controller\ResultBandController;
 use App\Controller\SectionController;
+use App\Controller\SiteController;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\SecurityHeadersMiddleware;
 use App\Service\AccessTokenService;
@@ -102,6 +103,7 @@ $feedbackController = new FeedbackController(
 $instrumentController = new InstrumentController();
 $instrumentVersionController = new InstrumentVersionController($auditService);
 $sectionController = new SectionController();
+$siteController = new SiteController($auditService);
 $itemController = new ItemController();
 $personController = new PersonController();
 $relationshipController = new RelationshipController();
@@ -116,6 +118,7 @@ $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
 $app->post('/api/auth/login', [$authController, 'login']);
 
+$app->get('/api/public/site', [$siteController, 'publicShow']);
 $app->get('/api/public/avaliacoes', [$publicEvaluationController, 'index']);
 $app->get(
     '/api/public/avaliacoes/{versionId:[0-9]+}',
@@ -168,13 +171,20 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $relationshipController,
     $resultBandController,
     $feedbackController,
-    $notificationController
+    $notificationController,
+    $siteController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->get('/auditoria', [$auditController, 'index']);
     $group->put('/senha', [$authController, 'changePassword']);
     $group->get('/perfil', [$professionalController, 'profile']);
     $group->put('/perfil', [$professionalController, 'updateProfile']);
+
+    $group->get('/site/blocos', [$siteController, 'index']);
+    $group->post('/site/blocos', [$siteController, 'create']);
+    $group->put('/site/blocos/{id:[0-9]+}', [$siteController, 'update']);
+    $group->delete('/site/blocos/{id:[0-9]+}', [$siteController, 'delete']);
+    $group->post('/site/blocos/{id:[0-9]+}/mover', [$siteController, 'move']);
 
     $group->get('/pessoas', [$personController, 'index']);
     $group->post('/pessoas', [$personController, 'create']);
