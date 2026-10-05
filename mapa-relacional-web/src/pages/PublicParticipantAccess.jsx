@@ -797,16 +797,19 @@ export default function PublicParticipantAccess({ token }) {
 
               <label className="block">
                 <span className="text-sm font-medium">Gênero</span>
-                <input
-                  type="text"
+                <select
                   required
-                  maxLength="30"
                   value={form.genero}
                   onChange={(event) =>
                     updateField('genero', event.target.value)
                   }
                   className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20"
-                />
+                >
+                  <option value="">Selecione</option>
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
+                  <option value="Outro">Outro</option>
+                </select>
               </label>
 
               {message ? (
