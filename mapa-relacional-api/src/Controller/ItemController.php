@@ -99,6 +99,11 @@ final class ItemController
             $ordem = (int) $orderStmt->fetchColumn();
         }
 
+        $codigo = $this->generateItemCode(
+            $pdo,
+            $context['section_id']
+        );
+
         try {
             $stmt = $pdo->prepare(
                 'INSERT INTO itens (
@@ -121,7 +126,7 @@ final class ItemController
             );
             $stmt->execute([
                 'secao_id' => $context['section_id'],
-                'codigo' => $validated['codigo'],
+                'codigo' => $codigo,
                 'texto' => $validated['texto'],
                 'tipo_resposta' => $validated['tipo_resposta'],
                 'ordem' => $ordem,
@@ -171,10 +176,16 @@ final class ItemController
 
         $itemId = $this->positiveId($args['itemId'] ?? null);
 
-        if (
-            $itemId === null
-            || $this->findItem($context['section_id'], $itemId) === null
-        ) {
+        if ($itemId === null) {
+            return $this->itemNotFound($response);
+        }
+
+        $existingItem = $this->findItem(
+            $context['section_id'],
+            $itemId
+        );
+
+        if ($existingItem === null) {
             return $this->itemNotFound($response);
         }
 
@@ -202,7 +213,7 @@ final class ItemController
                     AND secao_id = :secao_id'
             );
             $stmt->execute([
-                'codigo' => $validated['codigo'],
+                'codigo' => (string) $existingItem['codigo'],
                 'texto' => $validated['texto'],
                 'tipo_resposta' => $validated['tipo_resposta'],
                 'ordem' => $validated['ordem'],
@@ -370,14 +381,13 @@ final class ItemController
     }
 
     /**
-     * @return array{codigo:string,texto:string,tipo_resposta:string,ordem:?int,permite_nao_se_aplica:bool,ativo:bool}|ResponseInterface
+     * @return array{texto:string,tipo_resposta:string,ordem:?int,permite_nao_se_aplica:bool,ativo:bool}|ResponseInterface
      */
     private function validatePayload(
         array $data,
         ResponseInterface $response,
         bool $requireOrder = false
     ): array|ResponseInterface {
-        $codigo = trim((string) ($data['codigo'] ?? ''));
         $texto = trim((string) ($data['texto'] ?? ''));
         $tipoResposta = trim((string) ($data['tipo_resposta'] ?? ''));
 
@@ -416,13 +426,6 @@ final class ItemController
             return $this->validation($response, 'Ordem e obrigatoria.');
         }
 
-        if ($codigo === '' || strlen($codigo) > 80) {
-            return $this->validation(
-                $response,
-                'Codigo e obrigatorio e deve ter no maximo 80 caracteres.'
-            );
-        }
-
         if ($texto === '' || strlen($texto) > 10000) {
             return $this->validation(
                 $response,
@@ -455,13 +458,52 @@ final class ItemController
         }
 
         return [
-            'codigo' => $codigo,
             'texto' => $texto,
             'tipo_resposta' => $tipoResposta,
             'ordem' => $ordem,
             'permite_nao_se_aplica' => $permiteNaoSeAplica,
             'ativo' => $ativo,
         ];
+    }
+
+    private function generateItemCode(
+        PDO $pdo,
+        int $sectionId
+    ): string {
+        $stmt = $pdo->prepare(
+            'SELECT codigo
+             FROM itens
+             WHERE secao_id = :secao_id'
+        );
+        $stmt->execute([
+            'secao_id' => $sectionId,
+        ]);
+
+        $used = [];
+        $max = 0;
+
+        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $code) {
+            $code = (string) $code;
+            $used[$code] = true;
+
+            if (preg_match('/^ITEM_([0-9]+)$/', $code, $match) === 1) {
+                $max = max($max, (int) $match[1]);
+            }
+        }
+
+        $next = $max + 1;
+
+        do {
+            $code = 'ITEM_' . str_pad(
+                (string) $next,
+                3,
+                '0',
+                STR_PAD_LEFT
+            );
+            $next++;
+        } while (isset($used[$code]));
+
+        return $code;
     }
 
     private function findItem(int $sectionId, int $itemId): ?array
