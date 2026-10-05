@@ -30,13 +30,14 @@ composer migrate
 composer check-domain
 ```
 
-A V1 exige as migrations 001 a 009, incluindo:
+A V1 exige as migrations 001 a 010, incluindo:
 
 - resultados e comparações;
 - devolutivas;
 - auditoria;
 - rate limit;
-- site institucional configurável.
+- site institucional configurável;
+- score geral do casal/par.
 
 ## 3. Configuração de ambiente
 
