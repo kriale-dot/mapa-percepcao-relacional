@@ -41,6 +41,7 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
   const [application, setApplication] = useState(null)
   const [excludedItems, setExcludedItems] = useState([])
   const [results, setResults] = useState([])
+  const [generalResult, setGeneralResult] = useState(null)
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
   const [actionStatus, setActionStatus] = useState('')
@@ -64,6 +65,7 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
       setApplication(response.aplicacao)
       setExcludedItems(response.itens_excluidos || [])
       setResults(response.resultados || [])
+      setGeneralResult(response.resultado_geral || null)
       setStatus('ready')
     } catch (error) {
       if (error.status === 401) {
@@ -396,7 +398,26 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
                 : 'Os resultados serão disponibilizados depois da conclusão dos dois participantes.'}
             </p>
           ) : (
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <>
+              {generalResult ? (
+                <div className="mt-5 rounded-2xl border border-[#A8C8B8]/40 bg-white p-5">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#385048]/55">
+                    Score geral do casal
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold">
+                    {generalResult.percentual == null
+                      ? '—'
+                      : `${Number(generalResult.percentual).toFixed(2)}%`}
+                  </p>
+                  <p className="mt-1 text-sm text-[#385048]/65">
+                    {generalResult.acertos_gerais} de{' '}
+                    {generalResult.itens_validos} item(ns) ·{' '}
+                    {generalResult.faixa || 'Sem faixa'}
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
               {['A_SOBRE_B', 'B_SOBRE_A'].map((direction) => {
                 const result = resultsByDirection[direction]
 
@@ -421,7 +442,8 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
                   </div>
                 )
               })}
-            </div>
+              </div>
+            </>
           )}
         </section>
 
