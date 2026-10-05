@@ -163,6 +163,12 @@ export function updateProfessionalProfile(profile) {
   })
 }
 
+export function deleteProfessionalProfileImage(type) {
+  return request(`/api/profissional/perfil/imagem/${type}`, {
+    method: 'DELETE',
+    auth: true,
+  })
+}
 
 export function uploadSiteImage(file) {
   const form = new FormData()
