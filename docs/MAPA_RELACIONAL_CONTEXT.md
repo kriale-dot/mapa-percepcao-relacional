@@ -821,3 +821,31 @@ docs/PRODUCAO_V1.md
 ```
 
 Antes de produção, um backup precisa ser criado e uma restauração em banco separado precisa ser validada.
+
+### Estado oficial da V1.0.0
+
+Em 2026-10-05, a V1 foi formalmente encerrada em escopo e desenvolvimento funcional.
+
+A versão oficial é:
+
+```text
+1.0.0
+```
+
+O documento de fechamento é:
+
+```text
+docs/FECHAMENTO_V1.md
+```
+
+A V1 passa a operar em regime de congelamento funcional:
+
+- bugs podem ser corrigidos;
+- falhas de segurança podem ser corrigidas;
+- ajustes indispensáveis ao deploy podem ser feitos;
+- correções de compatibilidade, integridade e migration podem ser feitas;
+- novas funcionalidades e novas regras de negócio não entram mais na V1.
+
+A homologação final ainda deve cobrir o fluxo completo em ambiente de produção/homologação, especialmente as áreas que foram implementadas sem rodada formal completa de testes antes do avanço.
+
+Após o fechamento, qualquer expansão funcional deve ser tratada como planejamento de V2.
