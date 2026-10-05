@@ -97,6 +97,7 @@ export default function PublicInstitutionalSite() {
 
   const professional = site.profissional
   const blocks = site.blocos || []
+  const hasProfileBlock = blocks.some((block) => block.tipo === 'PERFIL')
 
   return (
     <div className="min-h-screen bg-[#FEFDFB] text-[#385048]">
@@ -148,13 +149,19 @@ export default function PublicInstitutionalSite() {
         {blocks.length === 0 ? (
           <DefaultInstitutional professional={professional} />
         ) : (
-          blocks.map((block) => (
-            <InstitutionalBlock
-              key={block.id}
-              block={block}
-              professional={professional}
-            />
-          ))
+          <>
+            {!hasProfileBlock ? (
+              <ProfileHero professional={professional} />
+            ) : null}
+
+            {blocks.map((block) => (
+              <InstitutionalBlock
+                key={block.id}
+                block={block}
+                professional={professional}
+              />
+            ))}
+          </>
         )}
       </main>
 
@@ -177,51 +184,66 @@ export default function PublicInstitutionalSite() {
   )
 }
 
+function ProfileHero({ professional }) {
+  return (
+    <section className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
+      <div className="flex justify-center lg:justify-start">
+        {professional.foto_url ? (
+          <img
+            src={professional.foto_url}
+            alt={professional.nome}
+            className="aspect-square w-full max-w-sm rounded-3xl object-cover shadow-sm"
+          />
+        ) : professional.logo_url ? (
+          <div className="flex aspect-square w-full max-w-sm items-center justify-center rounded-3xl border border-[#A8C8B8]/45 bg-white p-10 shadow-sm">
+            <img
+              src={professional.logo_url}
+              alt={`Logotipo de ${professional.nome}`}
+              className="max-h-full max-w-full object-contain"
+            />
+          </div>
+        ) : (
+          <div className="flex aspect-square w-full max-w-sm items-center justify-center rounded-3xl bg-[#A8C8B8]/20 text-6xl font-semibold">
+            {professional.nome?.trim()?.charAt(0) || 'P'}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
+          Profissional
+        </p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
+          {professional.nome}
+        </h1>
+
+        {professional.descricao ? (
+          <p className="mt-5 whitespace-pre-wrap text-lg leading-8 text-[#385048]/72">
+            {professional.descricao}
+          </p>
+        ) : null}
+
+        {professional.atuacao ? (
+          <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[#385048]/68">
+            {professional.atuacao}
+          </p>
+        ) : null}
+      </div>
+    </section>
+  )
+}
+
 function InstitutionalBlock({ block, professional }) {
   if (block.tipo === 'PERFIL') {
     return (
-      <section className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-        <div className="flex justify-center lg:justify-start">
-          {professional.foto_url ? (
-            <img
-              src={professional.foto_url}
-              alt={professional.nome}
-              className="aspect-square w-full max-w-sm rounded-3xl object-cover shadow-sm"
-            />
-          ) : professional.logo_url ? (
-            <div className="flex aspect-square w-full max-w-sm items-center justify-center rounded-3xl border border-[#A8C8B8]/45 bg-white p-10 shadow-sm">
-              <img
-                src={professional.logo_url}
-                alt={`Logotipo de ${professional.nome}`}
-                className="max-h-full max-w-full object-contain"
-              />
-            </div>
-          ) : (
-            <div className="flex aspect-square w-full max-w-sm items-center justify-center rounded-3xl bg-[#A8C8B8]/20 text-6xl font-semibold">
-              {professional.nome?.trim()?.charAt(0) || 'P'}
-            </div>
-          )}
-        </div>
-
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
-            Profissional
-          </p>
-          <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">
-            {block.titulo || professional.nome}
-          </h1>
-          {block.descricao || professional.descricao ? (
-            <p className="mt-5 whitespace-pre-wrap text-lg leading-8 text-[#385048]/72">
-              {block.descricao || professional.descricao}
-            </p>
-          ) : null}
-          {block.conteudo || professional.atuacao ? (
-            <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[#385048]/68">
-              {block.conteudo || professional.atuacao}
-            </p>
-          ) : null}
-        </div>
-      </section>
+      <ProfileHero
+        professional={{
+          ...professional,
+          nome: block.titulo || professional.nome,
+          descricao: block.descricao || professional.descricao,
+          atuacao: block.conteudo || professional.atuacao,
+        }}
+      />
     )
   }
 
