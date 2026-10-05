@@ -573,9 +573,11 @@ export default function PublicParticipantAccess({ token }) {
             </h1>
             <p className="mt-4 leading-7 text-[#385048]/70">
               Em cada item, responda duas perguntas: “O que eu penso disso?” e
-              “O que eu acredito que meu cônjuge pensa disso?”. Suas respostas
-              são salvas progressivamente e podem ser retomadas por este mesmo
-              link.
+              {access?.tipo_vinculo === 'CASAL'
+                ? ' “O que eu acredito que meu cônjuge pensa disso?”.'
+                : ' “O que eu acredito que a outra pessoa pensa disso?”.'}{' '}
+              Suas respostas são salvas progressivamente e podem ser retomadas
+              por este mesmo link.
             </p>
 
             <div className="mt-6">
@@ -674,7 +676,9 @@ export default function PublicParticipantAccess({ token }) {
                         {renderAnswerControl(
                           item,
                           'sobre_outro',
-                          'O que eu acredito que meu cônjuge pensa disso?'
+                          access?.tipo_vinculo === 'CASAL'
+                            ? 'O que eu acredito que meu cônjuge pensa disso?'
+                            : 'O que eu acredito que a outra pessoa pensa disso?'
                         )}
                       </div>
                     </article>
