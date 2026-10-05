@@ -170,6 +170,161 @@ final class ProfessionalController
         ]);
     }
 
+    public function deleteProfileImage(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface {
+        $id = $this->professionalId($request);
+
+        if ($id === null) {
+            return $this->json($response, [
+                'error' => 'unauthorized',
+                'message' => 'Autenticacao profissional obrigatoria.',
+            ], 401);
+        }
+
+        $type = strtolower(trim((string) ($args['tipo'] ?? '')));
+        $fields = [
+            'foto' => 'foto_url',
+            'logo' => 'logo_url',
+        ];
+        $field = $fields[$type] ?? null;
+
+        if ($field === null) {
+            return $this->validation($response, 'Tipo de imagem invalido.');
+        }
+
+        $professional = $this->find($id);
+
+        if ($professional === null) {
+            return $this->json($response, [
+                'error' => 'not_found',
+                'message' => 'Profissional nao encontrado.',
+            ], 404);
+        }
+
+        $currentUrl = $professional[$field] ?? null;
+
+        if ($currentUrl === null || trim((string) $currentUrl) === '') {
+            return $this->json($response, [
+                'message' => 'A imagem ja esta removida.',
+                'profissional' => $professional,
+            ]);
+        }
+
+        $currentUrl = (string) $currentUrl;
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            "UPDATE profissionais
+                SET {$field} = NULL
+              WHERE id = :id"
+        );
+        $stmt->execute(['id' => $id]);
+
+        $fileRemoved = false;
+        $fileKeptBecauseReferenced = false;
+
+        if ($this->imageUrlStillReferenced($pdo, $currentUrl)) {
+            $fileKeptBecauseReferenced = true;
+        } else {
+            $fileRemoved = $this->deleteLocalProfessionalUpload(
+                $id,
+                $currentUrl
+            );
+        }
+
+        $this->auditService->recordSafe(
+            'PROFISSIONAL',
+            $id,
+            'PERFIL_IMAGEM_EXCLUIDA',
+            'PROFISSIONAL',
+            $id,
+            [
+                'tipo' => $type,
+                'arquivo_local_removido' => $fileRemoved,
+                'arquivo_mantido_por_referencia' => $fileKeptBecauseReferenced,
+            ],
+            $request,
+            $id,
+            $pdo
+        );
+
+        return $this->json($response, [
+            'message' => 'Imagem excluida do perfil com sucesso.',
+            'profissional' => $this->find($id),
+        ]);
+    }
+
+    private function imageUrlStillReferenced(PDO $pdo, string $url): bool
+    {
+        $professionalStmt = $pdo->prepare(
+            'SELECT COUNT(*)
+               FROM profissionais
+              WHERE foto_url = :foto_url
+                 OR logo_url = :logo_url'
+        );
+        $professionalStmt->execute([
+            'foto_url' => $url,
+            'logo_url' => $url,
+        ]);
+
+        if ((int) $professionalStmt->fetchColumn() > 0) {
+            return true;
+        }
+
+        $blockStmt = $pdo->prepare(
+            'SELECT COUNT(*)
+               FROM site_blocos
+              WHERE midia_url = :midia_url'
+        );
+        $blockStmt->execute(['midia_url' => $url]);
+
+        return (int) $blockStmt->fetchColumn() > 0;
+    }
+
+    private function deleteLocalProfessionalUpload(
+        int $professionalId,
+        string $url
+    ): bool {
+        $path = parse_url($url, PHP_URL_PATH);
+
+        if (!is_string($path) || $path === '') {
+            return false;
+        }
+
+        $prefix = '/uploads/site/' . $professionalId . '/';
+
+        if (!str_starts_with($path, $prefix)) {
+            return false;
+        }
+
+        $filename = substr($path, strlen($prefix));
+
+        if (
+            $filename === ''
+            || str_contains($filename, '/')
+            || preg_match(
+                '/^[a-f0-9]{32}\.(?:jpg|png|webp)$/',
+                $filename
+            ) !== 1
+        ) {
+            return false;
+        }
+
+        $targetPath = dirname(__DIR__, 2)
+            . '/public'
+            . $prefix
+            . $filename;
+
+        if (!is_file($targetPath)) {
+            return false;
+        }
+
+        return @unlink($targetPath);
+    }
+
     private function professionalId(ServerRequestInterface $request): ?int
     {
         $professional = $request->getAttribute('auth.professional');
