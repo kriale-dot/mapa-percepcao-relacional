@@ -202,6 +202,7 @@ try {
         'devolutivas',
         'auditoria_eventos',
         'rate_limites',
+        'site_blocos',
     ];
 
     $database = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
@@ -241,6 +242,7 @@ try {
         '006_devolutivas.sql',
         '007_auditoria.sql',
         '008_rate_limites.sql',
+        '009_site_institucional.sql',
     ];
 
     $missingMigrations = array_values(
