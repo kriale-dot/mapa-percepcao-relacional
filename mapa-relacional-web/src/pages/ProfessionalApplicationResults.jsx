@@ -18,8 +18,8 @@ function directionLabel(direction, application) {
   const b = application?.participante_b?.nome || 'Participante B'
 
   return direction === 'A_SOBRE_B'
-    ? `Percepção de ${a} sobre ${b}`
-    : `Percepção de ${b} sobre ${a}`
+    ? `Score de ${a}`
+    : `Score de ${b}`
 }
 
 function comparisonLabels(direction, application) {
@@ -41,29 +41,38 @@ function bandClasses(band) {
   const normalized = String(band || '').toLowerCase()
 
   if (normalized === 'bom') {
-    return 'bg-[#88B098]/22 border-[#88B098]/55'
+    return 'bg-green-50 border-green-300'
   }
 
   if (normalized === 'regular') {
-    return 'bg-[#D8B078]/18 border-[#D8B078]/55'
+    return 'bg-yellow-50 border-yellow-300'
   }
 
   if (normalized === 'ruim') {
-    return 'bg-[#C97C5D]/14 border-[#C97C5D]/45'
+    return 'bg-red-50 border-red-300'
   }
 
   return 'bg-[#A8C8D0]/15 border-[#A8C8D0]/45'
 }
 
-function ResultBar({ percentage }) {
+function ResultBar({ percentage, band }) {
   const value =
     percentage == null ? 0 : Math.max(0, Math.min(100, Number(percentage)))
+  const normalized = String(band || '').toLowerCase()
+  const barClass =
+    normalized === 'bom'
+      ? 'bg-green-500'
+      : normalized === 'regular'
+        ? 'bg-yellow-400'
+        : normalized === 'ruim'
+          ? 'bg-red-500'
+          : 'bg-[#385048]'
 
   return (
     <div className="mt-4">
-      <div className="h-3 overflow-hidden rounded-full bg-[#A8C8B8]/20">
+      <div className="h-3 overflow-hidden rounded-full bg-black/10">
         <div
-          className="h-full rounded-full bg-[#385048]"
+          className={`h-full rounded-full ${barClass}`}
           style={{ width: `${value}%` }}
         />
       </div>
@@ -346,6 +355,47 @@ export default function ProfessionalApplicationResults({ applicationId }) {
 
         {hasResults ? (
           <>
+            {result?.resultado_geral ? (
+              <section
+                className={[
+                  'mt-7 rounded-3xl border p-7 shadow-sm',
+                  bandClasses(result.resultado_geral.faixa),
+                ].join(' ')}
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#385048]/55">
+                  Score geral do casal
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold">
+                  Acertos completos por item
+                </h2>
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-[#385048]/70">
+                  Um item soma 1 ponto geral somente quando as duas comparações
+                  coincidem: o que A acredita que B pensa coincide com o que B
+                  respondeu, e o que B acredita que A pensa coincide com o que
+                  A respondeu.
+                </p>
+
+                <div className="mt-5 flex flex-wrap items-end gap-3">
+                  <span className="text-5xl font-semibold">
+                    {Number(result.resultado_geral.percentual).toFixed(2)}%
+                  </span>
+                  <span className="mb-1 rounded-full bg-white/80 px-3 py-1 text-sm font-semibold">
+                    {result.resultado_geral.faixa || 'Sem faixa'}
+                  </span>
+                </div>
+
+                <ResultBar
+                  percentage={result.resultado_geral.percentual}
+                  band={result.resultado_geral.faixa}
+                />
+
+                <p className="mt-4 text-sm font-medium text-[#385048]/70">
+                  Score geral: {result.resultado_geral.acertos_gerais} de{' '}
+                  {result.resultado_geral.itens_validos} item(ns) válido(s)
+                </p>
+              </section>
+            ) : null}
+
             <div className="mt-7 grid gap-5 lg:grid-cols-2">
               {['A_SOBRE_B', 'B_SOBRE_A'].map((direction) => {
                 const item = resultsByDirection[direction]
@@ -380,7 +430,10 @@ export default function ProfessionalApplicationResults({ applicationId }) {
                       ) : null}
                     </div>
 
-                    <ResultBar percentage={item?.percentual} />
+                    <ResultBar
+                      percentage={item?.percentual}
+                      band={item?.faixa}
+                    />
 
                     <p className="mt-4 text-sm text-[#385048]/65">
                       {item?.coincidencias ?? 0} coincidência(s) em{' '}
