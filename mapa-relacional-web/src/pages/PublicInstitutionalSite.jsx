@@ -306,6 +306,50 @@ function InstitutionalBlock({ block, professional }) {
     )
   }
 
+  if (block.tipo === 'TEXTO_IMAGEM') {
+    const image = (
+      <img
+        src={block.midia_url}
+        alt={block.texto_alternativo || block.titulo || ''}
+        className="h-auto w-auto max-w-full"
+      />
+    )
+
+    return (
+      <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mx-auto grid max-w-5xl overflow-hidden rounded-3xl border border-[#A8C8B8]/40 bg-white shadow-sm md:grid-cols-2 md:items-center">
+          <div className="flex justify-center p-6 md:p-8">
+            {block.link_url ? (
+              <button
+                type="button"
+                onClick={() => openLink(block.link_url)}
+                className="cursor-pointer"
+                aria-label={
+                  block.texto_alternativo ||
+                  block.titulo ||
+                  'Abrir link da imagem'
+                }
+              >
+                {image}
+              </button>
+            ) : (
+              image
+            )}
+          </div>
+
+          <div className="p-6 pt-0 md:p-10">
+            <SectionHeading block={block} />
+            {block.conteudo ? (
+              <p className="mt-5 whitespace-pre-wrap text-base leading-8 text-[#385048]/72">
+                {block.conteudo}
+              </p>
+            ) : null}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   if (block.tipo === 'IMAGEM') {
     return (
       <section className="mx-auto max-w-6xl px-6 py-12">
