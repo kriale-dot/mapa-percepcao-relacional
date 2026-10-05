@@ -5,6 +5,7 @@ import {
   listSiteBlocks,
   moveSiteBlock,
   updateSiteBlock,
+  uploadSiteImage,
 } from '../services/api'
 import { clearAuthToken, getAuthToken } from '../services/auth'
 
@@ -61,6 +62,7 @@ export default function ProfessionalSiteEditor() {
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
   const [workingId, setWorkingId] = useState(null)
+  const [uploadingKey, setUploadingKey] = useState(null)
 
   useEffect(() => {
     if (!getAuthToken()) {
@@ -106,6 +108,45 @@ export default function ProfessionalSiteEditor() {
       ...current,
       [field]: value,
     }))
+  }
+
+  async function handleImageUpload(file, target) {
+    if (!file) return
+
+    const key = target === 'new' ? 'new' : `block-${target}`
+    setUploadingKey(key)
+    setMessage('')
+
+    try {
+      const result = await uploadSiteImage(file)
+      const url = result.imagem?.url
+
+      if (!url) {
+        throw new Error('A API não retornou a imagem enviada.')
+      }
+
+      if (target === 'new') {
+        updateNew('midia_url', url)
+      } else {
+        updateDraft(target, 'midia_url', url)
+      }
+
+      setMessage(
+        target === 'new'
+          ? 'Imagem enviada. Complete o bloco e clique em Adicionar bloco.'
+          : 'Imagem enviada. Clique em Salvar bloco para confirmar a alteração.',
+      )
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setMessage(error.message || 'Não foi possível enviar a imagem.')
+    } finally {
+      setUploadingKey(null)
+    }
   }
 
   async function handleCreate(event) {
@@ -315,6 +356,10 @@ export default function ProfessionalSiteEditor() {
 
                 <BlockFields
                   block={block}
+                  uploading={uploadingKey === `block-${block.id}`}
+                  onImageUpload={(file) =>
+                    handleImageUpload(file, block.id)
+                  }
                   onChange={(field, value) =>
                     updateDraft(block.id, field, value)
                   }
@@ -323,7 +368,10 @@ export default function ProfessionalSiteEditor() {
                 <div className="mt-5 flex justify-end">
                   <button
                     type="button"
-                    disabled={workingId !== null}
+                    disabled={
+                      workingId !== null ||
+                      uploadingKey === `block-${block.id}`
+                    }
                     onClick={() => handleSave(block)}
                     className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
                   >
@@ -348,13 +396,19 @@ export default function ProfessionalSiteEditor() {
           <form className="mt-6" onSubmit={handleCreate}>
             <BlockFields
               block={newBlock}
+              uploading={uploadingKey === 'new'}
+              onImageUpload={(file) =>
+                handleImageUpload(file, 'new')
+              }
               onChange={updateNew}
             />
 
             <div className="mt-6 flex justify-end">
               <button
                 type="submit"
-                disabled={status === 'creating'}
+                disabled={
+                  status === 'creating' || uploadingKey === 'new'
+                }
                 className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
                 {status === 'creating' ? 'Criando...' : 'Adicionar bloco'}
@@ -367,8 +421,14 @@ export default function ProfessionalSiteEditor() {
   )
 }
 
-function BlockFields({ block, onChange }) {
-  const mediaType = ['IMAGEM', 'VIDEO', 'AUDIO'].includes(block.tipo)
+function BlockFields({
+  block,
+  onChange,
+  onImageUpload,
+  uploading = false,
+}) {
+  const isImage = block.tipo === 'IMAGEM'
+  const externalMediaType = ['VIDEO', 'AUDIO'].includes(block.tipo)
   const hasLink = ['CTA', 'LINK', 'AVALIACAO'].includes(block.tipo)
 
   return (
@@ -444,10 +504,68 @@ function BlockFields({ block, onChange }) {
         />
       </label>
 
-      {mediaType ? (
+      {isImage ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-[#385048]/15 bg-[#FEFDFB] p-4">
+            <span className="text-sm font-medium">Imagem</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              required={!block.midia_url}
+              disabled={uploading}
+              onChange={(event) =>
+                onImageUpload?.(event.target.files?.[0] || null)
+              }
+              className="mt-3 block w-full text-sm"
+            />
+            <p className="mt-2 text-xs leading-5 text-[#385048]/55">
+              JPG, PNG ou WEBP. Limite padrão: 5 MB.
+            </p>
+            {uploading ? (
+              <p className="mt-2 text-sm font-semibold">
+                Enviando imagem...
+              </p>
+            ) : null}
+          </div>
+
+          <div>
+            <span className="text-sm font-medium">Pré-visualização</span>
+            {block.midia_url ? (
+              <img
+                src={block.midia_url}
+                alt={block.texto_alternativo || block.titulo || ''}
+                className="mt-2 max-h-52 w-full rounded-2xl border border-[#A8C8B8]/40 object-contain"
+              />
+            ) : (
+              <div className="mt-2 flex h-36 items-center justify-center rounded-2xl border border-dashed border-[#A8C8B8] text-sm text-[#385048]/50">
+                Nenhuma imagem enviada
+              </div>
+            )}
+          </div>
+
+          <label className="block md:col-span-2">
+            <span className="text-sm font-medium">
+              Texto alternativo / descrição da imagem
+            </span>
+            <input
+              type="text"
+              maxLength="255"
+              value={block.texto_alternativo}
+              onChange={(event) =>
+                onChange('texto_alternativo', event.target.value)
+              }
+              className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none"
+            />
+          </label>
+        </div>
+      ) : null}
+
+      {externalMediaType ? (
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block">
-            <span className="text-sm font-medium">URL da mídia</span>
+            <span className="text-sm font-medium">
+              URL do {block.tipo === 'VIDEO' ? 'vídeo' : 'áudio'}
+            </span>
             <input
               type="url"
               required
@@ -460,7 +578,7 @@ function BlockFields({ block, onChange }) {
 
           <label className="block">
             <span className="text-sm font-medium">
-              Texto alternativo / descrição da mídia
+              Descrição da mídia
             </span>
             <input
               type="text"
