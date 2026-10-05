@@ -277,16 +277,23 @@ export default function ProfessionalItems({
 
               <label className="block">
                 <span className="text-sm font-medium">Tipo de resposta</span>
-                <input
-                  type="text"
+                <select
                   required
-                  maxLength="40"
                   value={form.tipo_resposta}
                   onChange={(event) =>
                     updateField('tipo_resposta', event.target.value)
                   }
                   className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none focus:border-[#88B098] focus:ring-2 focus:ring-[#88B098]/20"
-                />
+                >
+                  <option value="">Selecione</option>
+                  <option value="ESCOLHA_UNICA">Escolha única</option>
+                  <option value="NUMERICO">Numérico</option>
+                  <option value="TEXTO">Texto livre</option>
+                </select>
+                <span className="mt-2 block text-xs text-[#385048]/55">
+                  Escolha única usa alternativas cadastradas. Numérico abre um
+                  campo de número. Texto livre abre um campo de texto.
+                </span>
               </label>
 
               <label className="block">
