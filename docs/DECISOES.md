@@ -674,3 +674,21 @@ As migrations oficiais da V1 são `001` a `008`.
 O documento de referência do encerramento é `docs/FECHAMENTO_V1.md`.
 
 A versão `1.0.0` representa **escopo fechado e código funcionalmente completo**, enquanto o estado “em produção” somente será atribuído depois do checklist de homologação e deploy.
+
+## D-043 — Fechamento da V1.0.0 é retratado por requisito obrigatório ausente
+**Data:** 2026-10-05  
+**Status:** vigente
+
+O fechamento formal realizado anteriormente foi prematuro.
+
+O documento original e `REQUISITOS_SISTEMA.md` exigem um site institucional público configurável pelo profissional por blocos. A home estática existente não satisfazia esse requisito.
+
+Consequências:
+
+- o fechamento de `1.0.0` fica retratado;
+- o projeto retorna temporariamente para `1.0.0-rc.1`;
+- o site institucional é implementado como correção de escopo da própria V1;
+- a migration `009_site_institucional.sql` passa a integrar a V1;
+- somente após validar o editor e a renderização pública responsiva poderá ocorrer novo fechamento formal da V1.
+
+O requisito não será deslocado para V2 porque já fazia parte do escopo original.
