@@ -182,6 +182,12 @@ export default function ProfessionalDashboard() {
               path: '/profissional/avaliacoes',
             },
             {
+              title: 'Site institucional',
+              description:
+                'Monte a página pública com textos, imagens, vídeos, links e chamadas para ação.',
+              path: '/profissional/site',
+            },
+            {
               title: 'Instrumentos',
               description:
                 'Gerencie instrumentos, versões, seções, itens e faixas.',
