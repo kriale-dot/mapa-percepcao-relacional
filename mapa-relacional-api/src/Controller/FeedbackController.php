@@ -421,6 +421,7 @@ final class FeedbackController
                     $feedback['comentario_profissional'],
                 'liberada_em' => $feedback['liberada_em'],
                 'resultados' => $result['resultados'],
+                'resultado_geral' => $result['resultado_geral'],
                 'secoes' => $result['secoes'],
                 'itens_excluidos' => $excludedItems,
             ],
