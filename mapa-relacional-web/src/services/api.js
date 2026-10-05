@@ -60,6 +60,12 @@ export function getApiHealth() {
   return request('/api/health')
 }
 
+export function getPublicSite() {
+  return request('/api/public/site', {
+    method: 'GET',
+  })
+}
+
 export function listPublicEvaluations() {
   return request('/api/public/avaliacoes', {
     method: 'GET',
@@ -151,6 +157,45 @@ export function updateProfessionalProfile(profile) {
     method: 'PUT',
     auth: true,
     body: JSON.stringify(profile),
+  })
+}
+
+
+export function listSiteBlocks() {
+  return request('/api/profissional/site/blocos', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function createSiteBlock(block) {
+  return request('/api/profissional/site/blocos', {
+    method: 'POST',
+    auth: true,
+    body: JSON.stringify(block),
+  })
+}
+
+export function updateSiteBlock(id, block) {
+  return request(`/api/profissional/site/blocos/${id}`, {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify(block),
+  })
+}
+
+export function deleteSiteBlock(id) {
+  return request(`/api/profissional/site/blocos/${id}`, {
+    method: 'DELETE',
+    auth: true,
+  })
+}
+
+export function moveSiteBlock(id, direction) {
+  return request(`/api/profissional/site/blocos/${id}/mover`, {
+    method: 'POST',
+    auth: true,
+    body: JSON.stringify({ direcao: direction }),
   })
 }
 
