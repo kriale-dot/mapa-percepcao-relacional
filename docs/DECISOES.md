@@ -831,3 +831,21 @@ O corpo do e-mail continua mostrando os scores e o texto correspondente ao score
 A geração do PDF ocorre antes do envio SMTP. Se a geração do documento ou o envio falhar, a conclusão final do segundo participante é revertida para permitir nova tentativa.
 
 A geração utiliza dompdf/dompdf no backend. Não é necessária migration de banco.
+
+## D-048 — Bloco institucional de vídeo
+**Data:** 2026-10-06  
+**Status:** vigente
+
+O site institucional passa a tratar `VIDEO` como bloco visual de primeira classe no editor e na página pública.
+
+Regras:
+
+- o profissional informa uma URL de vídeo;
+- o editor apresenta pré-visualização antes de salvar;
+- YouTube, YouTube Shorts e Vimeo são incorporados em player responsivo;
+- URLs diretas de arquivos de vídeo usam o player HTML5 nativo;
+- título, descrição/subtítulo, conteúdo complementar e descrição acessível continuam disponíveis;
+- o player público mantém proporção 16:9 e suporte a tela cheia;
+- não há upload de vídeo na V1; o bloco continua baseado em URL, conforme D-044.
+
+Nenhuma migration adicional é necessária.
