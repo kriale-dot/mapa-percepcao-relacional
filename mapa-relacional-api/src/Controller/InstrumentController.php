@@ -5,12 +5,19 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Config\Database;
+use App\Service\AuditService;
 use PDO;
+use PDOException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 final class InstrumentController
 {
+    public function __construct(
+        private readonly AuditService $auditService
+    ) {
+    }
+
     private const ALLOWED_STATUSES = [
         'RASCUNHO',
         'ATIVO',
@@ -37,6 +44,11 @@ final class InstrumentController
                 i.status,
                 i.created_at,
                 i.updated_at,
+                (SELECT COUNT(*)
+                   FROM aplicacoes a
+                   INNER JOIN instrumento_versoes av
+                     ON av.id = a.instrumento_versao_id
+                  WHERE av.instrumento_id = i.id) AS total_aplicacoes,
                 COUNT(v.id) AS total_versoes
              FROM instrumentos i
              LEFT JOIN instrumento_versoes v
@@ -204,35 +216,128 @@ final class InstrumentController
 
         $id = $this->positiveId($args['id'] ?? null);
 
-        if ($id === null || $this->find($professionalId, $id) === null) {
+        if ($id === null) {
             return $this->notFound($response);
+        }
+
+        $instrument = $this->find($professionalId, $id);
+
+        if ($instrument === null) {
+            return $this->notFound($response);
+        }
+
+        if ((int) ($instrument['total_aplicacoes'] ?? 0) > 0) {
+            return $this->json($response, [
+                'error' => 'instrument_has_applications',
+                'message' => 'Este instrumento possui avaliacoes vinculadas. Exclua primeiro cada avaliacao que nao precisa ser preservada.',
+            ], 409);
         }
 
         $pdo = Database::connect();
 
-        $count = $pdo->prepare(
-            'SELECT COUNT(*)
-               FROM instrumento_versoes
-              WHERE instrumento_id = :id'
-        );
-        $count->execute(['id' => $id]);
+        try {
+            $pdo->beginTransaction();
 
-        if ((int) $count->fetchColumn() > 0) {
-            return $this->json($response, [
-                'error' => 'instrument_has_versions',
-                'message' => 'Instrumentos com versoes nao podem ser excluidos. Arquive o instrumento.',
-            ], 409);
+            $params = ['instrumento_id' => $id];
+
+            $deleteAlternatives = $pdo->prepare(
+                'DELETE alt
+                   FROM alternativas alt
+                   INNER JOIN itens it
+                     ON it.id = alt.item_id
+                   INNER JOIN secoes s
+                     ON s.id = it.secao_id
+                   INNER JOIN instrumento_versoes v
+                     ON v.id = s.instrumento_versao_id
+                  WHERE v.instrumento_id = :instrumento_id'
+            );
+            $deleteAlternatives->execute($params);
+
+            $deleteItems = $pdo->prepare(
+                'DELETE it
+                   FROM itens it
+                   INNER JOIN secoes s
+                     ON s.id = it.secao_id
+                   INNER JOIN instrumento_versoes v
+                     ON v.id = s.instrumento_versao_id
+                  WHERE v.instrumento_id = :instrumento_id'
+            );
+            $deleteItems->execute($params);
+
+            $deleteSections = $pdo->prepare(
+                'DELETE s
+                   FROM secoes s
+                   INNER JOIN instrumento_versoes v
+                     ON v.id = s.instrumento_versao_id
+                  WHERE v.instrumento_id = :instrumento_id'
+            );
+            $deleteSections->execute($params);
+
+            $deleteBands = $pdo->prepare(
+                'DELETE rf
+                   FROM resultado_faixas rf
+                   INNER JOIN instrumento_versoes v
+                     ON v.id = rf.instrumento_versao_id
+                  WHERE v.instrumento_id = :instrumento_id'
+            );
+            $deleteBands->execute($params);
+
+            $deleteVersions = $pdo->prepare(
+                'DELETE FROM instrumento_versoes
+                  WHERE instrumento_id = :instrumento_id'
+            );
+            $deleteVersions->execute($params);
+
+            $deleteInstrument = $pdo->prepare(
+                'DELETE FROM instrumentos
+                  WHERE id = :id
+                    AND profissional_id = :profissional_id'
+            );
+            $deleteInstrument->execute([
+                'id' => $id,
+                'profissional_id' => $professionalId,
+            ]);
+
+            if ($deleteInstrument->rowCount() !== 1) {
+                $pdo->rollBack();
+
+                return $this->json($response, [
+                    'error' => 'instrument_delete_conflict',
+                    'message' => 'O instrumento nao pode mais ser excluido no estado atual.',
+                ], 409);
+            }
+
+            $this->auditService->recordSafe(
+                'PROFISSIONAL',
+                $professionalId,
+                'INSTRUMENTO_EXCLUIDO',
+                'INSTRUMENTO',
+                $id,
+                [
+                    'nome' => $instrument['nome'] ?? null,
+                    'status' => $instrument['status'] ?? null,
+                    'total_versoes' => (int) ($instrument['total_versoes'] ?? 0),
+                ],
+                $request,
+                $professionalId,
+                $pdo
+            );
+
+            $pdo->commit();
+        } catch (PDOException $error) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            if ((string) $error->getCode() === '23000') {
+                return $this->json($response, [
+                    'error' => 'instrument_in_use',
+                    'message' => 'O instrumento possui dependencias e nao pode ser excluido.',
+                ], 409);
+            }
+
+            throw $error;
         }
-
-        $stmt = $pdo->prepare(
-            'DELETE FROM instrumentos
-              WHERE id = :id
-                AND profissional_id = :profissional_id'
-        );
-        $stmt->execute([
-            'id' => $id,
-            'profissional_id' => $professionalId,
-        ]);
 
         return $this->json($response, [
             'message' => 'Instrumento excluido com sucesso.',
@@ -290,6 +395,11 @@ final class InstrumentController
                 i.status,
                 i.created_at,
                 i.updated_at,
+                (SELECT COUNT(*)
+                   FROM aplicacoes a
+                   INNER JOIN instrumento_versoes av
+                     ON av.id = a.instrumento_versao_id
+                  WHERE av.instrumento_id = i.id) AS total_aplicacoes,
                 COUNT(v.id) AS total_versoes
              FROM instrumentos i
              LEFT JOIN instrumento_versoes v
@@ -323,6 +433,7 @@ final class InstrumentController
     {
         $instrument['id'] = (int) $instrument['id'];
         $instrument['total_versoes'] = (int) ($instrument['total_versoes'] ?? 0);
+        $instrument['total_aplicacoes'] = (int) ($instrument['total_aplicacoes'] ?? 0);
 
         return $instrument;
     }
