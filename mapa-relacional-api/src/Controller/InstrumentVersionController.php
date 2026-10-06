@@ -452,17 +452,10 @@ final class InstrumentVersionController
             return $this->versionNotFound($response);
         }
 
-        if ($version['status'] !== 'RASCUNHO') {
-            return $this->immutable($response);
-        }
-
-        if (
-            (int) $version['total_secoes'] > 0
-            || (int) $version['total_aplicacoes'] > 0
-        ) {
+        if ((int) $version['total_aplicacoes'] > 0) {
             return $this->json($response, [
-                'error' => 'version_in_use',
-                'message' => 'A versao possui estrutura ou aplicacoes e nao pode ser excluida.',
+                'error' => 'version_has_applications',
+                'message' => 'Esta versao possui avaliacoes vinculadas. Exclua primeiro cada avaliacao que nao precisa ser preservada.',
             ], 409);
         }
 
@@ -471,24 +464,48 @@ final class InstrumentVersionController
         try {
             $pdo->beginTransaction();
 
-            $bandStmt = $pdo->prepare(
+            $params = ['version_id' => $versionId];
+
+            $deleteAlternatives = $pdo->prepare(
+                'DELETE alt
+                   FROM alternativas alt
+                   INNER JOIN itens it
+                     ON it.id = alt.item_id
+                   INNER JOIN secoes s
+                     ON s.id = it.secao_id
+                  WHERE s.instrumento_versao_id = :version_id'
+            );
+            $deleteAlternatives->execute($params);
+
+            $deleteItems = $pdo->prepare(
+                'DELETE it
+                   FROM itens it
+                   INNER JOIN secoes s
+                     ON s.id = it.secao_id
+                  WHERE s.instrumento_versao_id = :version_id'
+            );
+            $deleteItems->execute($params);
+
+            $deleteSections = $pdo->prepare(
+                'DELETE FROM secoes
+                  WHERE instrumento_versao_id = :version_id'
+            );
+            $deleteSections->execute($params);
+
+            $deleteBands = $pdo->prepare(
                 'DELETE FROM resultado_faixas
                   WHERE instrumento_versao_id = :version_id'
             );
-            $bandStmt->execute([
-                'version_id' => $versionId,
-            ]);
+            $deleteBands->execute($params);
 
             $stmt = $pdo->prepare(
                 'DELETE FROM instrumento_versoes
                   WHERE id = :id
-                    AND instrumento_id = :instrumento_id
-                    AND status = :status'
+                    AND instrumento_id = :instrumento_id'
             );
             $stmt->execute([
                 'id' => $versionId,
                 'instrumento_id' => $instrumentId,
-                'status' => 'RASCUNHO',
             ]);
 
             if ($stmt->rowCount() !== 1) {
@@ -499,6 +516,23 @@ final class InstrumentVersionController
                     'message' => 'A versao nao pode mais ser excluida no estado atual.',
                 ], 409);
             }
+
+            $this->auditService->recordSafe(
+                'PROFISSIONAL',
+                $professionalId,
+                'VERSAO_EXCLUIDA',
+                'INSTRUMENTO_VERSAO',
+                $versionId,
+                [
+                    'instrumento_id' => $instrumentId,
+                    'numero_versao' => $version['numero_versao'] ?? null,
+                    'status' => $version['status'] ?? null,
+                    'total_secoes' => (int) ($version['total_secoes'] ?? 0),
+                ],
+                $request,
+                $professionalId,
+                $pdo
+            );
 
             $pdo->commit();
         } catch (PDOException $error) {
