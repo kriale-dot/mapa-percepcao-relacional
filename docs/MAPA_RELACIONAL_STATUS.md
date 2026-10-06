@@ -3151,6 +3151,7 @@ Arquivos alterados nesta tarefa:
 - `mapa-relacional-web/src/pages/ProfessionalInstrumentVersions.jsx`;
 - `docs/MAPA_RELACIONAL_CONTEXT.md`;
 - `docs/DECISOES.md`;
+- `docs/REQUISITOS_SISTEMA.md`;
 - `docs/MAPA_RELACIONAL_STATUS.md`.
 
 Não foi necessária migration nova; as remoções são feitas explicitamente em ordem segura dentro de transações.
