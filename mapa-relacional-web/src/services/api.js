@@ -735,4 +735,74 @@ export function deleteAlternative(
   )
 }
 
+
+export function listPublicLibrary(query = '') {
+  const params = new URLSearchParams()
+
+  if (query.trim() !== '') {
+    params.set('q', query.trim())
+  }
+
+  const suffix = params.toString()
+
+  return request(
+    `/api/public/biblioteca${suffix ? `?${suffix}` : ''}`,
+    {
+      method: 'GET',
+    },
+  )
+}
+
+export function listLibraryDocuments(query = '') {
+  const params = new URLSearchParams()
+
+  if (query.trim() !== '') {
+    params.set('q', query.trim())
+  }
+
+  const suffix = params.toString()
+
+  return request(
+    `/api/profissional/biblioteca/documentos${suffix ? `?${suffix}` : ''}`,
+    {
+      method: 'GET',
+      auth: true,
+    },
+  )
+}
+
+export function createLibraryDocument({
+  titulo,
+  descricao,
+  status,
+  arquivo,
+}) {
+  const form = new FormData()
+  form.append('titulo', titulo)
+  form.append('descricao', descricao || '')
+  form.append('status', status || 'ATIVO')
+  form.append('arquivo', arquivo)
+
+  return request('/api/profissional/biblioteca/documentos', {
+    method: 'POST',
+    auth: true,
+    body: form,
+  })
+}
+
+export function updateLibraryDocument(id, document) {
+  return request(`/api/profissional/biblioteca/documentos/${id}`, {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify(document),
+  })
+}
+
+export function deleteLibraryDocument(id) {
+  return request(`/api/profissional/biblioteca/documentos/${id}`, {
+    method: 'DELETE',
+    auth: true,
+  })
+}
+
 export { API_URL }
