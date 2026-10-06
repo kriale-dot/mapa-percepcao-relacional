@@ -555,7 +555,7 @@ Essa decisão mantém a imutabilidade histórica já adotada para versões publi
 
 ## D-036 — Devolutiva é liberada por link seguro enviado pelo Brevo
 **Data:** 2026-10-04  
-**Status:** vigente
+**Status:** parcialmente substituída por D-046
 
 Na V1, o resultado não é enviado como anexo nem incorporado integralmente ao corpo do e-mail.
 
@@ -781,3 +781,38 @@ As cores obrigatórias da barra são:
 O algoritmo de cálculo passa de `1.0` para `2.0`.
 
 O score geral é persistido em `resultados_gerais`, separado dos dois registros direcionais de `resultados`.
+
+## D-046 — Resultado automático por e-mail após conclusão
+**Data:** 2026-10-06  
+**Status:** vigente
+
+Quando os dois participantes concluírem a **Avaliação Conjugal**, a plataforma deverá calcular os resultados e enviar automaticamente ao e-mail de contato da aplicação um resumo técnico, sem depender da devolutiva preparada pelo profissional.
+
+O e-mail automático contém:
+
+- score percentual do participante A;
+- score percentual do participante B;
+- score geral da avaliação;
+- título interpretativo;
+- texto interpretativo definido pela faixa do score geral;
+- aviso explícito de que o resultado automático não substitui a devolutiva profissional.
+
+As faixas narrativas da Avaliação Conjugal são independentes das três faixas técnicas `Ruim / Regular / Bom` usadas na barra e no resultado persistido. Para percentuais com casas decimais, os intervalos narrativos são contínuos:
+
+- `80,00–100,00%` — **Uma percepção compartilhada muito positiva**;
+- `60,00–79,99%` — **Uma boa compreensão, com espaço para aprofundar o diálogo**;
+- `40,00–59,99%` — **Uma oportunidade de se conhecerem melhor**;
+- `20,00–39,99%` — **Um convite à redescoberta**;
+- `0,00–19,99%` — **Um caminho para construir maior compreensão**.
+
+Os textos completos dessas cinco faixas são parte da comunicação automática da Avaliação Conjugal e devem permanecer exatamente alinhados ao conteúdo aprovado para esse instrumento.
+
+Esta regra **não substitui a devolutiva profissional** definida em D-036. O profissional continua podendo preparar, liberar e enviar posteriormente a devolutiva com síntese, observações, comentário profissional e link seguro.
+
+A afirmação anterior de D-036 de que nenhum resultado seria incorporado ao corpo do e-mail fica parcialmente substituída: o e-mail automático pode conter os **scores agregados e o texto interpretativo automático**, enquanto a devolutiva profissional completa continua protegida por link seguro.
+
+Como os textos aprovados usam linguagem própria de relacionamento conjugal, eles **não devem ser herdados automaticamente por outros instrumentos** da plataforma.
+
+No fluxo de conclusão, se o SMTP falhar no momento do envio obrigatório desse resumo automático, a conclusão final do segundo participante é revertida e a interface informa que a finalização não foi concluída. Isso permite nova tentativa sem registrar a avaliação como concluída sem que o e-mail automático tenha sido entregue.
+
+Nenhuma migration adicional é necessária para esta regra.
