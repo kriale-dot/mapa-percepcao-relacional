@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Config\Database;
+use App\Service\AuditService;
 use App\Service\ResultService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
@@ -14,7 +15,8 @@ use Throwable;
 final class ApplicationController
 {
     public function __construct(
-        private readonly ResultService $resultService
+        private readonly ResultService $resultService,
+        private readonly AuditService $auditService
     ) {
     }
 
@@ -356,6 +358,111 @@ final class ApplicationController
             'itens_excluidos' => $excludedStmt->fetchAll(PDO::FETCH_ASSOC),
             'resultados' => $results,
             'resultado_geral' => $generalResult,
+        ]);
+    }
+
+    public function delete(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface {
+        $professionalId = $this->professionalId($request);
+
+        if ($professionalId === null) {
+            return $this->unauthorized($response);
+        }
+
+        $id = $this->positiveId($args['id'] ?? null);
+
+        if ($id === null) {
+            return $this->notFound($response);
+        }
+
+        $application = $this->find($professionalId, $id);
+
+        if ($application === null) {
+            return $this->notFound($response);
+        }
+
+        $pdo = Database::connect();
+
+        try {
+            $pdo->beginTransaction();
+
+            foreach ([
+                'DELETE FROM comparacoes WHERE aplicacao_id = :aplicacao_id',
+                'DELETE FROM resultados_gerais WHERE aplicacao_id = :aplicacao_id',
+                'DELETE FROM resultados WHERE aplicacao_id = :aplicacao_id',
+                'DELETE FROM devolutivas WHERE aplicacao_id = :aplicacao_id',
+                'DELETE FROM aplicacao_itens_excluidos WHERE aplicacao_id = :aplicacao_id',
+                'DELETE FROM respostas WHERE aplicacao_id = :aplicacao_id',
+            ] as $sql) {
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(['aplicacao_id' => $id]);
+            }
+
+            $accessStmt = $pdo->prepare(
+                'DELETE aa
+                   FROM acessos_aplicacao aa
+                   INNER JOIN aplicacao_participantes ap
+                     ON ap.id = aa.aplicacao_participante_id
+                  WHERE ap.aplicacao_id = :aplicacao_id'
+            );
+            $accessStmt->execute(['aplicacao_id' => $id]);
+
+            $participantsStmt = $pdo->prepare(
+                'DELETE FROM aplicacao_participantes
+                  WHERE aplicacao_id = :aplicacao_id'
+            );
+            $participantsStmt->execute(['aplicacao_id' => $id]);
+
+            $applicationStmt = $pdo->prepare(
+                'DELETE FROM aplicacoes
+                  WHERE id = :id
+                    AND profissional_id = :profissional_id'
+            );
+            $applicationStmt->execute([
+                'id' => $id,
+                'profissional_id' => $professionalId,
+            ]);
+
+            if ($applicationStmt->rowCount() !== 1) {
+                $pdo->rollBack();
+
+                return $this->json($response, [
+                    'error' => 'application_delete_conflict',
+                    'message' => 'A avaliacao nao pode mais ser excluida no estado atual.',
+                ], 409);
+            }
+
+            $this->auditService->recordSafe(
+                'PROFISSIONAL',
+                $professionalId,
+                'AVALIACAO_EXCLUIDA',
+                'APLICACAO',
+                $id,
+                [
+                    'status' => $application['status'] ?? null,
+                    'instrumento_id' => (int) ($application['instrumento_id'] ?? 0),
+                    'instrumento_versao_id' => (int) ($application['instrumento_versao_id'] ?? 0),
+                    'numero_versao' => $application['numero_versao'] ?? null,
+                ],
+                $request,
+                $professionalId,
+                $pdo
+            );
+
+            $pdo->commit();
+        } catch (Throwable $error) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            throw $error;
+        }
+
+        return $this->json($response, [
+            'message' => 'Avaliacao excluida com sucesso.',
         ]);
     }
 
