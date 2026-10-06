@@ -81,7 +81,7 @@ $auditService = new AuditService();
 $rateLimitService = new RateLimitService();
 $alternativeController = new AlternativeController();
 $auditController = new AuditController();
-$applicationController = new ApplicationController($resultService);
+$applicationController = new ApplicationController($resultService, $auditService);
 $authController = new AuthController($auditService, $rateLimitService);
 $professionalController = new ProfessionalController($auditService);
 $publicEvaluationController = new PublicEvaluationController(
@@ -104,7 +104,7 @@ $feedbackController = new FeedbackController(
     $resultService,
     $auditService
 );
-$instrumentController = new InstrumentController();
+$instrumentController = new InstrumentController($auditService);
 $instrumentVersionController = new InstrumentVersionController($auditService);
 $sectionController = new SectionController();
 $siteController = new SiteController($auditService);
@@ -212,6 +212,7 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->get('/aplicacoes', [$applicationController, 'index']);
     $group->post('/aplicacoes', [$applicationController, 'create']);
     $group->get('/aplicacoes/{id:[0-9]+}', [$applicationController, 'show']);
+    $group->delete('/aplicacoes/{id:[0-9]+}', [$applicationController, 'delete']);
     $group->get(
         '/aplicacoes/{id:[0-9]+}/resultados',
         [$applicationController, 'results']
