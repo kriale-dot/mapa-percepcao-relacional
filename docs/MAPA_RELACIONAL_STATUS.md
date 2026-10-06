@@ -3279,6 +3279,13 @@ A validação confirmou o fluxo principal do módulo, incluindo acesso à área 
 
 Com a biblioteca validada, o projeto entra na fase de **deploy/homologação**.
 
+Domínios oficiais definidos em 2026-10-06:
+
+```text
+Site público: https://taniasantiago.com.br
+API: https://api.taniasantiago.com.br
+```
+
 Antes de liberar produção:
 
 1. atualizar o servidor a partir da branch `main`;
