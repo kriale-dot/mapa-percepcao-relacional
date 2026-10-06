@@ -428,10 +428,17 @@ HTML;
         string $participantBName,
         ?float $participantAPercentage,
         ?float $participantBPercentage,
-        float $generalPercentage
+        float $generalPercentage,
+        string $resultTitle,
+        string $resultText,
+        string $pdfContent,
+        string $pdfFilename
     ): void {
-        [$resultTitle, $resultText] =
-            $this->automaticResultNarrative($generalPercentage);
+        if ($pdfContent === '' || trim($pdfFilename) === '') {
+            throw new RuntimeException(
+                'Documento PDF do resultado automatico indisponivel.'
+            );
+        }
 
         $host = trim((string) ($_ENV['SMTP_HOST'] ?? ''));
         $port = (int) ($_ENV['SMTP_PORT'] ?? 587);
@@ -539,6 +546,12 @@ HTML;
 
         $mail->setFrom($fromEmail, $fromName);
         $mail->addAddress($email);
+        $mail->addStringAttachment(
+            $pdfContent,
+            $pdfFilename,
+            'base64',
+            'application/pdf'
+        );
         $mail->isHTML(true);
         $mail->Subject = 'Resultado automático - ' . $evaluationName;
 
@@ -575,6 +588,12 @@ HTML;
   </div>
 
   <p>
+    O documento PDF anexado apresenta a avaliação completa, incluindo
+    score geral, scores individuais, resultados por tópico e a comparação
+    item a item.
+  </p>
+
+  <p>
     Este é um resultado automático baseado na comparação das respostas.
     Ele não substitui a devolutiva do profissional, que poderá ser enviada
     separadamente após a análise da avaliação.
@@ -594,6 +613,7 @@ HTML;
             . $this->formatPercentage($generalPercentage) . PHP_EOL . PHP_EOL
             . $resultTitle . PHP_EOL
             . $resultText . PHP_EOL . PHP_EOL
+            . 'O PDF anexado apresenta a avaliação completa, incluindo a comparação item a item.' . PHP_EOL . PHP_EOL
             . 'Este é um resultado automático e não substitui a devolutiva do profissional.';
 
         if (!$mail->send()) {
@@ -606,7 +626,7 @@ HTML;
     /**
      * @return array{0:string,1:string}
      */
-    private function automaticResultNarrative(float $percentage): array
+    public function automaticResultNarrative(float $percentage): array
     {
         if ($percentage < 0 || $percentage > 100) {
             throw new RuntimeException(
