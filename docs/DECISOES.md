@@ -816,3 +816,18 @@ Como os textos aprovados usam linguagem própria de relacionamento conjugal, ele
 No fluxo de conclusão, se o SMTP falhar no momento do envio obrigatório desse resumo automático, a conclusão final do segundo participante é revertida e a interface informa que a finalização não foi concluída. Isso permite nova tentativa sem registrar a avaliação como concluída sem que o e-mail automático tenha sido entregue.
 
 Nenhuma migration adicional é necessária para esta regra.
+
+
+## D-047 — Resultado automático inclui PDF completo
+**Data:** 2026-10-06  
+**Status:** vigente
+
+O e-mail automático definido em D-046 passa a incluir um PDF completo da Avaliação Conjugal, organizado como a tela profissional de resultados.
+
+O PDF contém identificação da avaliação e participantes, versão do instrumento, score geral, texto interpretativo, scores individuais, resultados por seção, comparação item a item, itens Não se aplica, nome do profissional responsável e link para a plataforma.
+
+O corpo do e-mail continua mostrando os scores e o texto correspondente ao score total. O PDF apresenta o detalhamento integral e informa que o resultado automático não substitui a devolutiva profissional.
+
+A geração do PDF ocorre antes do envio SMTP. Se a geração do documento ou o envio falhar, a conclusão final do segundo participante é revertida para permitir nova tentativa.
+
+A geração utiliza dompdf/dompdf no backend. Não é necessária migration de banco.
