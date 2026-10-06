@@ -957,3 +957,42 @@ Se o envio SMTP do resultado automático falhar na conclusão do segundo partici
 
 
 O PDF automático inclui score geral, scores individuais, resultados por tópico, comparação item a item, itens excluídos por Não se aplica, nome do profissional e link para a plataforma. A geração usa `dompdf/dompdf` e não exige migration.
+
+## Biblioteca pública de documentos
+
+A plataforma possui um módulo público de biblioteca para materiais em PDF e PNG.
+
+Fluxos:
+
+```text
+Visitante
+→ /biblioteca
+→ pesquisa por título/descrição/nome do arquivo
+→ abre PDF ou PNG livremente
+
+Profissional autenticado
+→ /profissional/biblioteca
+→ envia PDF/PNG
+→ informa título e descrição
+→ define ATIVO ou INATIVO
+→ edita metadados ou exclui o documento
+```
+
+API:
+
+- `GET /api/public/biblioteca?q=`
+- `GET /api/profissional/biblioteca/documentos?q=`
+- `POST /api/profissional/biblioteca/documentos`
+- `PUT /api/profissional/biblioteca/documentos/{id}`
+- `DELETE /api/profissional/biblioteca/documentos/{id}`
+
+Arquivos enviados ficam em:
+
+```text
+mapa-relacional-api/public/uploads/biblioteca/{profissional_id}/
+```
+
+Formatos permitidos: PDF e PNG. O limite padrão é 20 MB via `LIBRARY_FILE_MAX_MB`. A tabela é `biblioteca_documentos`, criada pela migration `011_biblioteca_publica.sql`.
+
+O site institucional aceita o bloco `BIBLIOTECA`, cujo destino padrão é `/biblioteca`.
+
