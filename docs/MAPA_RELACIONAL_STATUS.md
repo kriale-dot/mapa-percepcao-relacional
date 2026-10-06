@@ -2,13 +2,13 @@
 
 > Documento de checkpoint. Atualizar ao final de cada etapa relevante, correção ou mudança de estado do projeto.
 
-**Data do checkpoint:** 2026-10-05  
+**Data do checkpoint:** 2026-10-06  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `1.0.0-rc.1`  
 **Marco atual:** V1 reaberta para correção de escopo obrigatório — site institucional  
-**Etapa atual:** Etapa 11 em validação — site institucional público configurável  
-**Próximo passo:** aplicar migration 009, validar editor por blocos e site público responsivo e somente então refazer o fechamento formal da V1
+**Etapa atual:** Etapa 11 em validação — site institucional público configurável + ajuste de resultado automático por e-mail  
+**Próximo passo:** validar o site institucional, o score geral e o novo e-mail automático da Avaliação Conjugal; somente depois refazer o fechamento formal da V1
 
 ## 1. Situação atual
 
@@ -3003,3 +3003,54 @@ Validação complementar:
 7. recarregar o perfil e confirmar persistência da exclusão;
 8. executar `npm run build` no frontend;
 9. executar `composer check` e `composer check-v1` na API.
+
+### Ajuste funcional — e-mail automático de resultado da Avaliação Conjugal
+
+Em 2026-10-06 foi implementado o envio automático de um resumo do resultado quando o segundo participante conclui a **Avaliação Conjugal**.
+
+Fluxo implementado:
+
+1. o segundo participante conclui;
+2. a aplicação passa para `CONCLUIDA` dentro da transação;
+3. `ResultService` calcula os scores direcionais e o score geral com algoritmo 2.0;
+4. o `MailService` envia ao e-mail de contato os scores de A, B e o score geral;
+5. o texto interpretativo do e-mail é escolhido pela porcentagem do score geral;
+6. a devolutiva profissional permanece independente e pode ser enviada posteriormente.
+
+Faixas narrativas do e-mail:
+
+- 80,00–100,00% — Uma percepção compartilhada muito positiva;
+- 60,00–79,99% — Uma boa compreensão, com espaço para aprofundar o diálogo;
+- 40,00–59,99% — Uma oportunidade de se conhecerem melhor;
+- 20,00–39,99% — Um convite à redescoberta;
+- 0,00–19,99% — Um caminho para construir maior compreensão.
+
+Os textos completos aprovados estão implementados no `MailService`. Eles são específicos da Avaliação Conjugal e não são aplicados automaticamente aos demais instrumentos.
+
+Arquivos de código alterados nesta tarefa:
+
+- `mapa-relacional-api/src/Service/MailService.php`;
+- `mapa-relacional-api/src/Controller/ParticipantAccessController.php`;
+- `mapa-relacional-api/public/index.php`.
+
+Não foi necessária migration.
+
+Comportamento de falha: se o SMTP falhar durante a conclusão final da Avaliação Conjugal, a transação é revertida e a API retorna erro de envio. Assim, o segundo participante pode tentar concluir novamente e a aplicação não fica marcada como concluída sem que o resultado automático seja entregue.
+
+Validação local pendente:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer serve
+```
+
+Depois, concluir uma Avaliação Conjugal de teste com os dois participantes e confirmar:
+
+1. o segundo participante recebe sucesso na conclusão;
+2. o e-mail automático chega ao `email_contato`;
+3. o e-mail mostra score de A, score de B e score geral;
+4. o texto corresponde à faixa do score geral;
+5. o e-mail informa que não substitui a devolutiva profissional;
+6. a devolutiva profissional continua em rascunho/não liberada até ação do profissional;
+7. com senha SMTP inválida temporariamente, a conclusão retorna erro e permanece disponível para nova tentativa.
