@@ -210,6 +210,7 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->get('/aplicacoes/opcoes', [$applicationController, 'options']);
     $group->get('/dashboard', [$applicationController, 'dashboard']);
     $group->get('/aplicacoes', [$applicationController, 'index']);
+    $group->get('/aplicacoes/emails', [$applicationController, 'emails']);
     $group->post('/aplicacoes', [$applicationController, 'create']);
     $group->get('/aplicacoes/{id:[0-9]+}', [$applicationController, 'show']);
     $group->delete('/aplicacoes/{id:[0-9]+}', [$applicationController, 'delete']);
