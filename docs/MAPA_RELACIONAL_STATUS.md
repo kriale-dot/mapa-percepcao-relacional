@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `1.0.0-rc.1`  
 **Marco atual:** V1 reaberta para correção de escopo obrigatório — site institucional  
-**Etapa atual:** Etapa 11 em validação — site institucional público configurável + ajuste de resultado automático por e-mail  
-**Próximo passo:** validar o site institucional, o score geral e o novo e-mail automático da Avaliação Conjugal; somente depois refazer o fechamento formal da V1
+**Etapa atual:** Etapa 11 em validação — site institucional público configurável + resultado automático por e-mail com PDF  
+**Próximo passo:** instalar a dependência de PDF e validar o site institucional, o score geral e o e-mail automático da Avaliação Conjugal com PDF anexado; somente depois refazer o fechamento formal da V1
 
 ## 1. Situação atual
 
