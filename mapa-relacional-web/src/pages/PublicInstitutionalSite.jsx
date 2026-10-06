@@ -106,6 +106,13 @@ export default function PublicInstitutionalSite() {
           <div className="flex flex-wrap justify-end gap-2">
             <button
               type="button"
+              onClick={() => navigate('/biblioteca')}
+              className="rounded-xl border border-[#385048]/20 bg-white px-4 py-2 text-sm font-semibold"
+            >
+              Biblioteca
+            </button>
+            <button
+              type="button"
               onClick={() => navigate('/avaliacoes')}
               className="rounded-xl bg-[#385048] px-4 py-2 text-sm font-semibold text-white"
             >
@@ -481,6 +488,35 @@ function InstitutionalBlock({ block, professional }) {
     )
   }
 
+  if (block.tipo === 'BIBLIOTECA') {
+    return (
+      <section className="bg-[#D8B078]/10">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <div className="mx-auto max-w-3xl">
+            <SectionHeading
+              block={block}
+              fallback="Biblioteca pública"
+            />
+            {block.conteudo ? (
+              <p className="mt-5 whitespace-pre-wrap text-base leading-8 text-[#385048]/72">
+                {block.conteudo}
+              </p>
+            ) : null}
+            <button
+              type="button"
+              onClick={() =>
+                openLink(block.link_url || '/biblioteca')
+              }
+              className="mt-6 rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white shadow-sm"
+            >
+              {block.link_texto || 'Abrir biblioteca'}
+            </button>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   if (block.tipo === 'AVALIACAO') {
     return (
       <section className="bg-[#A8C8B8]/12">
@@ -580,13 +616,22 @@ function DefaultInstitutional({ professional }) {
             {professional.atuacao}
           </p>
         ) : null}
-        <button
-          type="button"
-          onClick={() => navigate('/avaliacoes')}
-          className="mt-7 rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white"
-        >
-          Fazer uma avaliação
-        </button>
+        <div className="mt-7 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/avaliacoes')}
+            className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white"
+          >
+            Fazer uma avaliação
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/biblioteca')}
+            className="rounded-xl border border-[#385048]/20 bg-white px-5 py-3 text-sm font-semibold"
+          >
+            Acessar biblioteca
+          </button>
+        </div>
       </div>
     </section>
   )
