@@ -61,6 +61,7 @@
       "php -l src/Service/RateLimitService.php",
       "php -l bin/backup-db.php",
       "php -l src/Controller/SiteController.php",
+      "php -l src/Controller/LibraryController.php",
       "php -l bin/clean-db-keep-professionals.php",
       "php -l bin/clean-db-for-deploy.php",
       "php -l bin/remove-extra-evaluations.php"
