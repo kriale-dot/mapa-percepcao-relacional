@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  deleteApplication,
   getApplication,
   resendApplicationFeedback,
   resendParticipantAccess,
@@ -145,6 +146,36 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
     }
   }
 
+  async function handleDeleteEvaluation() {
+    const isCompleted = application?.status === 'CONCLUIDA'
+    const label = isCompleted ? 'avaliação concluída' : 'avaliação'
+
+    const confirmed = window.confirm(
+      `Excluir permanentemente esta ${label}?\n\nSerão apagados os participantes desta aplicação, links de acesso, respostas, itens marcados como "Não se aplica", comparações, resultados e eventual devolutiva profissional.\n\nO instrumento, a versão, as pessoas cadastradas e o vínculo não serão excluídos.\n\nEsta ação não pode ser desfeita.`,
+    )
+
+    if (!confirmed) return
+
+    setActionStatus('delete')
+    setActionMessage('')
+
+    try {
+      await deleteApplication(applicationId)
+      navigate('/profissional/avaliacoes')
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setActionMessage(
+        error.message || 'Não foi possível excluir a avaliação.',
+      )
+      setActionStatus('')
+    }
+  }
+
   const resultsByDirection = useMemo(() => {
     const map = {}
     results.forEach((result) => {
@@ -209,6 +240,16 @@ export default function ProfessionalApplicationDetail({ applicationId }) {
                 Ver resultados
               </button>
             ) : null}
+            <button
+              type="button"
+              disabled={actionStatus !== ''}
+              onClick={handleDeleteEvaluation}
+              className="rounded-xl border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50"
+            >
+              {actionStatus === 'delete'
+                ? 'Excluindo...'
+                : 'Excluir avaliação'}
+            </button>
             <button
               type="button"
               onClick={() => navigate('/profissional/avaliacoes')}
