@@ -71,7 +71,7 @@
     "check-smtp": "php bin/check-smtp.php",
     "check-v1": "php bin/check-v1.php",
     "backup-db": "php bin/backup-db.php",
-    "clean-db-keep-professionals": "php bin/clean-db-keep-professionals.php",
+    "clean-db-keep-professionals": "php bin/clean-db-for-deploy.php",
     "remove-extra-evaluations": "php bin/remove-extra-evaluations.php",
     "clean-db-for-deploy": "php bin/clean-db-for-deploy.php"
   }
