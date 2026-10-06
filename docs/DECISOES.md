@@ -849,3 +849,29 @@ Regras:
 - não há upload de vídeo na V1; o bloco continua baseado em URL, conforme D-044.
 
 Nenhuma migration adicional é necessária.
+
+## D-049 — Exclusões destrutivas exigem confirmação e preservam avaliações por padrão
+**Data:** 2026-10-06  
+**Status:** vigente
+
+Por solicitação explícita durante o estado `1.0.0-rc.1`, a área profissional passa a permitir exclusões físicas de instrumentos, versões e avaliações/aplicações, com proteção contra apagamentos indiretos de histórico.
+
+Esta decisão altera especificamente as regras de exclusão de D-018 e D-019, sem alterar a imutabilidade de **edição** das versões publicadas e arquivadas.
+
+Regras:
+
+- toda exclusão disponível na interface exige confirmação explícita e aviso dos efeitos;
+- uma avaliação/aplicação pode ser excluída pelo profissional proprietário, inclusive quando concluída;
+- excluir uma avaliação remove participantes/snapshots da aplicação, acessos, respostas, itens “Não se aplica”, comparações, resultados, resultado geral e devolutiva;
+- excluir uma avaliação não remove instrumento, versão, pessoas cadastradas nem vínculo administrativo;
+- uma versão pode ser excluída em qualquer estado somente quando não possui aplicações vinculadas;
+- excluir uma versão remove suas seções, itens, alternativas e faixas de resultado;
+- um instrumento pode ser excluído somente quando nenhuma de suas versões possui aplicações vinculadas;
+- excluir um instrumento remove todas as suas versões e respectivas estruturas;
+- instrumentos e versões **não** apagam avaliações automaticamente; se houver aplicações, a exclusão é bloqueada até que as avaliações que realmente não devam ser preservadas sejam removidas individualmente;
+- as exclusões são transacionais e registradas na auditoria.
+
+A regra de imutabilidade continua válida para alterações de conteúdo: versões `PUBLICADA` e `ARQUIVADA` continuam não editáveis.
+
+Como D-043 já retratou o fechamento anterior da V1, esta alteração entra no candidato ainda aberto antes do novo fechamento formal.
+
