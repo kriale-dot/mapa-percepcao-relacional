@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getPublicSite } from '../services/api'
+import { getVideoSource } from '../utils/video'
 
 function navigate(path) {
   window.history.pushState({}, '', path)
@@ -17,30 +18,6 @@ function openLink(url) {
   window.open(url, '_blank', 'noopener,noreferrer')
 }
 
-function youtubeEmbed(url) {
-  if (!url) return null
-
-  try {
-    const parsed = new URL(url)
-
-    if (parsed.hostname.includes('youtu.be')) {
-      const id = parsed.pathname.replace('/', '')
-      return id ? `https://www.youtube.com/embed/${id}` : null
-    }
-
-    if (parsed.hostname.includes('youtube.com')) {
-      const id = parsed.searchParams.get('v')
-      if (id) return `https://www.youtube.com/embed/${id}`
-
-      const match = parsed.pathname.match(/\/embed\/([^/]+)/)
-      return match ? `https://www.youtube.com/embed/${match[1]}` : null
-    }
-  } catch {
-    return null
-  }
-
-  return null
-}
 
 export default function PublicInstitutionalSite() {
   const [site, setSite] = useState(null)
@@ -396,29 +373,40 @@ function InstitutionalBlock({ block, professional }) {
   }
 
   if (block.tipo === 'VIDEO') {
-    const embedUrl = youtubeEmbed(block.midia_url)
+    const source = getVideoSource(block.midia_url)
 
     return (
       <section className="mx-auto max-w-6xl px-6 py-12">
         <div className="rounded-3xl border border-[#A8C8B8]/40 bg-white p-6 shadow-sm md:p-8">
           <SectionHeading block={block} />
-          <div className="mt-6 overflow-hidden rounded-2xl bg-black">
-            {embedUrl ? (
-              <iframe
-                src={embedUrl}
-                title={block.texto_alternativo || block.titulo || 'Vídeo'}
-                className="aspect-video w-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            ) : (
-              <video
-                src={block.midia_url}
-                controls
-                className="aspect-video w-full bg-black object-contain"
-              />
-            )}
-          </div>
+
+          {source ? (
+            <div className="mt-6 overflow-hidden rounded-2xl bg-black shadow-sm">
+              {source.kind === 'embed' ? (
+                <iframe
+                  src={source.url}
+                  title={block.texto_alternativo || block.titulo || 'Vídeo'}
+                  className="aspect-video w-full"
+                  loading="lazy"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  src={source.url}
+                  controls
+                  preload="metadata"
+                  className="aspect-video w-full bg-black object-contain"
+                />
+              )}
+            </div>
+          ) : (
+            <div className="mt-6 rounded-2xl border border-[#D8B078]/45 bg-[#D8B078]/10 px-5 py-4 text-sm text-[#385048]/70">
+              Vídeo temporariamente indisponível.
+            </div>
+          )}
+
           {block.conteudo ? (
             <p className="mt-5 whitespace-pre-wrap text-sm leading-7 text-[#385048]/70">
               {block.conteudo}
