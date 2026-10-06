@@ -13,6 +13,7 @@ use App\Controller\FeedbackController;
 use App\Controller\InstrumentController;
 use App\Controller\InstrumentVersionController;
 use App\Controller\ItemController;
+use App\Controller\LibraryController;
 use App\Controller\NotificationController;
 use App\Controller\ParticipantAccessController;
 use App\Controller\PersonController;
@@ -108,6 +109,7 @@ $instrumentController = new InstrumentController($auditService);
 $instrumentVersionController = new InstrumentVersionController($auditService);
 $sectionController = new SectionController();
 $siteController = new SiteController($auditService);
+$libraryController = new LibraryController($auditService);
 $itemController = new ItemController();
 $personController = new PersonController();
 $relationshipController = new RelationshipController();
@@ -123,6 +125,7 @@ $app->get('/api/health/database', [$healthController, 'database']);
 $app->post('/api/auth/login', [$authController, 'login']);
 
 $app->get('/api/public/site', [$siteController, 'publicShow']);
+$app->get('/api/public/biblioteca', [$libraryController, 'publicIndex']);
 $app->get('/api/public/avaliacoes', [$publicEvaluationController, 'index']);
 $app->get(
     '/api/public/avaliacoes/{versionId:[0-9]+}',
@@ -176,7 +179,8 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $resultBandController,
     $feedbackController,
     $notificationController,
-    $siteController
+    $siteController,
+    $libraryController
 ) {
     $group->get('/me', [$authController, 'me']);
     $group->get('/auditoria', [$auditController, 'index']);
@@ -194,6 +198,11 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->put('/site/blocos/{id:[0-9]+}', [$siteController, 'update']);
     $group->delete('/site/blocos/{id:[0-9]+}', [$siteController, 'delete']);
     $group->post('/site/blocos/{id:[0-9]+}/mover', [$siteController, 'move']);
+
+    $group->get('/biblioteca/documentos', [$libraryController, 'index']);
+    $group->post('/biblioteca/documentos', [$libraryController, 'create']);
+    $group->put('/biblioteca/documentos/{id:[0-9]+}', [$libraryController, 'update']);
+    $group->delete('/biblioteca/documentos/{id:[0-9]+}', [$libraryController, 'delete']);
 
     $group->get('/pessoas', [$personController, 'index']);
     $group->post('/pessoas', [$personController, 'create']);
