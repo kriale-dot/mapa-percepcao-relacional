@@ -326,6 +326,14 @@ Se o SMTP falhar durante a criação pública, a transação é revertida e a in
 
 O profissional visualiza automaticamente essas aplicações em sua área autenticada, acompanha o preenchimento, consulta os resultados e pode usar os dados de contato para abordagem posterior.
 
+### Exclusão de avaliações/aplicações
+
+O profissional proprietário pode excluir fisicamente uma avaliação, inclusive quando já estiver concluída. A operação é permanente e deve exigir confirmação explícita na interface com aviso dos efeitos.
+
+A exclusão remove os dados pertencentes àquela aplicação: participantes/snapshots da aplicação, acessos e tokens, respostas, marcações “Não se aplica”, comparações, resultados direcionais, resultado geral e eventual devolutiva profissional. A exclusão **não** remove o instrumento, a versão, cadastros permanentes de pessoas nem o vínculo administrativo.
+
+A remoção é executada em transação e registrada na auditoria. Depois da exclusão, links de participantes e de devolutiva associados à aplicação deixam de funcionar.
+
 ### Identificação inicial do participante
 
 Ao abrir seu link individual válido, o participante confirma os dados de identificação antes de acessar o questionário.
@@ -385,7 +393,7 @@ O gerenciamento inicial de instrumentos da V1 é acessado em `/profissional/inst
 
 Cada instrumento pertence ao profissional autenticado e possui nome, descrição e status. Os estados adotados nesta etapa são `RASCUNHO`, `ATIVO` e `ARQUIVADO`.
 
-A exclusão física é permitida somente enquanto o instrumento não possui versões. Depois que houver ao menos uma versão, o histórico deve ser preservado e o instrumento pode ser arquivado em vez de excluído.
+A exclusão física do instrumento é uma operação destrutiva explícita. Ela é permitida somente quando **nenhuma avaliação/aplicação está vinculada a qualquer versão** do instrumento. Quando permitida, a exclusão remove também todas as versões, seções, itens, alternativas e faixas de resultado do instrumento. Se existir ao menos uma aplicação vinculada, a API bloqueia a exclusão; as avaliações que realmente não precisarem ser preservadas devem ser excluídas individualmente antes. A interface deve sempre exibir confirmação com os efeitos da operação.
 
 ### Versões do instrumento
 
@@ -397,9 +405,9 @@ Estados adotados:
 - `PUBLICADA`;
 - `ARQUIVADA`.
 
-Na V1 foi adotada uma regra conservadora de imutabilidade: somente versões em `RASCUNHO` podem ser editadas ou excluídas. Ao publicar, a versão passa a ser imutável; qualquer mudança posterior deve ser feita em uma nova versão. Uma versão `PUBLICADA` pode ser `ARQUIVADA`, sem apagar seu histórico.
+Na V1 permanece a regra conservadora de imutabilidade para **edição**: somente versões em `RASCUNHO` podem ser alteradas. Ao publicar, a versão passa a ser imutável quanto ao conteúdo; qualquer mudança posterior deve ser feita em uma nova versão. Uma versão `PUBLICADA` pode ser `ARQUIVADA`.
 
-A exclusão de rascunho também é bloqueada se a versão já possuir seções ou aplicações vinculadas. Todas as operações de versão validam a propriedade do instrumento pelo profissional autenticado.
+A exclusão física é tratada separadamente da edição. Uma versão em qualquer estado (`RASCUNHO`, `PUBLICADA` ou `ARQUIVADA`) pode ser excluída somente quando **não possui nenhuma aplicação vinculada**. Quando permitida, a exclusão remove a versão e toda a sua estrutura: seções, itens, alternativas e faixas de resultado. Se houver aplicação vinculada, a API bloqueia a operação; as avaliações que realmente não precisarem ser preservadas devem ser excluídas individualmente antes. A interface deve sempre confirmar a exclusão e informar os efeitos. Todas as operações de versão validam a propriedade do instrumento pelo profissional autenticado.
 
 ### Seções da versão
 
@@ -785,8 +793,10 @@ Eventos iniciais incluem:
 - login profissional bem-sucedido;
 - alteração de senha;
 - atualização de perfil;
-- criação/publicação/arquivamento de versão;
+- criação/publicação/arquivamento/exclusão de versão;
+- exclusão de instrumento;
 - criação pública de aplicação;
+- exclusão de avaliação/aplicação;
 - marcação “Não se aplica”;
 - conclusão de participante;
 - salvamento/liberação de devolutiva;
