@@ -637,6 +637,9 @@ final class ParticipantAccessController
             );
         }
 
+        $automaticResultEnabled =
+            (string) $access['avaliacao_nome'] === 'Avaliação Conjugal';
+
         $pdo = Database::connect();
         $pdo->beginTransaction();
 
@@ -792,10 +795,7 @@ final class ParticipantAccessController
                     $pdo
                 );
 
-                if (
-                    (string) $access['avaliacao_nome']
-                    === 'Avaliação Conjugal'
-                ) {
+                if ($automaticResultEnabled) {
                     $generalPercentage =
                         $calculation['resultado_geral']['percentual'] ?? null;
 
@@ -843,9 +843,7 @@ final class ParticipantAccessController
                     'lado' => (string) $access['lado'],
                     'aplicacao_concluida' => $applicationCompleted,
                     'resultado_automatico_enviado' =>
-                        $applicationCompleted
-                        && (string) $access['avaliacao_nome']
-                            === 'Avaliação Conjugal',
+                        $applicationCompleted && $automaticResultEnabled,
                 ],
                 $request,
                 (int) $access['profissional_id'],
@@ -870,7 +868,11 @@ final class ParticipantAccessController
 
         return $this->json($response, [
             'message' => $applicationCompleted
-                ? 'Avaliacao concluida pelos dois participantes e resultado automatico enviado por e-mail.'
+                ? (
+                    $automaticResultEnabled
+                        ? 'Avaliacao concluida pelos dois participantes e resultado automatico enviado por e-mail.'
+                        : 'Avaliacao concluida pelos dois participantes.'
+                )
                 : 'Sua participacao foi concluida com sucesso.',
             'participante_status' => 'CONCLUIDO',
             'aplicacao_status' => $applicationCompleted
@@ -878,9 +880,7 @@ final class ParticipantAccessController
                 : 'EM_ANDAMENTO',
             'ambos_concluidos' => $applicationCompleted,
             'resultado_automatico_enviado' =>
-                $applicationCompleted
-                && (string) $access['avaliacao_nome']
-                    === 'Avaliação Conjugal',
+                $applicationCompleted && $automaticResultEnabled,
         ]);
     }
 
@@ -976,10 +976,10 @@ final class ParticipantAccessController
                ON i.id = v.instrumento_id
              INNER JOIN aplicacao_participantes pa_nome
                ON pa_nome.aplicacao_id = a.id
-              AND pa_nome.lado = 'A'
+              AND pa_nome.lado = \'A\'
              INNER JOIN aplicacao_participantes pb_nome
                ON pb_nome.aplicacao_id = a.id
-              AND pb_nome.lado = 'B'
+              AND pb_nome.lado = \'B\'
              WHERE aa.token_hash = :token_hash
              LIMIT 1'
         );
