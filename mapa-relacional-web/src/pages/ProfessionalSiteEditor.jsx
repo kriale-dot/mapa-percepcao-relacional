@@ -27,6 +27,7 @@ const typeLabels = {
   CTA: 'Chamada para ação',
   LINK: 'Botão / link',
   AVALIACAO: 'Seção de avaliações',
+  BIBLIOTECA: 'Seção da biblioteca',
 }
 
 const emptyBlock = {
@@ -437,6 +438,7 @@ function BlockFields({
     'CTA',
     'LINK',
     'AVALIACAO',
+    'BIBLIOTECA',
   ].includes(block.tipo)
 
   return (
@@ -641,7 +643,11 @@ function BlockFields({
               value={block.link_url}
               onChange={(event) => onChange('link_url', event.target.value)}
               className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none"
-              placeholder="/avaliacoes ou https://..."
+              placeholder={
+                block.tipo === 'BIBLIOTECA'
+                  ? '/biblioteca'
+                  : '/avaliacoes ou https://...'
+              }
             />
           </label>
 
