@@ -92,6 +92,7 @@ $publicEvaluationController = new PublicEvaluationController(
 $participantAccessController = new ParticipantAccessController(
     $accessTokenService,
     $resultService,
+    $mailService,
     $auditService
 );
 $feedbackController = new FeedbackController(
