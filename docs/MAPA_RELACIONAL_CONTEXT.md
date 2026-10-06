@@ -909,3 +909,27 @@ O backend:
 A URL gerada continua sendo armazenada em `foto_url`, `logo_url` ou `site_blocos.midia_url`, preservando a estrutura atual do banco sem migration adicional.
 
 Vídeo e áudio continuam por URL na V1.
+
+### Resultado automático por e-mail da Avaliação Conjugal
+
+Quando os dois participantes concluírem a **Avaliação Conjugal**, o cálculo técnico ocorre automaticamente e, no mesmo fluxo de conclusão, a plataforma envia ao `email_contato` da aplicação um resumo automático contendo:
+
+- score de A (`A_SOBRE_B`);
+- score de B (`B_SOBRE_A`);
+- score geral do par;
+- título e texto interpretativo conforme a porcentagem do score geral;
+- aviso de que o resultado automático não substitui a devolutiva profissional.
+
+As faixas narrativas aprovadas são independentes das faixas técnicas Ruim / Regular / Bom:
+
+- 80,00–100,00% — Uma percepção compartilhada muito positiva;
+- 60,00–79,99% — Uma boa compreensão, com espaço para aprofundar o diálogo;
+- 40,00–59,99% — Uma oportunidade de se conhecerem melhor;
+- 20,00–39,99% — Um convite à redescoberta;
+- 0,00–19,99% — Um caminho para construir maior compreensão.
+
+Os textos fornecidos para essas faixas são específicos da Avaliação Conjugal e não devem ser aplicados automaticamente a outros instrumentos.
+
+A devolutiva profissional continua separada: o profissional pode preparar síntese, observações e comentário e, quando liberar, o sistema envia o link seguro da devolutiva.
+
+Se o envio SMTP do resultado automático falhar na conclusão do segundo participante, a transação de conclusão é revertida para permitir nova tentativa e impedir que a Avaliação Conjugal fique marcada como concluída sem o envio obrigatório.
