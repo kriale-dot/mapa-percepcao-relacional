@@ -8,6 +8,7 @@ import {
   uploadSiteImage,
 } from '../services/api'
 import { clearAuthToken, getAuthToken } from '../services/auth'
+import { getVideoSource } from '../utils/video'
 
 function navigate(path) {
   window.history.pushState({}, '', path)
@@ -579,8 +580,18 @@ function BlockFields({
               value={block.midia_url}
               onChange={(event) => onChange('midia_url', event.target.value)}
               className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none"
-              placeholder="https://..."
+              placeholder={
+                block.tipo === 'VIDEO'
+                  ? 'YouTube, Vimeo ou URL direta do arquivo'
+                  : 'https://...'
+              }
             />
+            {block.tipo === 'VIDEO' ? (
+              <p className="mt-2 text-xs leading-5 text-[#385048]/55">
+                Compatível com YouTube, YouTube Shorts, Vimeo e arquivos de
+                vídeo acessíveis por URL direta.
+              </p>
+            ) : null}
           </label>
 
           <label className="block">
@@ -595,8 +606,29 @@ function BlockFields({
                 onChange('texto_alternativo', event.target.value)
               }
               className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 outline-none"
+              placeholder={
+                block.tipo === 'VIDEO'
+                  ? 'Descrição acessível do vídeo'
+                  : ''
+              }
             />
           </label>
+
+          {block.tipo === 'VIDEO' ? (
+            <div className="md:col-span-2">
+              <span className="text-sm font-medium">
+                Pré-visualização do vídeo
+              </span>
+              <VideoPreview
+                url={block.midia_url}
+                title={
+                  block.texto_alternativo ||
+                  block.titulo ||
+                  'Pré-visualização do vídeo'
+                }
+              />
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -631,6 +663,50 @@ function BlockFields({
           )}
         </div>
       ) : null}
+    </div>
+  )
+}
+
+
+function VideoPreview({ url, title }) {
+  const source = getVideoSource(url)
+
+  if (!url) {
+    return (
+      <div className="mt-2 flex aspect-video w-full items-center justify-center rounded-2xl border border-dashed border-[#A8C8B8] bg-[#FEFDFB] text-sm text-[#385048]/50">
+        Informe a URL para visualizar o vídeo
+      </div>
+    )
+  }
+
+  if (!source) {
+    return (
+      <div className="mt-2 rounded-2xl border border-[#D8B078]/45 bg-[#D8B078]/10 px-5 py-4 text-sm text-[#385048]/70">
+        Não foi possível reconhecer esta URL de vídeo.
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-2 overflow-hidden rounded-2xl bg-black">
+      {source.kind === 'embed' ? (
+        <iframe
+          src={source.url}
+          title={title}
+          className="aspect-video w-full"
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      ) : (
+        <video
+          src={source.url}
+          controls
+          preload="metadata"
+          className="aspect-video w-full bg-black object-contain"
+        />
+      )}
     </div>
   )
 }
