@@ -3087,3 +3087,35 @@ Dependência adicionada:
 Não há migration nova.
 
 Antes de testar, executar `composer install` para instalar a nova dependência e depois `composer check`.
+
+### Ajuste institucional — bloco de vídeo
+
+Em 2026-10-06 o bloco `VIDEO` do site institucional foi consolidado como bloco visual completo.
+
+Comportamento implementado:
+
+- seleção do tipo Vídeo no editor;
+- campo de URL específico;
+- descrição acessível da mídia;
+- pré-visualização do vídeo dentro do editor;
+- suporte a YouTube, YouTube Shorts e Vimeo por incorporação responsiva;
+- suporte a URL direta de arquivo por player HTML5;
+- renderização pública responsiva em 16:9 com controles e tela cheia.
+
+Arquivos alterados:
+
+- `mapa-relacional-web/src/utils/video.js` (novo);
+- `mapa-relacional-web/src/pages/ProfessionalSiteEditor.jsx`;
+- `mapa-relacional-web/src/pages/PublicInstitutionalSite.jsx`.
+
+O backend já aceitava o tipo `VIDEO` e a `midia_url`; portanto não foi necessária alteração de banco nem migration.
+
+Validação pendente:
+
+```powershell
+cd mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Depois, criar um bloco Vídeo no editor, testar ao menos uma URL do YouTube e confirmar a reprodução no site público.
