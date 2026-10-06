@@ -7,8 +7,8 @@
 **Branch de referência:** `main`  
 **Versão:** `1.0.0-rc.1`  
 **Marco atual:** V1 reaberta para correção de escopo obrigatório — site institucional  
-**Etapa atual:** Etapa 11 em validação — site institucional público configurável + resultado automático por e-mail com PDF  
-**Próximo passo:** instalar a dependência de PDF e validar o site institucional, o score geral e o e-mail automático da Avaliação Conjugal com PDF anexado; somente depois refazer o fechamento formal da V1
+**Etapa atual:** preparação para deploy/homologação da versão candidata  
+**Próximo passo:** configurar o ambiente de produção, aplicar migrations 001–011, executar os checklists e realizar a homologação ponta a ponta
 
 ## 1. Situação atual
 
@@ -3233,7 +3233,7 @@ Não foi necessária migration.
 
 ### Módulo — Biblioteca pública
 
-Em 2026-10-06 foi implementado o módulo de Biblioteca pública solicitado para a Plataforma Tânia.
+Em 2026-10-06 foi implementado e **validado localmente com sucesso** o módulo de Biblioteca pública solicitado para a Plataforma Tânia.
 
 Funcionalidades implementadas:
 
@@ -3267,33 +3267,30 @@ Arquivos principais:
 - `mapa-relacional-web/src/pages/ProfessionalSiteEditor.jsx`;
 - `mapa-relacional-web/src/pages/PublicInstitutionalSite.jsx`.
 
-Validação local necessária após atualizar a cópia de desenvolvimento:
+### Validação local concluída
 
-```powershell
-cd mapa-relacional-api
-composer migrate
-composer check
-composer serve
-```
+O usuário confirmou em 2026-10-06 que o módulo foi testado localmente e funcionou corretamente.
 
-Em outro terminal:
+A validação confirmou o fluxo principal do módulo, incluindo acesso à área profissional, publicação de documentos, acesso público e busca.
 
-```powershell
-cd mapa-relacional-web
-npm run build
-npm run dev
-```
+**Estado:** implementado e validado localmente.
 
-Testar:
+### Entrada no deploy
 
-1. abrir `/profissional/biblioteca`;
-2. publicar um PDF;
-3. publicar um PNG;
-4. confirmar que formato diferente é rejeitado;
-5. editar título/descrição/status;
-6. abrir `/biblioteca` sem autenticação;
-7. testar busca;
-8. confirmar que documento INATIVO não aparece publicamente;
-9. excluir um documento e confirmar que o link deixa de funcionar;
-10. confirmar o bloco Biblioteca e o botão público.
+Com a biblioteca validada, o projeto entra na fase de **deploy/homologação**.
+
+Antes de liberar produção:
+
+1. atualizar o servidor a partir da branch `main`;
+2. instalar dependências de produção;
+3. configurar `.env` com URLs HTTPS, banco, JWT e SMTP;
+4. garantir gravação em `public/uploads`, `storage/logs` e `storage/backups`;
+5. aplicar migrations 001–011;
+6. executar `composer check-domain`;
+7. executar `composer check`;
+8. gerar backup com `composer backup-db`;
+9. executar `composer check-v1`;
+10. gerar o frontend com `npm ci && npm run build`;
+11. configurar Apache/HTTPS;
+12. realizar homologação ponta a ponta no domínio definitivo.
 
