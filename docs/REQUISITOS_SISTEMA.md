@@ -334,6 +334,21 @@ Depois de publicada e utilizada em aplicações, uma versão não deverá ter su
 
 Alterações estruturais deverão gerar nova versão.
 
+### RF-034 — Exclusão segura de instrumentos e versões
+
+A exclusão física de instrumentos e versões deverá ser uma operação destrutiva explícita, separada da edição normal.
+
+**Critérios de aceitação:**
+
+- uma versão em qualquer estado poderá ser excluída somente quando não houver nenhuma aplicação vinculada a ela;
+- quando permitida, a exclusão da versão remove também suas seções, itens, alternativas e faixas de resultado;
+- um instrumento poderá ser excluído somente quando nenhuma aplicação estiver vinculada a qualquer uma de suas versões;
+- quando permitida, a exclusão do instrumento remove também todas as suas versões e respectivas estruturas;
+- instrumentos e versões nunca deverão excluir aplicações automaticamente;
+- se existirem aplicações vinculadas, a operação deverá ser bloqueada e a interface deverá orientar que as avaliações que realmente não precisam ser preservadas sejam excluídas individualmente primeiro;
+- toda exclusão deverá exigir confirmação explícita, informar os efeitos e registrar evento de auditoria;
+- versões publicadas e arquivadas continuam imutáveis para edição; a possibilidade de exclusão não permite alteração de conteúdo histórico.
+
 ---
 
 ## 5.5 Seções, itens e alternativas
@@ -454,6 +469,18 @@ A nomenclatura final poderá ser refinada antes da produção.
 ### RF-054 — Acompanhamento
 
 O profissional deverá visualizar o estado de preenchimento de cada participante.
+
+### RF-055 — Exclusão explícita de avaliação
+
+O profissional proprietário deverá poder excluir definitivamente uma aplicação, inclusive quando já estiver concluída, desde que confirme explicitamente a operação depois de receber um aviso claro sobre seus efeitos.
+
+**Critérios de aceitação:**
+
+- a exclusão remove participantes/snapshots pertencentes à aplicação, acessos, respostas, marcações “Não se aplica”, comparações, resultados direcionais, resultado geral e eventual devolutiva profissional;
+- a exclusão não remove o instrumento, a versão, cadastros permanentes de pessoas nem o vínculo administrativo;
+- links de acesso dos participantes e eventual link de devolutiva deixam de funcionar depois da exclusão;
+- a operação deve ocorrer em transação e ser registrada na auditoria;
+- a interface deve informar que a exclusão é permanente e não pode ser desfeita.
 
 ---
 
@@ -816,7 +843,7 @@ SMS e WhatsApp permanecem fora do escopo da V1. A arquitetura poderá receber es
 
 ### RF-140 — Preservação histórica
 
-Aplicações concluídas deverão preservar:
+Enquanto uma aplicação existir, especialmente quando estiver concluída, ela deverá preservar:
 
 - versão do instrumento;
 - participantes/snapshots;
@@ -824,6 +851,8 @@ Aplicações concluídas deverão preservar:
 - exclusões;
 - cálculo;
 - comentário/devolutiva.
+
+A única exceção é a exclusão destrutiva explícita prevista em **RF-055**, solicitada pelo profissional proprietário, confirmada com aviso dos efeitos e registrada na auditoria.
 
 ### RF-141 — Auditoria
 
