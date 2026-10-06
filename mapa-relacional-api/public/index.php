@@ -28,6 +28,7 @@ use App\Service\AccessTokenService;
 use App\Service\AuditService;
 use App\Service\MailService;
 use App\Service\RateLimitService;
+use App\Service\ResultPdfService;
 use App\Service\ResultService;
 use App\Middleware\ProfessionalAuthMiddleware;
 use Dotenv\Dotenv;
@@ -75,6 +76,7 @@ $healthController = new HealthController();
 $accessTokenService = new AccessTokenService();
 $mailService = new MailService();
 $resultService = new ResultService();
+$resultPdfService = new ResultPdfService($resultService);
 $auditService = new AuditService();
 $rateLimitService = new RateLimitService();
 $alternativeController = new AlternativeController();
@@ -92,6 +94,7 @@ $publicEvaluationController = new PublicEvaluationController(
 $participantAccessController = new ParticipantAccessController(
     $accessTokenService,
     $resultService,
+    $resultPdfService,
     $mailService,
     $auditService
 );
