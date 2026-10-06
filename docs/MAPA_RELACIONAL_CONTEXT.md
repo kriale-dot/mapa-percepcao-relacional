@@ -933,3 +933,6 @@ Os textos fornecidos para essas faixas são específicos da Avaliação Conjugal
 A devolutiva profissional continua separada: o profissional pode preparar síntese, observações e comentário e, quando liberar, o sistema envia o link seguro da devolutiva.
 
 Se o envio SMTP do resultado automático falhar na conclusão do segundo participante, a transação de conclusão é revertida para permitir nova tentativa e impedir que a Avaliação Conjugal fique marcada como concluída sem o envio obrigatório.
+
+
+O PDF automático inclui score geral, scores individuais, resultados por tópico, comparação item a item, itens excluídos por Não se aplica, nome do profissional e link para a plataforma. A geração usa `dompdf/dompdf` e não exige migration.
