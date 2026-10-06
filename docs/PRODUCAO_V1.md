@@ -30,14 +30,15 @@ composer migrate
 composer check-domain
 ```
 
-A V1 exige as migrations 001 a 010, incluindo:
+A versão candidata atual exige as migrations 001 a 011, incluindo:
 
 - resultados e comparações;
 - devolutivas;
 - auditoria;
 - rate limit;
 - site institucional configurável;
-- score geral do casal/par.
+- score geral do casal/par;
+- biblioteca pública de documentos PDF e PNG.
 
 ## 3. Configuração de ambiente
 
@@ -156,11 +157,12 @@ Configuração padrão:
 
 ```text
 SITE_IMAGE_MAX_MB=5
+LIBRARY_FILE_MAX_MB=20
 ```
 
 A extensão PHP `fileinfo` deve estar habilitada.
 
-Os arquivos enviados pelo usuário ficam fora do Git. Em produção, a pasta de uploads deve fazer parte da estratégia de backup de arquivos, separadamente do backup SQL do banco.
+Os arquivos enviados pelo usuário ficam fora do Git. Em produção, a pasta de uploads deve fazer parte da estratégia de backup de arquivos, separadamente do backup SQL do banco. Isso inclui tanto imagens institucionais quanto documentos da biblioteca pública.
 
 ## 9. Checklist automatizado
 
@@ -212,7 +214,12 @@ Confirmar pelo menos um fluxo completo:
 16. reenvio de acesso invalida o link anterior;
 17. reenvio da devolutiva invalida o link anterior;
 18. editor do site permite criar, editar, ocultar e reordenar blocos;
-19. site institucional responde adequadamente em desktop, tablet e smartphone.
+19. site institucional responde adequadamente em desktop, tablet e smartphone;
+20. visitante abre `/biblioteca` sem autenticação;
+21. busca da biblioteca localiza documentos ativos por título/descrição/nome do arquivo;
+22. PDF e PNG ativos podem ser abertos pelo visitante;
+23. documento INATIVO não aparece publicamente;
+24. área profissional publica, edita e exclui documentos da biblioteca.
 
 ## 11. Observação de escopo
 
