@@ -339,6 +339,13 @@ export function createApplication(application) {
   })
 }
 
+export function deleteApplication(id) {
+  return request(`/api/profissional/aplicacoes/${id}`, {
+    method: 'DELETE',
+    auth: true,
+  })
+}
+
 export function getApplicationResults(id) {
   return request(`/api/profissional/aplicacoes/${id}/resultados`, {
     method: 'GET',
