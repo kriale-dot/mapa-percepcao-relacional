@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Config\Database;
 use App\Service\AccessTokenService;
 use App\Service\AuditService;
+use App\Service\MailService;
 use App\Service\ResultService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
@@ -17,6 +18,7 @@ final class ParticipantAccessController
     public function __construct(
         private readonly AccessTokenService $tokenService,
         private readonly ResultService $resultService,
+        private readonly MailService $mailService,
         private readonly AuditService $auditService
     ) {
     }
@@ -785,10 +787,50 @@ final class ParticipantAccessController
                     'id' => (int) $access['aplicacao_id'],
                 ]);
 
-                $this->resultService->calculate(
+                $calculation = $this->resultService->calculate(
                     (int) $access['aplicacao_id'],
                     $pdo
                 );
+
+                if (
+                    (string) $access['avaliacao_nome']
+                    === 'Avaliação Conjugal'
+                ) {
+                    $generalPercentage =
+                        $calculation['resultado_geral']['percentual'] ?? null;
+
+                    if ($generalPercentage === null) {
+                        throw new \RuntimeException(
+                            'Nao foi possivel calcular o score total da avaliacao.'
+                        );
+                    }
+
+                    try {
+                        $this->mailService->sendAutomaticResultSummary(
+                            (string) $access['email_contato'],
+                            (string) $access['avaliacao_nome'],
+                            (string) $access['participante_a_nome'],
+                            (string) $access['participante_b_nome'],
+                            isset(
+                                $calculation['resultados']['A_SOBRE_B']['percentual']
+                            )
+                                ? (float) $calculation['resultados']['A_SOBRE_B']['percentual']
+                                : null,
+                            isset(
+                                $calculation['resultados']['B_SOBRE_A']['percentual']
+                            )
+                                ? (float) $calculation['resultados']['B_SOBRE_A']['percentual']
+                                : null,
+                            (float) $generalPercentage
+                        );
+                    } catch (\Throwable $error) {
+                        throw new \RuntimeException(
+                            'AUTOMATIC_RESULT_EMAIL_FAILED',
+                            0,
+                            $error
+                        );
+                    }
+                }
             }
 
             $this->auditService->recordSafe(
@@ -800,6 +842,10 @@ final class ParticipantAccessController
                 [
                     'lado' => (string) $access['lado'],
                     'aplicacao_concluida' => $applicationCompleted,
+                    'resultado_automatico_enviado' =>
+                        $applicationCompleted
+                        && (string) $access['avaliacao_nome']
+                            === 'Avaliação Conjugal',
                 ],
                 $request,
                 (int) $access['profissional_id'],
@@ -812,18 +858,29 @@ final class ParticipantAccessController
                 $pdo->rollBack();
             }
 
+            if ($error->getMessage() === 'AUTOMATIC_RESULT_EMAIL_FAILED') {
+                return $this->json($response, [
+                    'error' => 'automatic_result_email_failed',
+                    'message' => 'Nao foi possivel enviar o resultado automatico para o e-mail cadastrado. A conclusao nao foi finalizada; tente novamente.',
+                ], 502);
+            }
+
             throw $error;
         }
 
         return $this->json($response, [
             'message' => $applicationCompleted
-                ? 'Avaliacao concluida pelos dois participantes.'
+                ? 'Avaliacao concluida pelos dois participantes e resultado automatico enviado por e-mail.'
                 : 'Sua participacao foi concluida com sucesso.',
             'participante_status' => 'CONCLUIDO',
             'aplicacao_status' => $applicationCompleted
                 ? 'CONCLUIDA'
                 : 'EM_ANDAMENTO',
             'ambos_concluidos' => $applicationCompleted,
+            'resultado_automatico_enviado' =>
+                $applicationCompleted
+                && (string) $access['avaliacao_nome']
+                    === 'Avaliação Conjugal',
         ]);
     }
 
@@ -902,9 +959,12 @@ final class ParticipantAccessController
                 a.profissional_id,
                 a.instrumento_versao_id,
                 a.status AS aplicacao_status,
+                a.email_contato,
                 a.tipo_vinculo_snapshot,
                 a.duracao_vinculo_texto,
-                i.nome AS avaliacao_nome
+                i.nome AS avaliacao_nome,
+                pa_nome.nome_snapshot AS participante_a_nome,
+                pb_nome.nome_snapshot AS participante_b_nome
              FROM acessos_aplicacao aa
              INNER JOIN aplicacao_participantes ap
                ON ap.id = aa.aplicacao_participante_id
@@ -914,6 +974,12 @@ final class ParticipantAccessController
                ON v.id = a.instrumento_versao_id
              INNER JOIN instrumentos i
                ON i.id = v.instrumento_id
+             INNER JOIN aplicacao_participantes pa_nome
+               ON pa_nome.aplicacao_id = a.id
+              AND pa_nome.lado = 'A'
+             INNER JOIN aplicacao_participantes pb_nome
+               ON pb_nome.aplicacao_id = a.id
+              AND pb_nome.lado = 'B'
              WHERE aa.token_hash = :token_hash
              LIMIT 1'
         );
