@@ -217,6 +217,17 @@ O banco deve evoluir por migrações SQL sequenciais armazenadas em:
 mapa-relacional-api/migrations/
 ```
 
+### Domínios oficiais de produção
+
+Os endereços definitivos definidos para o deploy são:
+
+```text
+Site público: https://taniasantiago.com.br
+API: https://api.taniasantiago.com.br
+```
+
+A API deve usar `APP_URL=https://api.taniasantiago.com.br` e `FRONTEND_URL=https://taniasantiago.com.br`. O frontend de produção deve ser compilado com `VITE_API_URL=https://api.taniasantiago.com.br`.
+
 ### Ambiente de desenvolvimento local
 
 A raiz oficial do projeto no ambiente Windows de desenvolvimento é:
