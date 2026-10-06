@@ -134,8 +134,15 @@ export default function ProfessionalInstrumentVersions({ instrumentId }) {
   }
 
   async function handleDelete(version) {
+    if ((version.total_aplicacoes || 0) > 0) {
+      window.alert(
+        `A versão "${version.numero_versao}" possui ${version.total_aplicacoes} avaliação(ões) vinculada(s) e não pode ser excluída agora.\n\nExclua primeiro, individualmente, as avaliações que não precisam ser preservadas. Depois volte aqui para excluir a versão.`,
+      )
+      return
+    }
+
     const confirmed = window.confirm(
-      `Excluir a versão em rascunho "${version.numero_versao}"?`,
+      `Excluir permanentemente a versão "${version.numero_versao}" (${version.status})?\n\nSerão apagadas todas as seções, itens, alternativas e faixas de resultado desta versão.\n\nSe esta for a versão publicada disponível, o instrumento deixará de aparecer no catálogo público até que outra versão seja publicada.\n\nEsta ação não pode ser desfeita.`,
     )
 
     if (!confirmed) return
@@ -369,13 +376,6 @@ export default function ProfessionalInstrumentVersions({ instrumentId }) {
                         >
                           Publicar
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(version)}
-                          className="rounded-xl border border-[#D8B078]/60 px-4 py-2 text-sm font-semibold"
-                        >
-                          Excluir
-                        </button>
                       </>
                     ) : null}
 
@@ -388,6 +388,14 @@ export default function ProfessionalInstrumentVersions({ instrumentId }) {
                         Arquivar
                       </button>
                     ) : null}
+
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(version)}
+                      className="rounded-xl border border-red-300 px-4 py-2 text-sm font-semibold text-red-700"
+                    >
+                      Excluir
+                    </button>
                   </div>
                 </div>
               </article>
