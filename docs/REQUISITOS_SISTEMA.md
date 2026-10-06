@@ -1309,3 +1309,61 @@ Alterações que mudem o comportamento esperado do produto devem:
 3. atualizar `MAPA_RELACIONAL_CONTEXT.md` se afetar o contexto permanente;
 4. atualizar `MAPA_RELACIONAL_STATUS.md` quando a mudança entrar em desenvolvimento ou for concluída;
 5. ser implementadas por etapa pequena e testável.
+
+## 5.16 Biblioteca pública
+
+### RF-150 — Área pública da biblioteca
+
+A plataforma deverá disponibilizar uma biblioteca pública em `/biblioteca`, acessível livremente por visitantes, sem autenticação ou cadastro.
+
+### RF-151 — Tipos de documento
+
+A biblioteca deverá aceitar documentos nos formatos PDF e PNG.
+
+### RF-152 — Metadados
+
+Cada documento deverá possuir:
+
+- título obrigatório;
+- descrição opcional;
+- arquivo;
+- status `ATIVO` ou `INATIVO`.
+
+### RF-153 — Gestão profissional
+
+O profissional autenticado deverá poder:
+
+- publicar documento;
+- editar título e descrição;
+- ativar ou ocultar documento;
+- excluir documento.
+
+### RF-154 — Busca pública
+
+A área pública deverá oferecer busca por:
+
+- título;
+- descrição;
+- nome original do arquivo.
+
+A busca deverá considerar somente documentos ativos do profissional público.
+
+### RF-155 — Acesso aos arquivos
+
+Documentos ativos deverão poder ser abertos diretamente pelo visitante. PNG poderá ser apresentado com pré-visualização na listagem.
+
+### RF-156 — Integração com o site institucional
+
+O site institucional deverá oferecer acesso à biblioteca da mesma forma que oferece acesso às avaliações. O editor por blocos deverá aceitar um bloco específico de biblioteca com destino padrão `/biblioteca`.
+
+### RF-157 — Segurança de upload
+
+O backend deverá:
+
+- validar o MIME real do arquivo;
+- rejeitar formatos diferentes de PDF e PNG;
+- usar nomes aleatórios no armazenamento;
+- manter os arquivos em diretório público protegido contra execução de scripts;
+- permitir limite de tamanho configurável;
+- registrar criação, atualização e exclusão na auditoria.
+
