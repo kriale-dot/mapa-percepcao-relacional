@@ -79,7 +79,7 @@ Ao concluir uma etapa relevante, atualize o STATUS.
 
 **Versão atual:** `1.0.0-rc.1`
 
-A V1 foi reaberta para concluir o site institucional configurável, requisito obrigatório identificado após um fechamento prematuro. O próximo marco é validar essa correção e então refazer o fechamento formal.
+A versão candidata está em preparação para deploy/homologação. O módulo de Biblioteca pública foi implementado e validado localmente; o próximo marco é configurar o ambiente de produção e executar o checklist completo de homologação.
 
 Consulte:
 
