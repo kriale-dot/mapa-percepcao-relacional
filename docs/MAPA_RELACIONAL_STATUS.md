@@ -3231,3 +3231,69 @@ Não foi necessária migration.
 
 **Validação ainda não executada.** A implementação foi registrada, mas não considerar a funcionalidade validada até teste local posterior.
 
+### Módulo — Biblioteca pública
+
+Em 2026-10-06 foi implementado o módulo de Biblioteca pública solicitado para a Plataforma Tânia.
+
+Funcionalidades implementadas:
+
+- área pública em `/biblioteca`;
+- acesso livre, sem login ou cadastro;
+- documentos PDF e PNG;
+- título e descrição;
+- busca por título, descrição e nome original do arquivo;
+- pré-visualização de PNG e abertura direta de PDF/PNG;
+- área profissional em `/profissional/biblioteca`;
+- upload com validação real de MIME por `fileinfo`;
+- limite padrão de 20 MB configurável por `LIBRARY_FILE_MAX_MB`;
+- status ATIVO/INATIVO para publicar ou ocultar;
+- edição de título, descrição e status;
+- exclusão física do registro e do arquivo armazenado;
+- auditoria para criação, atualização e exclusão;
+- novo bloco institucional `BIBLIOTECA`;
+- botão Biblioteca no cabeçalho público;
+- migration `011_biblioteca_publica.sql`.
+
+Arquivos principais:
+
+- `mapa-relacional-api/src/Controller/LibraryController.php`;
+- `mapa-relacional-api/migrations/011_biblioteca_publica.sql`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-web/src/pages/PublicLibrary.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalLibrary.jsx`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/App.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalDashboard.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalSiteEditor.jsx`;
+- `mapa-relacional-web/src/pages/PublicInstitutionalSite.jsx`.
+
+Validação local necessária após atualizar a cópia de desenvolvimento:
+
+```powershell
+cd mapa-relacional-api
+composer migrate
+composer check
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Testar:
+
+1. abrir `/profissional/biblioteca`;
+2. publicar um PDF;
+3. publicar um PNG;
+4. confirmar que formato diferente é rejeitado;
+5. editar título/descrição/status;
+6. abrir `/biblioteca` sem autenticação;
+7. testar busca;
+8. confirmar que documento INATIVO não aparece publicamente;
+9. excluir um documento e confirmar que o link deixa de funcionar;
+10. confirmar o bloco Biblioteca e o botão público.
+
