@@ -11,7 +11,8 @@
     "vlucas/phpdotenv": "^5.6",
     "monolog/monolog": "^3.8",
     "firebase/php-jwt": "^6.10",
-    "phpmailer/phpmailer": "^6.9"
+    "phpmailer/phpmailer": "^6.9",
+    "dompdf/dompdf": "^3.1"
   },
   "autoload": {
     "psr-4": {
@@ -46,6 +47,7 @@
       "php -l src/Controller/PublicEvaluationController.php",
       "php -l src/Service/AccessTokenService.php",
       "php -l src/Service/MailService.php",
+      "php -l src/Service/ResultPdfService.php",
       "php -l src/Controller/ParticipantAccessController.php",
       "php -l bin/check-smtp.php",
       "php -l src/Service/ResultService.php",
