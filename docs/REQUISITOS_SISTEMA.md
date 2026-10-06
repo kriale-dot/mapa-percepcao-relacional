@@ -809,6 +809,20 @@ O profissional deverá visualizar:
 - resultados quando disponíveis;
 - comentário profissional.
 
+### RF-123 — Lista de e-mails das avaliações
+
+O profissional deverá poder gerar uma lista dos e-mails de contato cadastrados nas suas avaliações.
+
+**Critérios de aceitação:**
+
+- a lista deve considerar somente aplicações pertencentes ao profissional autenticado;
+- os e-mails devem ser apresentados sem duplicidades;
+- o sistema deve informar quantas avaliações estão associadas a cada endereço;
+- a lista deve poder ser copiada em formato simples, um e-mail por linha;
+- a lista deve poder ser exportada em CSV;
+- a geração deve considerar todas as avaliações do profissional, independentemente dos filtros atuais da listagem;
+- a geração deve ser registrada na auditoria sem incluir os próprios endereços de e-mail no contexto do evento.
+
 ---
 
 ## 5.14 Notificações
