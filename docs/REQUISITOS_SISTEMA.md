@@ -693,7 +693,10 @@ Quando os dois participantes concluírem a **Avaliação Conjugal**, o sistema d
 - score percentual do participante B;
 - score geral;
 - título e texto interpretativo conforme o score geral;
+- PDF anexo com a avaliação completa, organizado como a tela profissional de resultados;
 - aviso de que o resultado automático não substitui a devolutiva profissional.
+
+O PDF deverá incluir score geral, scores individuais, resultado por seção, comparação item a item, itens marcados como Não se aplica, nome do profissional responsável e link para a plataforma.
 
 As faixas narrativas são:
 
