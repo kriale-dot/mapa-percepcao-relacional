@@ -875,3 +875,20 @@ A regra de imutabilidade continua válida para alterações de conteúdo: versõ
 
 Como D-043 já retratou o fechamento anterior da V1, esta alteração entra no candidato ainda aberto antes do novo fechamento formal.
 
+## D-050 — Lista de e-mails das avaliações usa contatos únicos e escopo profissional
+**Data:** 2026-10-06  
+**Status:** vigente
+
+A área profissional de avaliações passa a oferecer uma lista consolidada dos e-mails usados como `email_contato` nas aplicações.
+
+Regras:
+
+- somente aplicações do profissional autenticado entram na consulta;
+- os endereços são normalizados para minúsculas e apresentados sem duplicidades;
+- para cada endereço, o sistema informa a quantidade de avaliações, a primeira utilização e a utilização mais recente;
+- a lista pode ser copiada como texto simples, um endereço por linha;
+- a lista pode ser exportada em CSV;
+- a geração considera todas as aplicações do profissional e não herda os filtros atuais da listagem de avaliações;
+- o evento `LISTA_EMAILS_GERADA` é registrado na auditoria apenas com totais agregados, sem armazenar os endereços no contexto do evento;
+- nenhuma migration adicional é necessária, pois a origem dos dados permanece `aplicacoes.email_contato`.
+
