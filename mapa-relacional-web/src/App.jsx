@@ -15,11 +15,13 @@ import ProfessionalApplicationDetail from './pages/ProfessionalApplicationDetail
 import ProfessionalDashboard from './pages/ProfessionalDashboard'
 import ProfessionalAudit from './pages/ProfessionalAudit'
 import ProfessionalSiteEditor from './pages/ProfessionalSiteEditor'
+import ProfessionalLibrary from './pages/ProfessionalLibrary'
 import PublicEvaluations from './pages/PublicEvaluations'
 import PublicEvaluationStart from './pages/PublicEvaluationStart'
 import PublicParticipantAccess from './pages/PublicParticipantAccess'
 import PublicResult from './pages/PublicResult'
 import PublicInstitutionalSite from './pages/PublicInstitutionalSite'
+import PublicLibrary from './pages/PublicLibrary'
 import {
   getApiHealth,
   getAuthenticatedProfessional,
@@ -56,6 +58,10 @@ function App() {
 
   if (path === '/avaliacoes') {
     return <PublicEvaluations />
+  }
+
+  if (path === '/biblioteca') {
+    return <PublicLibrary />
   }
 
   const publicEvaluationMatch = path.match(
@@ -100,6 +106,10 @@ function App() {
 
   if (path === '/profissional/site') {
     return <ProfessionalSiteEditor />
+  }
+
+  if (path === '/profissional/biblioteca') {
+    return <ProfessionalLibrary />
   }
 
   if (path === '/profissional/perfil') {
