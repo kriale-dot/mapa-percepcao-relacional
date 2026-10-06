@@ -420,4 +420,241 @@ HTML;
         }
     }
 
+
+    public function sendAutomaticResultSummary(
+        string $email,
+        string $evaluationName,
+        string $participantAName,
+        string $participantBName,
+        ?float $participantAPercentage,
+        ?float $participantBPercentage,
+        float $generalPercentage
+    ): void {
+        [$resultTitle, $resultText] =
+            $this->automaticResultNarrative($generalPercentage);
+
+        $host = trim((string) ($_ENV['SMTP_HOST'] ?? ''));
+        $port = (int) ($_ENV['SMTP_PORT'] ?? 587);
+        $username = trim((string) ($_ENV['SMTP_USERNAME'] ?? ''));
+        $password = (string) ($_ENV['SMTP_PASSWORD'] ?? '');
+        $encryption = strtolower(trim(
+            (string) ($_ENV['SMTP_ENCRYPTION'] ?? '')
+        ));
+        $fromEmail = trim((string) ($_ENV['MAIL_FROM_EMAIL'] ?? ''));
+        $fromName = trim((string) (
+            $_ENV['MAIL_FROM_NAME']
+                ?? 'Avaliação de Percepção Relacional'
+        ));
+        $timeout = max(
+            5,
+            (int) ($_ENV['SMTP_TIMEOUT_SECONDS'] ?? 15)
+        );
+
+        if (
+            $host === ''
+            || $port <= 0
+            || $username === ''
+            || $password === ''
+            || $fromEmail === ''
+        ) {
+            throw new RuntimeException(
+                'Configuracao SMTP incompleta.'
+            );
+        }
+
+        if (
+            filter_var($email, FILTER_VALIDATE_EMAIL) === false
+            || filter_var($fromEmail, FILTER_VALIDATE_EMAIL) === false
+        ) {
+            throw new RuntimeException(
+                'Endereco de e-mail invalido.'
+            );
+        }
+
+        $mail = new PHPMailer(true);
+        $mail->CharSet = 'UTF-8';
+        $mail->isSMTP();
+        $mail->Host = $host;
+        $mail->Port = $port;
+        $mail->SMTPAuth = true;
+        $mail->Username = $username;
+        $mail->Password = $password;
+        $mail->Timeout = $timeout;
+
+        if ($encryption === 'ssl' || $encryption === 'smtps') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($encryption === 'tls' || $encryption === 'starttls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } elseif ($encryption === '' || $encryption === 'auto') {
+            $mail->SMTPSecure = '';
+        } elseif ($encryption === 'none') {
+            $mail->SMTPAutoTLS = false;
+            $mail->SMTPSecure = '';
+        } else {
+            throw new RuntimeException(
+                'SMTP_ENCRYPTION invalido.'
+            );
+        }
+
+        $safeEvaluation = htmlspecialchars(
+            $evaluationName,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeParticipantA = htmlspecialchars(
+            $participantAName,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeParticipantB = htmlspecialchars(
+            $participantBName,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeScoreA = htmlspecialchars(
+            $this->formatPercentage($participantAPercentage),
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeScoreB = htmlspecialchars(
+            $this->formatPercentage($participantBPercentage),
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeGeneralScore = htmlspecialchars(
+            $this->formatPercentage($generalPercentage),
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeResultTitle = htmlspecialchars(
+            $resultTitle,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+        $safeResultText = htmlspecialchars(
+            $resultText,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
+
+        $mail->setFrom($fromEmail, $fromName);
+        $mail->addAddress($email);
+        $mail->isHTML(true);
+        $mail->Subject = 'Resultado automático - ' . $evaluationName;
+
+        $mail->Body = <<<HTML
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Resultado automático</title>
+</head>
+<body style="font-family:Arial,sans-serif;color:#385048;line-height:1.6">
+  <h2 style="margin-bottom:8px">{$safeEvaluation}</h2>
+
+  <p>
+    Os dois participantes concluíram a avaliação e a plataforma calculou
+    automaticamente os scores de percepção.
+  </p>
+
+  <div style="margin:24px 0;padding:18px;border:1px solid #A8C8B8;border-radius:12px">
+    <p style="margin:0 0 8px">
+      <strong>Score de {$safeParticipantA}:</strong> {$safeScoreA}
+    </p>
+    <p style="margin:0 0 8px">
+      <strong>Score de {$safeParticipantB}:</strong> {$safeScoreB}
+    </p>
+    <p style="margin:0">
+      <strong>Score total da avaliação:</strong> {$safeGeneralScore}
+    </p>
+  </div>
+
+  <div style="margin:24px 0;padding:18px;background:#FEFDFB;border:1px solid #D8B078;border-radius:12px">
+    <h3 style="margin-top:0">{$safeResultTitle}</h3>
+    <p style="margin-bottom:0">{$safeResultText}</p>
+  </div>
+
+  <p>
+    Este é um resultado automático baseado na comparação das respostas.
+    Ele não substitui a devolutiva do profissional, que poderá ser enviada
+    separadamente após a análise da avaliação.
+  </p>
+</body>
+</html>
+HTML;
+
+        $mail->AltBody =
+            $evaluationName . PHP_EOL . PHP_EOL
+            . 'Os dois participantes concluíram a avaliação.' . PHP_EOL . PHP_EOL
+            . 'Score de ' . $participantAName . ': '
+            . $this->formatPercentage($participantAPercentage) . PHP_EOL
+            . 'Score de ' . $participantBName . ': '
+            . $this->formatPercentage($participantBPercentage) . PHP_EOL
+            . 'Score total da avaliação: '
+            . $this->formatPercentage($generalPercentage) . PHP_EOL . PHP_EOL
+            . $resultTitle . PHP_EOL
+            . $resultText . PHP_EOL . PHP_EOL
+            . 'Este é um resultado automático e não substitui a devolutiva do profissional.';
+
+        if (!$mail->send()) {
+            throw new RuntimeException(
+                'Falha ao enviar e-mail do resultado automatico.'
+            );
+        }
+    }
+
+    /**
+     * @return array{0:string,1:string}
+     */
+    private function automaticResultNarrative(float $percentage): array
+    {
+        if ($percentage < 0 || $percentage > 100) {
+            throw new RuntimeException(
+                'Percentual geral invalido para resultado automatico.'
+            );
+        }
+
+        if ($percentage >= 80) {
+            return [
+                'Uma percepção compartilhada muito positiva',
+                'Parabéns! Vocês demonstram uma ótima sintonia na percepção do relacionamento. Que tal aproveitar essa sintonia para fortalecer ainda mais os aspectos que já fazem bem a vocês e dedicar atenção especial às áreas que merecem mais cuidado?',
+            ];
+        }
+
+        if ($percentage >= 60) {
+            return [
+                'Uma boa compreensão, com espaço para aprofundar o diálogo',
+                'Vocês apresentam uma boa percepção um do outro. Pequenos investimentos na comunicação verbal e não verbal podem ajudar a esclarecer expectativas, expressar sentimentos e compreender melhor aquilo que nem sempre é dito com palavras.',
+            ];
+        }
+
+        if ($percentage >= 40) {
+            return [
+                'Uma oportunidade de se conhecerem melhor',
+                'Talvez existam percepções diferentes, dúvidas ou aspectos do cotidiano que ainda não receberam a devida atenção. Este é um convite para observar com mais carinho as reações um do outro e conversar com mais transparência sobre o que cada um sente, pensa e espera.',
+            ];
+        }
+
+        if ($percentage >= 20) {
+            return [
+                'Um convite à redescoberta',
+                'Vocês podem estar diante de uma oportunidade valiosa de redescobrir um ao outro. Para quem está junto há muitos anos, pode ser o momento de renovar a curiosidade e olhar para o parceiro para além das imagens construídas ao longo do tempo. Para quem está no início da união, é uma oportunidade de continuar descobrindo as particularidades, os valores e as expectativas de cada um.',
+            ];
+        }
+
+        return [
+            'Um caminho para construir maior compreensão',
+            'O resultado sugere que vocês ainda podem ampliar bastante o conhecimento sobre a maneira como cada um percebe o relacionamento. Isso não define a qualidade ou o futuro da união. É um ponto de partida para investir no diálogo, na convivência e na descoberta mútua, respeitando o tempo e a história de vocês.',
+        ];
+    }
+
+    private function formatPercentage(?float $percentage): string
+    {
+        if ($percentage === null) {
+            return 'Não disponível';
+        }
+
+        return number_format($percentage, 2, ',', '.') . '%';
+    }
+
 }
