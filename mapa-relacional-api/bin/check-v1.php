@@ -219,6 +219,7 @@ try {
         'auditoria_eventos',
         'rate_limites',
         'site_blocos',
+        'biblioteca_documentos',
     ];
 
     $database = (string) $pdo->query('SELECT DATABASE()')->fetchColumn();
@@ -260,6 +261,7 @@ try {
         '008_rate_limites.sql',
         '009_site_institucional.sql',
         '010_resultado_geral.sql',
+        '011_biblioteca_publica.sql',
     ];
 
     $missingMigrations = array_values(
