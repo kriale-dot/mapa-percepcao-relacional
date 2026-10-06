@@ -468,17 +468,53 @@ final class InstrumentVersionController
 
         $pdo = Database::connect();
 
-        $stmt = $pdo->prepare(
-            'DELETE FROM instrumento_versoes
-              WHERE id = :id
-                AND instrumento_id = :instrumento_id
-                AND status = :status'
-        );
-        $stmt->execute([
-            'id' => $versionId,
-            'instrumento_id' => $instrumentId,
-            'status' => 'RASCUNHO',
-        ]);
+        try {
+            $pdo->beginTransaction();
+
+            $bandStmt = $pdo->prepare(
+                'DELETE FROM resultado_faixas
+                  WHERE instrumento_versao_id = :version_id'
+            );
+            $bandStmt->execute([
+                'version_id' => $versionId,
+            ]);
+
+            $stmt = $pdo->prepare(
+                'DELETE FROM instrumento_versoes
+                  WHERE id = :id
+                    AND instrumento_id = :instrumento_id
+                    AND status = :status'
+            );
+            $stmt->execute([
+                'id' => $versionId,
+                'instrumento_id' => $instrumentId,
+                'status' => 'RASCUNHO',
+            ]);
+
+            if ($stmt->rowCount() !== 1) {
+                $pdo->rollBack();
+
+                return $this->json($response, [
+                    'error' => 'version_delete_conflict',
+                    'message' => 'A versao nao pode mais ser excluida no estado atual.',
+                ], 409);
+            }
+
+            $pdo->commit();
+        } catch (PDOException $error) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            if ((string) $error->getCode() === '23000') {
+                return $this->json($response, [
+                    'error' => 'version_in_use',
+                    'message' => 'A versao possui dependencias e nao pode ser excluida.',
+                ], 409);
+            }
+
+            throw $error;
+        }
 
         return $this->json($response, [
             'message' => 'Versao excluida com sucesso.',
