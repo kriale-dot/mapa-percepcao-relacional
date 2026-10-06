@@ -741,6 +741,17 @@ A lista profissional de avaliações passa a suportar filtros por:
 
 Os filtros são executados no backend e sempre restritos ao profissional autenticado.
 
+A área de avaliações também permite gerar uma **lista única de e-mails de contato** cadastrados nas aplicações do profissional. A lista:
+
+- considera todas as aplicações do profissional, independentemente dos filtros visuais da tela;
+- normaliza os endereços para minúsculas e remove duplicidades;
+- informa quantas avaliações utilizaram cada e-mail;
+- informa a primeira e a última data de avaliação associadas ao endereço;
+- pode ser copiada como texto simples;
+- pode ser exportada em CSV;
+- nunca inclui aplicações pertencentes a outro profissional;
+- registra o evento `LISTA_EMAILS_GERADA` na auditoria com apenas os totais, sem gravar os endereços no contexto do evento.
+
 A página de detalhe de uma aplicação mostra:
 
 - identificação da aplicação;
