@@ -3054,3 +3054,36 @@ Depois, concluir uma Avaliação Conjugal de teste com os dois participantes e c
 5. o e-mail informa que não substitui a devolutiva profissional;
 6. a devolutiva profissional continua em rascunho/não liberada até ação do profissional;
 7. com senha SMTP inválida temporariamente, a conclusão retorna erro e permanece disponível para nova tentativa.
+
+### Ampliação — PDF completo anexado ao resultado automático
+
+Em 2026-10-06 o resultado automático da Avaliação Conjugal foi ampliado para anexar um PDF completo ao e-mail enviado quando o segundo participante conclui.
+
+O PDF reproduz a organização da tela profissional de resultados e inclui:
+
+- comparação relacional e versão do instrumento;
+- score geral e explicação do cálculo;
+- texto interpretativo da faixa do score total;
+- score de A e score de B;
+- resultado por tópico;
+- comparação item a item com Coincide/Diverge/Não comparável;
+- itens marcados como Não se aplica;
+- nome do profissional responsável;
+- link para a plataforma;
+- aviso de que o resultado automático não substitui a devolutiva profissional.
+
+Arquivos de código envolvidos:
+
+- `mapa-relacional-api/src/Service/ResultPdfService.php` (novo);
+- `mapa-relacional-api/src/Service/MailService.php`;
+- `mapa-relacional-api/src/Controller/ParticipantAccessController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-api/composer.json`.
+
+Dependência adicionada:
+
+- `dompdf/dompdf`.
+
+Não há migration nova.
+
+Antes de testar, executar `composer install` para instalar a nova dependência e depois `composer check`.
