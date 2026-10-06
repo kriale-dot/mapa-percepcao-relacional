@@ -3119,3 +3119,67 @@ npm run dev
 ```
 
 Depois, criar um bloco Vídeo no editor, testar ao menos uma URL do YouTube e confirmar a reprodução no site público.
+
+### Ajuste funcional — exclusão segura de instrumentos, versões e avaliações
+
+Em 2026-10-06 foi implementada a exclusão destrutiva controlada na área profissional, mantendo proteção explícita contra apagamento indireto de avaliações históricas.
+
+Comportamento implementado:
+
+- avaliações/aplicações podem ser excluídas pelo profissional proprietário, inclusive quando concluídas;
+- a exclusão da avaliação remove, em transação, participantes da aplicação, acessos, respostas, itens “Não se aplica”, comparações, resultados direcionais, resultado geral e devolutiva;
+- a exclusão da avaliação não remove instrumento, versão, pessoas permanentes nem vínculo administrativo;
+- versões em qualquer estado podem ser excluídas quando não possuem aplicações vinculadas;
+- a exclusão da versão remove seções, itens, alternativas e faixas de resultado;
+- instrumentos podem ser excluídos quando nenhuma de suas versões possui aplicações vinculadas;
+- a exclusão do instrumento remove todas as versões e respectivas estruturas;
+- versões e instrumentos com aplicações vinculadas continuam bloqueados até que as avaliações que não precisam ser preservadas sejam excluídas individualmente;
+- a interface usa confirmação explícita com descrição dos efeitos antes de cada exclusão permitida;
+- exclusões bloqueadas por avaliações vinculadas exibem orientação ao profissional;
+- eventos `AVALIACAO_EXCLUIDA`, `VERSAO_EXCLUIDA` e `INSTRUMENTO_EXCLUIDO` são registrados na auditoria.
+
+Arquivos alterados nesta tarefa:
+
+- `mapa-relacional-api/src/Controller/ApplicationController.php`;
+- `mapa-relacional-api/src/Controller/InstrumentController.php`;
+- `mapa-relacional-api/src/Controller/InstrumentVersionController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalApplications.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalApplicationDetail.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalInstruments.jsx`;
+- `mapa-relacional-web/src/pages/ProfessionalInstrumentVersions.jsx`;
+- `docs/MAPA_RELACIONAL_CONTEXT.md`;
+- `docs/DECISOES.md`;
+- `docs/MAPA_RELACIONAL_STATUS.md`.
+
+Não foi necessária migration nova; as remoções são feitas explicitamente em ordem segura dentro de transações.
+
+Validação local pendente:
+
+```powershell
+cd mapa-relacional-api
+composer check
+composer check-v1
+composer serve
+```
+
+Em outro terminal:
+
+```powershell
+cd mapa-relacional-web
+npm run build
+npm run dev
+```
+
+Validar:
+
+1. cancelar cada confirmação e confirmar que nenhum dado é removido;
+2. excluir uma avaliação concluída e confirmar que ela some da lista e que seus links antigos deixam de funcionar;
+3. confirmar que pessoas cadastradas, vínculo, instrumento e versão permanecem após excluir somente a avaliação;
+4. tentar excluir uma versão ainda vinculada a avaliação e confirmar o bloqueio;
+5. depois de excluir as avaliações vinculadas, excluir a versão e confirmar a remoção de seções, itens, alternativas e faixas;
+6. tentar excluir um instrumento com avaliações vinculadas e confirmar o bloqueio;
+7. depois de remover as avaliações que não precisam ser preservadas, excluir o instrumento e confirmar a remoção de suas versões e estruturas;
+8. abrir `/profissional/auditoria` e confirmar os eventos de exclusão.
+
