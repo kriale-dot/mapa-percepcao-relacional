@@ -47,13 +47,22 @@ No `.env` de produção:
 ```text
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://api.seu-dominio
-FRONTEND_URL=https://seu-dominio
+APP_URL=https://api.taniasantiago.com.br
+FRONTEND_URL=https://taniasantiago.com.br
 ```
 
 O `JWT_SECRET` deve ser longo, aleatório e exclusivo do ambiente de produção.
 
 Credenciais de banco e SMTP ficam somente no `.env`.
+
+Domínios oficiais de produção:
+
+```text
+Site público: https://taniasantiago.com.br
+API: https://api.taniasantiago.com.br
+```
+
+No build do frontend, configurar `VITE_API_URL=https://api.taniasantiago.com.br`.
 
 ## 4. SMTP Brevo
 
