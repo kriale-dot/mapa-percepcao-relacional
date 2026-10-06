@@ -154,6 +154,72 @@ final class ApplicationController
         ]);
     }
 
+    public function emails(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    ): ResponseInterface {
+        $professionalId = $this->professionalId($request);
+
+        if ($professionalId === null) {
+            return $this->unauthorized($response);
+        }
+
+        $pdo = Database::connect();
+
+        $stmt = $pdo->prepare(
+            'SELECT
+                LOWER(TRIM(a.email_contato)) AS email,
+                COUNT(*) AS total_avaliacoes,
+                MIN(a.created_at) AS primeira_avaliacao_em,
+                MAX(a.created_at) AS ultima_avaliacao_em
+             FROM aplicacoes a
+             WHERE a.profissional_id = :profissional_id
+               AND TRIM(a.email_contato) <> \'\'
+             GROUP BY LOWER(TRIM(a.email_contato))
+             ORDER BY email ASC'
+        );
+        $stmt->execute([
+            'profissional_id' => $professionalId,
+        ]);
+
+        $emails = array_map(
+            static function (array $item): array {
+                $item['total_avaliacoes'] =
+                    (int) ($item['total_avaliacoes'] ?? 0);
+
+                return $item;
+            },
+            $stmt->fetchAll(PDO::FETCH_ASSOC)
+        );
+
+        $totalAvaliacoes = array_sum(
+            array_column($emails, 'total_avaliacoes')
+        );
+
+        $this->auditService->recordSafe(
+            'PROFISSIONAL',
+            $professionalId,
+            'LISTA_EMAILS_GERADA',
+            'APLICACAO',
+            null,
+            [
+                'total_emails_unicos' => count($emails),
+                'total_avaliacoes' => $totalAvaliacoes,
+            ],
+            $request,
+            $professionalId,
+            $pdo
+        );
+
+        return $this->json($response, [
+            'emails' => $emails,
+            'resumo' => [
+                'total_emails_unicos' => count($emails),
+                'total_avaliacoes' => $totalAvaliacoes,
+            ],
+        ]);
+    }
+
     public function dashboard(
         ServerRequestInterface $request,
         ResponseInterface $response
