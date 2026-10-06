@@ -3184,3 +3184,50 @@ Validar:
 7. depois de remover as avaliações que não precisam ser preservadas, excluir o instrumento e confirmar a remoção de suas versões e estruturas;
 8. abrir `/profissional/auditoria` e confirmar os eventos de exclusão.
 
+### Ajuste funcional — lista consolidada de e-mails das avaliações
+
+Em 2026-10-06 foi implementada a geração de uma lista consolidada dos e-mails cadastrados como contato das avaliações.
+
+Backend:
+
+```text
+GET /api/profissional/aplicacoes/emails
+```
+
+A consulta:
+
+- é restrita ao profissional autenticado;
+- usa `aplicacoes.email_contato`;
+- normaliza os endereços para minúsculas;
+- remove duplicidades;
+- retorna a quantidade de avaliações associadas a cada endereço;
+- retorna a primeira e a última data de avaliação associadas ao endereço;
+- retorna também o total de e-mails únicos e o total de avaliações representadas;
+- registra `LISTA_EMAILS_GERADA` na auditoria somente com totais agregados.
+
+Frontend em `/profissional/avaliacoes`:
+
+- botão **Gerar lista de e-mails**;
+- exibição da quantidade de endereços únicos;
+- exibição do total de avaliações representadas;
+- lista simples, um e-mail por linha;
+- botão **Copiar e-mails**;
+- botão **Baixar CSV**;
+- CSV com e-mail, quantidade de avaliações, primeira avaliação e última avaliação;
+- a lista usa todas as avaliações do profissional e não é limitada pelos filtros atuais da tela.
+
+Arquivos alterados:
+
+- `mapa-relacional-api/src/Controller/ApplicationController.php`;
+- `mapa-relacional-api/public/index.php`;
+- `mapa-relacional-web/src/services/api.js`;
+- `mapa-relacional-web/src/pages/ProfessionalApplications.jsx`;
+- `docs/MAPA_RELACIONAL_CONTEXT.md`;
+- `docs/REQUISITOS_SISTEMA.md`;
+- `docs/DECISOES.md`;
+- `docs/MAPA_RELACIONAL_STATUS.md`.
+
+Não foi necessária migration.
+
+**Validação ainda não executada.** A implementação foi registrada, mas não considerar a funcionalidade validada até teste local posterior.
+
