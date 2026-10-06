@@ -508,7 +508,9 @@ export default function PublicParticipantAccess({ token }) {
           </h1>
           <p className="mt-4 leading-7 text-[#385048]/70">
             {completion.ambos_concluidos
-              ? 'Os dois participantes concluíram a avaliação. Ela agora está pronta para a etapa de comparação e resultados.'
+              ? completion.resultado_automatico_enviado
+                ? 'Os dois participantes concluíram a avaliação. O resultado automático foi calculado e enviado por e-mail.'
+                : 'Os dois participantes concluíram a avaliação. Ela agora está pronta para a etapa de comparação e resultados.'
               : 'Sua parte foi concluída com sucesso. A avaliação ficará aguardando a conclusão do outro participante.'}
           </p>
 
@@ -521,6 +523,22 @@ export default function PublicParticipantAccess({ token }) {
               {completion.aplicacao_status}
             </p>
           </div>
+
+          {completion.resultado_automatico_enviado ? (
+            <div
+              role="status"
+              className="mt-5 rounded-2xl border border-[#A8C8B8]/55 bg-[#A8C8B8]/10 p-5"
+            >
+              <p className="text-sm font-semibold text-[#385048]">
+                Resultado automático enviado por e-mail
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[#385048]/75">
+                O resultado automático desta avaliação foi enviado para o
+                e-mail cadastrado, incluindo os scores, o texto interpretativo
+                e o documento PDF com a comparação completa.
+              </p>
+            </div>
+          ) : null}
 
           <p className="mt-6 text-sm leading-6 text-[#385048]/60">
             Depois de concluir, este acesso não permite alterar as respostas.
