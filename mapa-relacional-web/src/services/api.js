@@ -317,6 +317,13 @@ export function listApplications(filters = {}) {
   )
 }
 
+export function listApplicationEmails() {
+  return request('/api/profissional/aplicacoes/emails', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
 export function getApplication(id) {
   return request(`/api/profissional/aplicacoes/${id}`, {
     method: 'GET',
