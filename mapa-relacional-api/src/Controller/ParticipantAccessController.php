@@ -637,9 +637,6 @@ final class ParticipantAccessController
             );
         }
 
-        $automaticResultEnabled =
-            (string) $access['avaliacao_nome'] === 'Avaliação Conjugal';
-
         $pdo = Database::connect();
         $pdo->beginTransaction();
 
@@ -736,6 +733,9 @@ final class ParticipantAccessController
                 'progresso' => $progress,
             ], 409);
         }
+
+        $automaticResultEnabled =
+            (string) $access['avaliacao_nome'] === 'Avaliação Conjugal';
 
         $pdo = Database::connect();
         $pdo->beginTransaction();
