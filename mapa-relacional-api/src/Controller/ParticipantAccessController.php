@@ -8,6 +8,7 @@ use App\Config\Database;
 use App\Service\AccessTokenService;
 use App\Service\AuditService;
 use App\Service\MailService;
+use App\Service\ResultPdfService;
 use App\Service\ResultService;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
@@ -18,6 +19,7 @@ final class ParticipantAccessController
     public function __construct(
         private readonly AccessTokenService $tokenService,
         private readonly ResultService $resultService,
+        private readonly ResultPdfService $resultPdfService,
         private readonly MailService $mailService,
         private readonly AuditService $auditService
     ) {
@@ -806,6 +808,19 @@ final class ParticipantAccessController
                     }
 
                     try {
+                        [$resultTitle, $resultText] =
+                            $this->mailService->automaticResultNarrative(
+                                (float) $generalPercentage
+                            );
+
+                        $pdf = $this->resultPdfService
+                            ->generateAutomaticResultPdf(
+                                (int) $access['aplicacao_id'],
+                                $resultTitle,
+                                $resultText,
+                                $pdo
+                            );
+
                         $this->mailService->sendAutomaticResultSummary(
                             (string) $access['email_contato'],
                             (string) $access['avaliacao_nome'],
@@ -821,7 +836,11 @@ final class ParticipantAccessController
                             )
                                 ? (float) $calculation['resultados']['B_SOBRE_A']['percentual']
                                 : null,
-                            (float) $generalPercentage
+                            (float) $generalPercentage,
+                            $resultTitle,
+                            $resultText,
+                            $pdf['content'],
+                            $pdf['filename']
                         );
                     } catch (\Throwable $error) {
                         throw new \RuntimeException(
