@@ -24,6 +24,7 @@ final class SiteController
         'CTA',
         'LINK',
         'AVALIACAO',
+        'BIBLIOTECA',
     ];
 
     public function __construct(
