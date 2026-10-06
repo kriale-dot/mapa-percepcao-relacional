@@ -685,6 +685,28 @@ A área profissional deverá poder identificar itens comparáveis com:
 - divergência;
 - exclusão por “Não se aplica”.
 
+### RF-107 — Resultado automático por e-mail da Avaliação Conjugal
+
+Quando os dois participantes concluírem a **Avaliação Conjugal**, o sistema deverá calcular os scores e enviar automaticamente ao e-mail de contato da aplicação:
+
+- score percentual do participante A;
+- score percentual do participante B;
+- score geral;
+- título e texto interpretativo conforme o score geral;
+- aviso de que o resultado automático não substitui a devolutiva profissional.
+
+As faixas narrativas são:
+
+- 80,00–100,00%: **Uma percepção compartilhada muito positiva**;
+- 60,00–79,99%: **Uma boa compreensão, com espaço para aprofundar o diálogo**;
+- 40,00–59,99%: **Uma oportunidade de se conhecerem melhor**;
+- 20,00–39,99%: **Um convite à redescoberta**;
+- 0,00–19,99%: **Um caminho para construir maior compreensão**.
+
+Essas cinco faixas narrativas não substituem as três faixas técnicas Ruim / Regular / Bom usadas no resultado persistido e na barra gráfica.
+
+Os textos conjugais não deverão ser aplicados automaticamente a outros instrumentos.
+
 ---
 
 ## 5.12 Comentário profissional e devolutiva
@@ -705,7 +727,9 @@ O sistema deverá permitir disponibilizar o resultado aos participantes conforme
 
 O resultado deverá poder ser encaminhado ou disponibilizado a partir do e-mail de contato associado à aplicação.
 
-Na V1, a disponibilização será feita por **link seguro enviado por e-mail via SMTP Brevo**. O link somente ficará ativo depois que o profissional liberar a devolutiva. O token bruto não será armazenado no banco; será persistido apenas seu hash SHA-256.
+Na **Avaliação Conjugal**, após a conclusão dos dois participantes, a plataforma envia automaticamente um resumo com os três scores agregados e o texto interpretativo definido em RF-107.
+
+A devolutiva profissional permanece um fluxo separado. Quando o profissional a liberar, a disponibilização completa será feita por **link seguro enviado por e-mail via SMTP Brevo**. O link somente ficará ativo depois da liberação profissional. O token bruto não será armazenado no banco; será persistido apenas seu hash SHA-256.
 
 O link público deverá apresentar o resultado comparativo liberado, a síntese, as observações e o comentário profissional, sem expor as respostas individuais brutas de cada participante.
 
@@ -767,6 +791,7 @@ Os fluxos implementados incluem:
 
 - envio inicial dos dois acessos da avaliação;
 - reenvio individual de acesso de participante ainda não concluído;
+- envio automático dos scores e texto interpretativo da Avaliação Conjugal quando os dois participantes concluem;
 - envio da devolutiva liberada;
 - reenvio da devolutiva liberada.
 
