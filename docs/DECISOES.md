@@ -892,3 +892,24 @@ Regras:
 - o evento `LISTA_EMAILS_GERADA` é registrado na auditoria apenas com totais agregados, sem armazenar os endereços no contexto do evento;
 - nenhuma migration adicional é necessária, pois a origem dos dados permanece `aplicacoes.email_contato`.
 
+## D-051 — Biblioteca pública de documentos
+**Data:** 2026-10-06  
+**Status:** vigente
+
+A Plataforma Tânia passa a incluir um módulo de **Biblioteca pública**, independente das avaliações, para disponibilização gratuita de materiais aos visitantes.
+
+Regras aprovadas:
+
+- a biblioteca é acessada publicamente por `/biblioteca`, sem autenticação ou cadastro;
+- o profissional gerencia os documentos em `/profissional/biblioteca`;
+- cada documento possui título, descrição, arquivo e status;
+- formatos permitidos: **PDF** e **PNG**;
+- somente documentos com status `ATIVO` aparecem para visitantes;
+- o visitante pode pesquisar por título, descrição ou nome do arquivo;
+- os arquivos são validados por MIME real com `fileinfo`;
+- o limite padrão é 20 MB, configurável por `LIBRARY_FILE_MAX_MB`;
+- os arquivos são armazenados em `public/uploads/biblioteca/{profissional_id}/` com nomes aleatórios;
+- a área pública do site oferece link para a biblioteca, e o editor institucional passa a aceitar o bloco `BIBLIOTECA`;
+- criação, atualização e exclusão são registradas na auditoria;
+- a migration oficial é `011_biblioteca_publica.sql`.
+
