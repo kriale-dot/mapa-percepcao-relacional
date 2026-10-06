@@ -3,6 +3,7 @@ import {
   createApplication,
   deleteApplication,
   getApplicationOptions,
+  listApplicationEmails,
   listApplications,
 } from '../services/api'
 import { clearAuthToken, getAuthToken } from '../services/auth'
@@ -41,6 +42,14 @@ export default function ProfessionalApplications() {
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
   const [deletingId, setDeletingId] = useState(null)
+  const [emailList, setEmailList] = useState([])
+  const [emailSummary, setEmailSummary] = useState({
+    total_emails_unicos: 0,
+    total_avaliacoes: 0,
+  })
+  const [emailListStatus, setEmailListStatus] = useState('idle')
+  const [emailListOpen, setEmailListOpen] = useState(false)
+  const [emailListMessage, setEmailListMessage] = useState('')
 
   useEffect(() => {
     if (!getAuthToken()) {
@@ -85,6 +94,11 @@ export default function ProfessionalApplications() {
         (relationship) => relationship.id === Number(form.vinculo_id),
       ) || null,
     [relationships, form.vinculo_id],
+  )
+
+  const emailText = useMemo(
+    () => emailList.map((item) => item.email).join('\n'),
+    [emailList],
   )
 
   function updateField(field, value) {
@@ -186,6 +200,89 @@ export default function ProfessionalApplications() {
     } finally {
       setDeletingId(null)
     }
+  }
+
+  async function handleGenerateEmailList() {
+    setEmailListOpen(true)
+    setEmailListStatus('loading')
+    setEmailListMessage('')
+
+    try {
+      const result = await listApplicationEmails()
+      setEmailList(result.emails || [])
+      setEmailSummary(
+        result.resumo || {
+          total_emails_unicos: 0,
+          total_avaliacoes: 0,
+        },
+      )
+      setEmailListStatus('ready')
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setEmailListStatus('error')
+      setEmailListMessage(
+        error.message || 'Não foi possível gerar a lista de e-mails.',
+      )
+    }
+  }
+
+  async function handleCopyEmails() {
+    if (!emailText) return
+
+    try {
+      await navigator.clipboard.writeText(emailText)
+      setEmailListMessage('Lista de e-mails copiada.')
+    } catch {
+      const textarea = document.createElement('textarea')
+      textarea.value = emailText
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      setEmailListMessage('Lista de e-mails copiada.')
+    }
+  }
+
+  function handleDownloadEmailCsv() {
+    if (emailList.length === 0) return
+
+    const escapeCsv = (value) =>
+      `"${String(value ?? '').replaceAll('"', '""')}"`
+
+    const rows = [
+      ['E-mail', 'Avaliações', 'Primeira avaliação', 'Última avaliação'],
+      ...emailList.map((item) => [
+        item.email,
+        item.total_avaliacoes,
+        item.primeira_avaliacao_em,
+        item.ultima_avaliacao_em,
+      ]),
+    ]
+
+    const csv = rows
+      .map((row) => row.map(escapeCsv).join(';'))
+      .join('\r\n')
+
+    const blob = new Blob(['\uFEFF', csv], {
+      type: 'text/csv;charset=utf-8',
+    })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'emails-avaliacoes.csv'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    setEmailListMessage('Arquivo CSV gerado.')
   }
 
   function handleLogout() {
@@ -393,6 +490,117 @@ export default function ProfessionalApplications() {
             <h2 className="mt-2 text-2xl font-semibold">
               Avaliações cadastradas
             </h2>
+          </div>
+
+          <div className="mb-5 rounded-2xl border border-[#A8C8B8]/40 bg-white p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold">Lista de e-mails</p>
+                <p className="mt-1 text-xs text-[#385048]/60">
+                  Gera uma lista única com todos os e-mails de contato das
+                  avaliações, independentemente dos filtros abaixo.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleGenerateEmailList}
+                disabled={emailListStatus === 'loading'}
+                className="rounded-xl border border-[#88B098] px-4 py-2 text-sm font-semibold disabled:opacity-50"
+              >
+                {emailListStatus === 'loading'
+                  ? 'Gerando...'
+                  : 'Gerar lista de e-mails'}
+              </button>
+            </div>
+
+            {emailListOpen ? (
+              <div className="mt-5 border-t border-[#A8C8B8]/30 pt-5">
+                {emailListStatus === 'error' ? (
+                  <div
+                    role="alert"
+                    className="rounded-xl bg-[#D8B078]/18 px-4 py-3 text-sm"
+                  >
+                    {emailListMessage}
+                  </div>
+                ) : null}
+
+                {emailListStatus === 'ready' ? (
+                  <>
+                    <div className="flex flex-wrap gap-3 text-sm">
+                      <span className="rounded-full bg-[#A8C8B8]/18 px-3 py-1 font-semibold">
+                        {emailSummary.total_emails_unicos} e-mail(s) único(s)
+                      </span>
+                      <span className="rounded-full bg-[#A8C8D0]/18 px-3 py-1 font-semibold">
+                        {emailSummary.total_avaliacoes} avaliação(ões)
+                      </span>
+                    </div>
+
+                    {emailList.length === 0 ? (
+                      <p className="mt-4 text-sm text-[#385048]/65">
+                        Ainda não há e-mails cadastrados em avaliações.
+                      </p>
+                    ) : (
+                      <>
+                        <textarea
+                          readOnly
+                          rows={Math.min(12, Math.max(4, emailList.length))}
+                          value={emailText}
+                          className="mt-4 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3 font-mono text-sm outline-none"
+                          aria-label="Lista de e-mails das avaliações"
+                        />
+
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={handleCopyEmails}
+                            className="rounded-xl bg-[#385048] px-4 py-2 text-sm font-semibold text-white"
+                          >
+                            Copiar e-mails
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleDownloadEmailCsv}
+                            className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
+                          >
+                            Baixar CSV
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setEmailListOpen(false)}
+                            className="rounded-xl border border-[#385048]/20 px-4 py-2 text-sm font-semibold"
+                          >
+                            Fechar
+                          </button>
+                        </div>
+
+                        {emailListMessage ? (
+                          <p className="mt-3 text-xs text-[#385048]/65">
+                            {emailListMessage}
+                          </p>
+                        ) : null}
+
+                        <div className="mt-4 max-h-72 overflow-auto rounded-xl border border-[#A8C8B8]/30">
+                          {emailList.map((item) => (
+                            <div
+                              key={item.email}
+                              className="flex flex-col gap-1 border-b border-[#A8C8B8]/20 px-4 py-3 text-sm last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
+                            >
+                              <span className="break-all font-medium">
+                                {item.email}
+                              </span>
+                              <span className="text-xs text-[#385048]/55">
+                                {item.total_avaliacoes} avaliação(ões)
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
           <form
