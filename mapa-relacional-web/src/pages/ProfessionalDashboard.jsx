@@ -188,6 +188,12 @@ export default function ProfessionalDashboard() {
               path: '/profissional/site',
             },
             {
+              title: 'Biblioteca pública',
+              description:
+                'Publique documentos PDF e PNG com título, descrição e acesso livre.',
+              path: '/profissional/biblioteca',
+            },
+            {
               title: 'Instrumentos',
               description:
                 'Gerencie instrumentos, versões, seções, itens e faixas.',
