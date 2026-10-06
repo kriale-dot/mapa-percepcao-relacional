@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   createApplication,
+  deleteApplication,
   getApplicationOptions,
   listApplications,
 } from '../services/api'
@@ -39,6 +40,7 @@ export default function ProfessionalApplications() {
   const [filters, setFilters] = useState(emptyFilters)
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
+  const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => {
     if (!getAuthToken()) {
@@ -151,6 +153,38 @@ export default function ProfessionalApplications() {
 
       setStatus('ready')
       setMessage(error.message || 'Não foi possível criar a avaliação.')
+    }
+  }
+
+  async function handleDelete(application) {
+    const isCompleted = application.status === 'CONCLUIDA'
+    const label = isCompleted ? 'avaliação concluída' : 'avaliação'
+
+    const confirmed = window.confirm(
+      `Excluir permanentemente esta ${label}?\n\nSerão apagados os participantes desta aplicação, links de acesso, respostas, itens marcados como "Não se aplica", comparações, resultados e eventual devolutiva profissional.\n\nO instrumento, a versão, as pessoas cadastradas e o vínculo não serão excluídos.\n\nEsta ação não pode ser desfeita.`,
+    )
+
+    if (!confirmed) return
+
+    setDeletingId(application.id)
+    setMessage('')
+
+    try {
+      await deleteApplication(application.id)
+      setApplications((current) =>
+        current.filter((item) => item.id !== application.id),
+      )
+      setMessage('Avaliação excluída com sucesso.')
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+
+      setMessage(error.message || 'Não foi possível excluir a avaliação.')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -582,6 +616,17 @@ export default function ProfessionalApplications() {
                       Ver resultados
                     </button>
                   ) : null}
+
+                  <button
+                    type="button"
+                    disabled={deletingId === application.id}
+                    onClick={() => handleDelete(application)}
+                    className="rounded-xl border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 disabled:opacity-50"
+                  >
+                    {deletingId === application.id
+                      ? 'Excluindo...'
+                      : 'Excluir avaliação'}
+                  </button>
                 </div>
 
                 <p className="mt-4 text-xs text-[#385048]/50">
