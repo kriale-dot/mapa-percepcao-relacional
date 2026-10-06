@@ -117,8 +117,15 @@ export default function ProfessionalInstruments() {
   }
 
   async function handleDelete(instrument) {
+    if ((instrument.total_aplicacoes || 0) > 0) {
+      window.alert(
+        `O instrumento "${instrument.nome}" possui ${instrument.total_aplicacoes} avaliação(ões) vinculada(s) e não pode ser excluído agora.\n\nExclua primeiro, individualmente, as avaliações que não precisam ser preservadas. Depois volte aqui para excluir o instrumento.`,
+      )
+      return
+    }
+
     const confirmed = window.confirm(
-      `Excluir o instrumento "${instrument.nome}"? Esta ação só é permitida quando ele ainda não possui versões.`,
+      `Excluir permanentemente o instrumento "${instrument.nome}"?\n\nSerão apagadas todas as versões do instrumento e, com elas, suas seções, itens, alternativas e faixas de resultado.\n\nAvaliações não são apagadas automaticamente; se existir alguma avaliação vinculada, a API bloqueará a exclusão.\n\nEsta ação não pode ser desfeita.`,
     )
 
     if (!confirmed) return
@@ -314,7 +321,8 @@ export default function ProfessionalInstruments() {
                       {instrument.descricao || 'Sem descrição.'}
                     </p>
                     <p className="mt-3 text-xs text-[#385048]/50">
-                      {instrument.total_versoes} versão(ões)
+                      {instrument.total_versoes} versão(ões) ·{' '}
+                      {instrument.total_aplicacoes || 0} avaliação(ões)
                     </p>
                   </div>
 
