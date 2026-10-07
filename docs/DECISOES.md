@@ -913,3 +913,21 @@ Regras aprovadas:
 - criação, atualização e exclusão são registradas na auditoria;
 - a migration oficial é `011_biblioteca_publica.sql`.
 
+
+
+## D-052 — Atualizar firebase/php-jwt para 7.x no deploy
+
+**Data:** 2026-10-07  
+**Status:** vigente
+
+Durante o primeiro `composer install --no-dev --optimize-autoloader` no servidor de produção, o Composer bloqueou `firebase/php-jwt ^6.10` por advisory de segurança que afeta versões anteriores à 7.0.0.
+
+Decisão:
+
+- atualizar a dependência para `firebase/php-jwt ^7.0`;
+- não desabilitar `audit.block-insecure`;
+- não adicionar exceção/ignore para o advisory;
+- manter o uso atual de HS256 com `JWT_SECRET` de pelo menos 32 caracteres;
+- validar novamente `composer check` e o login profissional após a instalação.
+
+A API já usa a interface moderna `JWT::encode(...)` e `JWT::decode(..., new Key(...))`, compatível com a linha 7.x.
