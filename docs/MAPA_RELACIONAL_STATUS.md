@@ -3301,3 +3301,26 @@ Antes de liberar produção:
 11. configurar Apache/HTTPS;
 12. realizar homologação ponta a ponta no domínio definitivo.
 
+
+
+### Correção de deploy — firebase/php-jwt
+
+Em 2026-10-07, durante a instalação das dependências no Droplet, o Composer bloqueou a linha `firebase/php-jwt 6.x` por advisory de segurança.
+
+Correção aplicada no repositório:
+
+- `firebase/php-jwt` atualizado de `^6.10` para `^7.0`;
+- nenhuma exceção de segurança foi adicionada ao Composer;
+- o fluxo JWT existente permanece baseado em HS256 e `JWT_SECRET` com mínimo de 32 caracteres.
+
+Validação pendente no servidor após `git pull`:
+
+```bash
+cd /var/www/plataforma-tania
+git pull origin main
+cd mapa-relacional-api
+composer install --no-dev --optimize-autoloader
+composer check
+```
+
+Depois da instalação, validar login profissional antes de avançar para a publicação.
