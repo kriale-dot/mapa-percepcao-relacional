@@ -3324,3 +3324,20 @@ composer check
 ```
 
 Depois da instalação, validar login profissional antes de avançar para a publicação.
+
+
+### Deploy — dependências PHP e validação sintática no servidor
+
+Em 2026-10-07, após atualizar `firebase/php-jwt` para a linha segura 7.x, a instalação das dependências PHP foi concluída no Droplet e o comando:
+
+```bash
+composer check
+```
+
+foi executado com sucesso.
+
+Resultado: todos os arquivos PHP verificados pelo checklist passaram sem erros de sintaxe, incluindo API, autenticação JWT, geração de PDF, biblioteca pública, auditoria, rate limit, scripts de migração e utilitários de deploy.
+
+**Estado desta etapa:** concluída.
+
+**Próximo passo:** preparar banco e `.env` de produção, restaurar os dados necessários e somente depois configurar o VirtualHost da API.
