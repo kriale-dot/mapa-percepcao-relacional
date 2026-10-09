@@ -931,3 +931,19 @@ Decisão:
 - validar novamente `composer check` e o login profissional após a instalação.
 
 A API já usa a interface moderna `JWT::encode(...)` e `JWT::decode(..., new Key(...))`, compatível com a linha 7.x.
+
+
+## D-053 — Redefinição de senha profissional por e-mail
+**Data:** 2026-10-09
+**Status:** implementação pendente de homologação
+
+O fluxo vale somente para profissionais, sem alterar tokens dos participantes.
+- solicitação pública com mensagem genérica para não revelar existência de contas;
+- token aleatório de 32 bytes enviado via SMTP, armazenado como SHA-256;
+- validade de 30 minutos, uso único e invalidação de solicitações anteriores;
+- limites de taxa por IP e e-mail;
+- nova senha protegida por password_hash(), com atualização de senha_alterada_em e invalidação dos JWTs existentes;
+- nova migration 012_profissional_recuperacao_senha.sql; sem credenciais SMTP novas;
+- não registrar tokens brutos nem senhas na auditoria.
+
+Pendente: testes locais, SMTP e homologação antes de considerar funcionalidade concluída.
