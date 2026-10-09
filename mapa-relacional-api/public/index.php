@@ -8,6 +8,7 @@ use App\Controller\AlternativeController;
 use App\Controller\AuditController;
 use App\Controller\ApplicationController;
 use App\Controller\AuthController;
+use App\Controller\PasswordResetController;
 use App\Controller\HealthController;
 use App\Controller\FeedbackController;
 use App\Controller\InstrumentController;
@@ -84,6 +85,7 @@ $alternativeController = new AlternativeController();
 $auditController = new AuditController();
 $applicationController = new ApplicationController($resultService, $auditService);
 $authController = new AuthController($auditService, $rateLimitService);
+$passwordResetController = new PasswordResetController($mailService, $rateLimitService, $auditService);
 $professionalController = new ProfessionalController($auditService);
 $publicEvaluationController = new PublicEvaluationController(
     $accessTokenService,
@@ -123,6 +125,8 @@ $notificationController = new NotificationController(
 $app->get('/api/health', [$healthController, 'app']);
 $app->get('/api/health/database', [$healthController, 'database']);
 $app->post('/api/auth/login', [$authController, 'login']);
+$app->post('/api/auth/esqueci-senha', [$passwordResetController, 'request']);
+$app->post('/api/auth/redefinir-senha', [$passwordResetController, 'reset']);
 
 $app->get('/api/public/site', [$siteController, 'publicShow']);
 $app->get('/api/public/biblioteca', [$libraryController, 'publicIndex']);
