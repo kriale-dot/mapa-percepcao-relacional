@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import ProfessionalProfile from './pages/ProfessionalProfile'
 import ProfessionalPassword from './pages/ProfessionalPassword'
+import ProfessionalPasswordRecovery from './pages/ProfessionalPasswordRecovery'
 import ProfessionalInstruments from './pages/ProfessionalInstruments'
 import ProfessionalInstrumentVersions from './pages/ProfessionalInstrumentVersions'
 import ProfessionalResultBands from './pages/ProfessionalResultBands'
@@ -90,6 +91,14 @@ function App() {
 
   if (publicResultMatch) {
     return <PublicResult token={publicResultMatch[1]} />
+  }
+
+  if (path === '/profissional/esqueci-senha') {
+    return <ProfessionalPasswordRecovery mode="request" />
+  }
+
+  if (path === '/profissional/redefinir-senha') {
+    return <ProfessionalPasswordRecovery mode="reset" />
   }
 
   if (path === '/profissional/login') {
@@ -493,6 +502,10 @@ function ProfessionalLogin() {
               {status === 'loading' ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
+          <button type="button" onClick={() => navigate('/profissional/esqueci-senha')}
+            className="mt-5 text-sm font-semibold underline underline-offset-4">
+            Esqueci minha senha
+          </button>
         </div>
       </main>
     </div>
