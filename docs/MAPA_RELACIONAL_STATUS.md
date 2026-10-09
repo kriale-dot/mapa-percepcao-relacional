@@ -3341,3 +3341,17 @@ Resultado: todos os arquivos PHP verificados pelo checklist passaram sem erros d
 **Estado desta etapa:** concluída.
 
 **Próximo passo:** preparar banco e `.env` de produção, restaurar os dados necessários e somente depois configurar o VirtualHost da API.
+
+
+## 2026-10-09 — Recuperação de senha profissional por e-mail (pendente de validação)
+
+Implementação adicionada no GitHub:
+- migration 012_profissional_recuperacao_senha.sql com tokens em hash, expiração e uso único;
+- PasswordResetController com solicitação e redefinição pública, resposta genérica para e-mails inexistentes e limites de taxa;
+- MailService com SMTP atual e links de recuperação;
+- rotas POST /api/auth/esqueci-senha e POST /api/auth/redefinir-senha;
+- frontend com link "Esqueci minha senha", tela de pedido e tela de nova senha.
+
+A redefinição altera senha_hash e senha_alterada_em, invalidando os JWTs antigos pela regra vigente.
+
+Estado: CÓDIGO VERSIONADO; NÃO HOMOLOGADO. Antes de publicar, executar composer migrate, composer check, npm run build e testes do fluxo por e-mail. Verificar migração 012, expiração, uso único, limites de taxa, e-mail inexistente, senha antiga e invalidação de tokens anteriores. O check-domain não foi alterado para validar nominalmente a tabela nova.
