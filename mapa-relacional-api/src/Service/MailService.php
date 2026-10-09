@@ -9,6 +9,57 @@ use RuntimeException;
 
 final class MailService
 {
+    public function sendProfessionalPasswordReset(string $email, string $name, string $link): void
+    {
+        $host = trim((string) ($_ENV['SMTP_HOST'] ?? ''));
+        $username = trim((string) ($_ENV['SMTP_USERNAME'] ?? ''));
+        $password = (string) ($_ENV['SMTP_PASSWORD'] ?? '');
+        $sender = trim((string) ($_ENV['MAIL_FROM_EMAIL'] ?? ''));
+        $senderName = (string) ($_ENV['MAIL_FROM_NAME'] ?? 'Avaliação de Percepção Relacional');
+        if ($host === '' || $username === '' || $password === '' || !filter_var($sender, FILTER_VALIDATE_EMAIL)) {
+            throw new RuntimeException('Configuracao SMTP incompleta.');
+        }
+        $mail = new PHPMailer(true);
+        $mail->CharSet = 'UTF-8';
+        $mail->isSMTP();
+        $mail->Host = $host;
+        $mail->Port = (int) ($_ENV['SMTP_PORT'] ?? 587);
+        $mail->SMTPAuth = true;
+        $mail->Username = $username;
+        $mail->Password = $password;
+        $mail->Timeout = max(5, (int) ($_ENV['SMTP_TIMEOUT_SECONDS'] ?? 15));
+        $encryption = strtolower(trim((string) ($_ENV['SMTP_ENCRYPTION'] ?? '')));
+        if (in_array($encryption, ['ssl', 'smtps'], true)) {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } elseif (in_array($encryption, ['tls', 'starttls'], true)) {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } elseif (in_array($encryption, ['', 'auto'], true)) {
+            $mail->SMTPSecure = '';
+        } elseif ($encryption === 'none') {
+            $mail->SMTPAutoTLS = false;
+            $mail->SMTPSecure = '';
+        } else {
+            throw new RuntimeException('SMTP_ENCRYPTION invalido.');
+        }
+        $safeName = htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $safeLink = htmlspecialchars($link, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        $mail->setFrom($sender, $senderName);
+        $mail->addAddress($email);
+        $mail->isHTML(true);
+        $mail->Subject = 'Redefinição de senha - Avaliação de Percepção Relacional';
+        $mail->Body = '<div style="font-family:Arial,sans-serif;color:#385048;line-height:1.6">'
+            . '<h2>Redefinição de senha</h2><p>Olá, ' . $safeName . '.</p>'
+            . '<p>Recebemos um pedido para redefinir a senha da sua área profissional.</p>'
+            . '<p><a href="' . $safeLink . '">Definir uma nova senha</a></p>'
+            . '<p>O link expira em 30 minutos e só pode ser utilizado uma vez.</p>'
+            . '<p>Se você não solicitou a alteração, ignore esta mensagem.</p></div>';
+        $mail->AltBody = 'Olá, ' . $name . ".\n\n" . 'Para redefinir sua senha, abra o link: '
+            . $link . "\n\n" . 'Validade: 30 minutos. Se não solicitou, ignore este e-mail.';
+        if (!$mail->send()) {
+            throw new RuntimeException('Falha ao enviar email de redefinicao.');
+        }
+    }
+
     /**
      * @param array{name:string,link:string} $participantA
      * @param array{name:string,link:string} $participantB
