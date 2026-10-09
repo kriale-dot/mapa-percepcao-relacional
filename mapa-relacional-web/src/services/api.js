@@ -141,6 +141,20 @@ export function loginProfessional(email, senha) {
   })
 }
 
+export function requestProfessionalPasswordReset(email) {
+  return request('/api/auth/esqueci-senha', {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
+}
+
+export function resetProfessionalPassword(token, nova_senha) {
+  return request('/api/auth/redefinir-senha', {
+    method: 'POST',
+    body: JSON.stringify({ token, nova_senha }),
+  })
+}
+
 export function getAuthenticatedProfessional() {
   return request('/api/profissional/me', {
     method: 'GET',
