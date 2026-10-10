@@ -42,6 +42,12 @@ export default function PublicInstitutionalSite() {
     }
   }, [])
 
+  useEffect(() => {
+    if (site?.site_titulo) {
+      document.title = site.site_titulo
+    }
+  }, [site?.site_titulo])
+
   if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FEFDFB] px-6 text-[#385048]">
