@@ -955,3 +955,14 @@ Pendente: testes locais, SMTP e homologação antes de considerar funcionalidade
 O profissional edita um título HTML próprio pelo editor institucional. O valor pertence à conta profissional, armazenado em `profissionais.site_titulo` (migration 013), não aos blocos de conteúdo. O campo exige 1–160 caracteres. A API pública retorna o título, com fallback "Avaliação de Percepção Relacional"; o frontend atualiza `document.title` ao carregar o site institucional. Somente o profissional autenticado pode gravar o valor. Não confundir com o bloco de tipo TITULO nem modificar a identidade oficial do instrumento.
 
 **Validação em 2026-10-10:** o usuário confirmou que a definição do título do site está funcionando perfeitamente. A funcionalidade fica registrada como concluída no fluxo validado pelo usuário; sem afirmação de testes automatizados nesta atualização.
+
+
+## D-055 — Caminhos oficiais do deploy e acesso MySQL de produção
+**Data:** 2026-10-10  
+**Status:** vigente; acesso recuperado, revisão de segurança pendente
+
+A API de produção deve ser atualizada em `/var/www/api.taniasantiago.com.br`, com DocumentRoot do Apache em `/var/www/api.taniasantiago.com.br/public`; o site público utiliza `/var/www/taniasantiago.com.br`. Não utilizar o caminho anterior `/var/www/plataforma-tania/mapa-relacional-api` como destino de produção sem confirmar o VirtualHost ativo.
+
+O log da API no Apache é `/var/log/apache2/api_taniasantiago_error.log`. A aplicação acessa o banco `mapa_relacional` por um usuário dedicado `mapa_app`, com credenciais exclusivamente no `.env` do servidor; o usuário `root` do MySQL não deve ser usado pela aplicação web. Permissões da conta de aplicação devem ficar limitadas às operações necessárias.
+
+Em 2026-10-10, `GET /api/health` retornou 200. Um erro 500 em `GET /api/public/site` foi rastreado até `PDOException 1698: Access denied for user 'root'@'localhost'`; após configurar acesso MySQL próprio, o usuário confirmou funcionamento normal. O relato não substitui homologação completa. Persistem pendentes revisão `APP_ENV=production`, ocultação de erros detalhados (`APP_DEBUG=false`), conferência de migrations e teste completo da recuperação de senha.
