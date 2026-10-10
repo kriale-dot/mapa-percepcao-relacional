@@ -1007,3 +1007,16 @@ Formatos permitidos: PDF e PNG. O limite padrão é 20 MB via `LIBRARY_FILE_MAX_
 
 O site institucional aceita o bloco `BIBLIOTECA`, cujo destino padrão é `/biblioteca`.
 
+
+## Configuração do título HTML do site institucional
+
+O profissional autenticado pode definir o título da aba do navegador em `/profissional/site`, na seção **Configurações do site**. Este título é independente dos blocos de conteúdo do tipo `TITULO` e não altera a nomenclatura oficial da avaliação.
+
+- Persistência: campo `profissionais.site_titulo`, migration `013_site_titulo.sql`.
+- API protegida: `GET /api/profissional/site/configuracoes` e `PUT /api/profissional/site/configuracoes`.
+- API pública: `GET /api/public/site` retorna `site_titulo` com fallback `Avaliação de Percepção Relacional`.
+- Frontend: o site público aplica o valor recebido a `document.title`.
+- Limite do campo: 1 a 160 caracteres.
+- Estado: funcionamento confirmado pelo usuário em 2026-10-10.
+
+A recuperação de senha profissional adicionada na migration 012 permanece pendente de homologação, independentemente dessa confirmação.
