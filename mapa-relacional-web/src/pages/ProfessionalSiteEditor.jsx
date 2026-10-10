@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import {
   createSiteBlock,
+  getSiteSettings,
+  updateSiteSettings,
   deleteSiteBlock,
   listSiteBlocks,
   moveSiteBlock,
@@ -61,6 +63,8 @@ function normalizeBlock(block) {
 
 export default function ProfessionalSiteEditor() {
   const [blocks, setBlocks] = useState([])
+  const [siteTitle, setSiteTitle] = useState('')
+  const [savingTitle, setSavingTitle] = useState(false)
   const [newBlock, setNewBlock] = useState(emptyBlock)
   const [status, setStatus] = useState('loading')
   const [message, setMessage] = useState('')
@@ -81,7 +85,8 @@ export default function ProfessionalSiteEditor() {
     setMessage('')
 
     try {
-      const result = await listSiteBlocks()
+      const [result, settings] = await Promise.all([listSiteBlocks(), getSiteSettings()])
+      setSiteTitle(settings.site_titulo || '')
       setBlocks((result.blocos || []).map(normalizeBlock))
       setStatus('ready')
     } catch (error) {
@@ -95,6 +100,27 @@ export default function ProfessionalSiteEditor() {
       setMessage(
         error.message || 'Não foi possível carregar o site institucional.',
       )
+    }
+  }
+
+  async function saveTitle(event) {
+    event.preventDefault()
+    setSavingTitle(true)
+    setMessage('')
+    try {
+      const result = await updateSiteSettings(siteTitle.trim())
+      setSiteTitle(result.site_titulo)
+      document.title = result.site_titulo
+      setMessage('Título do site salvo com sucesso.')
+    } catch (error) {
+      if (error.status === 401) {
+        clearAuthToken()
+        navigate('/profissional/login')
+        return
+      }
+      setMessage(error.message || 'Não foi possível salvar o título.')
+    } finally {
+      setSavingTitle(false)
     }
   }
 
@@ -271,6 +297,30 @@ export default function ProfessionalSiteEditor() {
       </header>
 
       <main className="mx-auto max-w-6xl px-6 py-10">
+        <section className="mb-8 rounded-3xl border border-[#A8C8B8]/45 bg-white p-7 shadow-sm">
+          <h1 className="text-2xl font-semibold">Configurações do site</h1>
+          <p className="mt-2 text-sm text-[#385048]/70">
+            Defina o título exibido na aba do navegador. Ele é diferente dos títulos dos blocos.
+          </p>
+          <form onSubmit={saveTitle} className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end">
+            <label className="flex-1 text-sm font-medium">
+              Título do site
+              <input
+                type="text"
+                required
+                maxLength={160}
+                value={siteTitle}
+                onChange={(event) => setSiteTitle(event.target.value)}
+                className="mt-2 w-full rounded-xl border border-[#385048]/20 bg-[#FEFDFB] px-4 py-3"
+                placeholder="Ex.: Tânia Santiago | Terapia Familiar e de Casal"
+              />
+            </label>
+            <button type="submit" disabled={savingTitle}
+              className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">
+              {savingTitle ? 'Salvando...' : 'Salvar título'}
+            </button>
+          </form>
+        </section>
         <section className="rounded-3xl border border-[#A8C8B8]/45 bg-white p-7 shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#385048]/55">
             Editor por blocos
