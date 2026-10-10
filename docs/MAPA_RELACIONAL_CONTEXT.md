@@ -1020,3 +1020,14 @@ O profissional autenticado pode definir o título da aba do navegador em `/profi
 - Estado: funcionamento confirmado pelo usuário em 2026-10-10.
 
 A recuperação de senha profissional adicionada na migration 012 permanece pendente de homologação, independentemente dessa confirmação.
+
+
+## Ambientes publicados — checkpoint 2026-10-10
+
+- Site público: `https://taniasantiago.com.br` — DocumentRoot Apache `/var/www/taniasantiago.com.br`.
+- API: `https://api.taniasantiago.com.br` — raiz `/var/www/api.taniasantiago.com.br` e DocumentRoot `/var/www/api.taniasantiago.com.br/public`.
+- Log de erros Apache específico: `/var/log/apache2/api_taniasantiago_error.log`.
+- Banco da aplicação: `mapa_relacional`. Em produção, a aplicação usa o usuário próprio `mapa_app` configurado no `.env`, em vez de tentar autenticar como `root`@localhost; credenciais não são versionadas.
+- Em 2026-10-10, `GET /api/health` respondeu HTTP 200; após resolver uma falha de autenticação PDO, o usuário confirmou que o sistema funcionou. Isso não equivale à homologação de todas as funcionalidades.
+- Atenção na próxima revisão: configurar produção sem exibir stack traces; conferir `APP_ENV` e `APP_DEBUG`, pois o health indicava `development`.
+- As migrations 012/013 e o fluxo de redefinição de senha ainda precisam de conferência/homologação específica antes do fechamento da versão candidata.
