@@ -3358,7 +3358,7 @@ Estado: CÓDIGO VERSIONADO; NÃO HOMOLOGADO. Antes de publicar, executar compose
 
 ## 2026-10-10 — Título HTML configurável do site institucional
 
-Implementado no GitHub, aguardando validação local:
+Implementado no GitHub e validado funcionalmente pelo usuário em 2026-10-10:
 - migration `013_site_titulo.sql`: campo `profissionais.site_titulo`;
 - API protegida `GET/PUT /api/profissional/site/configuracoes`;
 - `GET /api/public/site` retorna `site_titulo` com valor padrão;
@@ -3367,4 +3367,6 @@ Implementado no GitHub, aguardando validação local:
 
 O título da aba é independente do bloco institucional do tipo TITULO. Limite de 160 caracteres. Sem novas variáveis de ambiente.
 
-**Pendente:** aplicar migrations 012 e 013 na sequência, executar `composer check` e `npm run build`, testar a gravação do título, sua persistência e atualização na aba do navegador. Recuperação de senha segue sem teste por escolha do usuário.
+**Validação confirmada pelo usuário:** a definição do título do site está funcionando perfeitamente. Funcionalidade considerada concluída quanto ao fluxo funcional reportado. Não houve execução independente de `composer check` ou `npm run build` nesta atualização documental.
+
+**Pendente separada:** a recuperação de senha por e-mail (migration 012) continua sem homologação, por escolha do usuário. A migration 013 integra a funcionalidade já reportada como funcional; verificar o registro de migrations e os checklists no próximo ciclo técnico, sem repetir testes agora.
