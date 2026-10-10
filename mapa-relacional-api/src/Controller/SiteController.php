@@ -32,6 +32,50 @@ final class SiteController
     ) {
     }
 
+
+    public function showSettings(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        $id = $this->professionalId($request);
+        if ($id === null) {
+            return $this->unauthorized($response);
+        }
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare('SELECT site_titulo FROM profissionais WHERE id = :id LIMIT 1');
+        $stmt->execute(['id' => $id]);
+        $title = $stmt->fetchColumn();
+        if ($title === false) {
+            return $this->notFound($response);
+        }
+        return $this->json($response, [
+            'site_titulo' => trim((string) $title) ?: 'Avaliação de Percepção Relacional',
+        ]);
+    }
+
+    public function updateSettings(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        $id = $this->professionalId($request);
+        if ($id === null) {
+            return $this->unauthorized($response);
+        }
+        $data = $request->getParsedBody();
+        $data = is_array($data) ? $data : [];
+        $title = trim((string) ($data['site_titulo'] ?? ''));
+        if ($title === '' || mb_strlen($title, 'UTF-8') > 160) {
+            return $this->validation($response, 'O título deve ter entre 1 e 160 caracteres.');
+        }
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare('UPDATE profissionais SET site_titulo = :titulo WHERE id = :id');
+        $stmt->execute(['titulo' => $title, 'id' => $id]);
+        $this->auditService->recordSafe(
+            'PROFISSIONAL', $id, 'SITE_TITULO_ATUALIZADO',
+            'PROFISSIONAL', $id, [], $request, $id, $pdo
+        );
+        return $this->json($response, [
+            'message' => 'Título do site atualizado com sucesso.',
+            'site_titulo' => $title,
+        ]);
+    }
+
     public function publicShow(
         ServerRequestInterface $request,
         ResponseInterface $response
@@ -48,7 +92,8 @@ final class SiteController
                 atuacao,
                 foto_url,
                 logo_url,
-                dados_contato
+                dados_contato,
+                site_titulo
              FROM profissionais
              WHERE status = \'ATIVO\'
              ORDER BY id ASC
@@ -97,6 +142,7 @@ final class SiteController
         return $this->json($response, [
             'profissional' => $this->normalizeProfessional($professional),
             'blocos' => $blocks,
+            'site_titulo' => trim((string) ($professional['site_titulo'] ?? '')) ?: 'Avaliação de Percepção Relacional',
         ]);
     }
 
