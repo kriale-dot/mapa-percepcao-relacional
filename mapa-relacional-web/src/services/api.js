@@ -195,6 +195,21 @@ export function uploadSiteImage(file) {
   })
 }
 
+export function getSiteSettings() {
+  return request('/api/profissional/site/configuracoes', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function updateSiteSettings(site_titulo) {
+  return request('/api/profissional/site/configuracoes', {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify({ site_titulo }),
+  })
+}
+
 export function listSiteBlocks() {
   return request('/api/profissional/site/blocos', {
     method: 'GET',
