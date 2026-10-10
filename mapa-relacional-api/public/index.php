@@ -197,6 +197,8 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     );
 
     $group->post('/site/upload-imagem', [$siteController, 'uploadImage']);
+    $group->get('/site/configuracoes', [$siteController, 'showSettings']);
+    $group->put('/site/configuracoes', [$siteController, 'updateSettings']);
     $group->get('/site/blocos', [$siteController, 'index']);
     $group->post('/site/blocos', [$siteController, 'create']);
     $group->put('/site/blocos/{id:[0-9]+}', [$siteController, 'update']);
