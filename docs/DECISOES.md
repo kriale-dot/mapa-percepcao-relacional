@@ -947,3 +947,9 @@ O fluxo vale somente para profissionais, sem alterar tokens dos participantes.
 - não registrar tokens brutos nem senhas na auditoria.
 
 Pendente: testes locais, SMTP e homologação antes de considerar funcionalidade concluída.
+
+## D-054 — Título da aba do site institucional configurável
+**Data:** 2026-10-10  
+**Status:** implementado; validação pendente
+
+O profissional edita um título HTML próprio pelo editor institucional. O valor pertence à conta profissional, armazenado em `profissionais.site_titulo` (migration 013), não aos blocos de conteúdo. O campo exige 1–160 caracteres. A API pública retorna o título, com fallback "Avaliação de Percepção Relacional"; o frontend atualiza `document.title` ao carregar o site institucional. Somente o profissional autenticado pode gravar o valor. Não confundir com o bloco de tipo TITULO nem modificar a identidade oficial do instrumento.
