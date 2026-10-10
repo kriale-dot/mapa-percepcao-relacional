@@ -3355,3 +3355,16 @@ Implementação adicionada no GitHub:
 A redefinição altera senha_hash e senha_alterada_em, invalidando os JWTs antigos pela regra vigente.
 
 Estado: CÓDIGO VERSIONADO; NÃO HOMOLOGADO. Antes de publicar, executar composer migrate, composer check, npm run build e testes do fluxo por e-mail. Verificar migração 012, expiração, uso único, limites de taxa, e-mail inexistente, senha antiga e invalidação de tokens anteriores. O check-domain não foi alterado para validar nominalmente a tabela nova.
+
+## 2026-10-10 — Título HTML configurável do site institucional
+
+Implementado no GitHub, aguardando validação local:
+- migration `013_site_titulo.sql`: campo `profissionais.site_titulo`;
+- API protegida `GET/PUT /api/profissional/site/configuracoes`;
+- `GET /api/public/site` retorna `site_titulo` com valor padrão;
+- editor em `/profissional/site` oferece campo "Título do site" e botão "Salvar título";
+- a página institucional aplica `document.title` após carregar a configuração pública.
+
+O título da aba é independente do bloco institucional do tipo TITULO. Limite de 160 caracteres. Sem novas variáveis de ambiente.
+
+**Pendente:** aplicar migrations 012 e 013 na sequência, executar `composer check` e `npm run build`, testar a gravação do título, sua persistência e atualização na aba do navegador. Recuperação de senha segue sem teste por escolha do usuário.
