@@ -2,13 +2,13 @@
 
 > Documento de checkpoint. Atualizar ao final de cada etapa relevante, correção ou mudança de estado do projeto.
 
-**Data do checkpoint:** 2026-10-06  
+**Data do checkpoint:** 2026-10-10  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `1.0.0-rc.1`  
 **Marco atual:** V1 reaberta para correção de escopo obrigatório — site institucional  
-**Etapa atual:** preparação para deploy/homologação da versão candidata  
-**Próximo passo:** configurar o ambiente de produção, aplicar migrations 001–011, executar os checklists e realizar a homologação ponta a ponta
+**Etapa atual:** API implantada; homologação e endurecimento de produção pendentes  
+**Próximo passo:** conferir configurações seguras de produção, migrations, checklists e homologação ponta a ponta
 
 ## 1. Situação atual
 
@@ -3370,3 +3370,21 @@ O título da aba é independente do bloco institucional do tipo TITULO. Limite d
 **Validação confirmada pelo usuário:** a definição do título do site está funcionando perfeitamente. Funcionalidade considerada concluída quanto ao fluxo funcional reportado. Não houve execução independente de `composer check` ou `npm run build` nesta atualização documental.
 
 **Pendente separada:** a recuperação de senha por e-mail (migration 012) continua sem homologação, por escolha do usuário. A migration 013 integra a funcionalidade já reportada como funcional; verificar o registro de migrations e os checklists no próximo ciclo técnico, sem repetir testes agora.
+
+
+## 2026-10-10 — Implantação no servidor e recuperação da conexão MySQL
+
+**Marco:** API publicada e acesso ao banco corrigido, conforme testes e confirmação do usuário em produção. **Versão permanece `1.0.0-rc.1`** até homologação completa.
+
+- API: `https://api.taniasantiago.com.br`; DocumentRoot do Apache: `/var/www/api.taniasantiago.com.br/public`; raiz da aplicação: `/var/www/api.taniasantiago.com.br`.
+- Frontend: `https://taniasantiago.com.br`; DocumentRoot: `/var/www/taniasantiago.com.br`.
+- Log específico do Apache: `/var/log/apache2/api_taniasantiago_error.log`.
+- Deploy incremental dos arquivos de recuperação de senha e título configurável foi reenviado ao diretório correto; inicialmente houve envio a diretório incorreto e falha transitória de sintaxe no `public/index.php`.
+- Diagnóstico confirmado: `php -l public/index.php` sem erros; `GET /api/health` respondeu HTTP 200 em produção em 2026-10-10.
+- `GET /api/public/site` retornou inicialmente HTTP 500 com `PDOException SQLSTATE[HY000] [1698] Access denied for user 'root'@'localhost'`.
+- Foi criado/configurado um usuário MySQL de aplicação `mapa_app` para o banco `mapa_relacional`, com credenciais armazenadas exclusivamente no `.env` de produção; o usuário confirmou após a correção: **“funcionou perfeitamente”**.
+- **Não versionar senha, conteúdo do `.env`, logs com informações sensíveis nem credenciais.** O acesso MySQL resolvido não implica que todas as rotas e fluxos foram homologados.
+
+**Verificações pendentes:** confirmar `APP_ENV=production` e `APP_DEBUG=false` (a resposta de health anterior informava `environment: development` e um erro HTTP 500 expôs stack trace); validar a aplicação completa no domínio; confirmar registro das migrations 012 e 013 em `schema_migrations` antes de qualquer reexecução; homologar a recuperação de senha por e-mail, ainda não testada; rodar os checklists de produção, backup e verificações de permissões.
+
+**Próxima ação:** revisão de segurança e homologação ponta a ponta antes do encerramento formal da V1.
