@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getPublicSite } from '../services/api'
+import { getPublicSite, recordSiteVisit, getPublicVisitCounter } from '../services/api'
 import { getVideoSource } from '../utils/video'
 
 function navigate(path) {
@@ -22,6 +22,7 @@ function openLink(url) {
 export default function PublicInstitutionalSite() {
   const [site, setSite] = useState(null)
   const [status, setStatus] = useState('loading')
+  const [counter, setCounter] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -39,6 +40,27 @@ export default function PublicInstitutionalSite() {
 
     return () => {
       active = false
+    }
+  }, [])
+
+  useEffect(() => {
+    // Token temporario por aba: evita duplicacoes por recarga e StrictMode.
+    try {
+      let token = sessionStorage.getItem('site_visita_token')
+      if (!token) {
+        const bytes = new Uint8Array(16)
+        crypto.getRandomValues(bytes)
+        token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
+        sessionStorage.setItem('site_visita_token', token)
+      }
+      const ua = navigator.userAgent
+      const dispositivo = /tablet|ipad/i.test(ua) ? 'tablet' : /mobi|android|iphone/i.test(ua) ? 'celular' : 'desktop'
+      recordSiteVisit({ sessao: token, pagina: '/', origem: document.referrer, dispositivo })
+        .catch(() => {})
+        .finally(() => getPublicVisitCounter().then(setCounter).catch(() => {}))
+    } catch {
+      // O site continua acessivel caso o navegador bloqueie o armazenamento.
+      getPublicVisitCounter().then(setCounter).catch(() => {})
     }
   }, [])
 
@@ -167,6 +189,11 @@ export default function PublicInstitutionalSite() {
           </div>
           <div className="text-sm text-[#385048]/55 md:text-right">
             Avaliação de Percepção Relacional
+            {counter?.mostrar ? (
+              <p className="mt-2 text-xs">
+                {Number(counter.total || 0).toLocaleString('pt-BR')} visitas
+              </p>
+            ) : null}
           </div>
         </div>
       </footer>
