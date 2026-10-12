@@ -44,7 +44,7 @@ final class SiteAnalyticsController
     {
         $unknown = ['pais' => null, 'regiao' => null, 'cidade' => null];
         $database = (string) ($_ENV['SITE_GEOIP_DB'] ?? '');
-        if ($database === '' || !is_readable($database) || !class_exists(\\GeoIp2\\Database\\Reader::class)) {
+        if ($database === '' || !is_readable($database) || !class_exists(\GeoIp2\Database\Reader::class)) {
             return $unknown;
         }
         // REMOTE_ADDR e o unico endereco considerado: nao confiar em headers enviados pelo cliente.
@@ -54,7 +54,7 @@ final class SiteAnalyticsController
             return $unknown;
         }
         try {
-            $reader = new \\GeoIp2\\Database\\Reader($database);
+            $reader = new \GeoIp2\Database\Reader($database);
             try {
                 $city = $reader->city($ip);
                 return [
