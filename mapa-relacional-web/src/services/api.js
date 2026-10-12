@@ -184,9 +184,10 @@ export function deleteProfessionalProfileImage(type) {
   })
 }
 
-export function uploadSiteImage(file) {
+export function uploadSiteImage(file, type = null) {
   const form = new FormData()
   form.append('imagem', file)
+  if (type) form.append('tipo', type)
 
   return request('/api/profissional/site/upload-imagem', {
     method: 'POST',
