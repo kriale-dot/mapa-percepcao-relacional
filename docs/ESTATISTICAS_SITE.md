@@ -18,16 +18,16 @@ Se o arquivo GeoIP estiver ausente ou ilegível, o sistema registra visitas com 
 
 ## Rotas
 
-- `POST /api/public/site/visita`: registra sessão única para `/` (e aceita `/biblioteca` no backend, cujo registro no frontend ainda precisa ser integrado).
+- `POST /api/public/site/visita`: registra sessão única para `/` ou `/biblioteca`; ambas já usam o utilitário compartilhado `siteTracking.js`. Uma visita é renovada após 30 minutos de inatividade.
 - `GET /api/public/site/contador`: devolve total somente quando a exibição pública foi habilitada.
 - `GET /api/profissional/site/estatisticas?dias=30`: resumo, evolução, dispositivos, origem por domínio e localização agregada.
 - `GET/PUT /api/profissional/site/estatisticas/configuracoes`: registro e exibição pública.
 
-A geolocalização é aproximada e pode ser imprecisa por VPN, operadoras móveis, proxies e bases desatualizadas. Exibir valores desconhecidos como "Não identificado". O rastreamento é feito pela homepage; páginas adicionais precisam ser instrumentadas separadamente.
+A geolocalização é aproximada e pode ser imprecisa por VPN, operadoras móveis, proxies e bases desatualizadas. Exibir valores desconhecidos como "Não identificado". O rastreamento foi conectado à homepage e à biblioteca pública, sem eventos ou métricas de avaliações. A consulta `paginas` contabiliza uma visualização por página e sessão, e não cada recarregamento.
 
 ## Validação pendente
 
-- Instalar dependências; análise sintática PHP e build React.
+- Instalar dependências e atualizar `composer.lock` localmente; análise sintática PHP e build React.
 - Migration em MySQL de teste.
 - Verificar deduplicação de visitas, configurações, controles de acesso e consultas agregadas.
 - Validar geolocalização com IP público em ambiente sem proxy e atrás de proxy confiável.
