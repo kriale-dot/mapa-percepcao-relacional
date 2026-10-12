@@ -966,3 +966,19 @@ A API de produção deve ser atualizada em `/var/www/api.taniasantiago.com.br`, 
 O log da API no Apache é `/var/log/apache2/api_taniasantiago_error.log`. A aplicação acessa o banco `mapa_relacional` por um usuário dedicado `mapa_app`, com credenciais exclusivamente no `.env` do servidor; o usuário `root` do MySQL não deve ser usado pela aplicação web. Permissões da conta de aplicação devem ficar limitadas às operações necessárias.
 
 Em 2026-10-10, `GET /api/health` retornou 200. Um erro 500 em `GET /api/public/site` foi rastreado até `PDOException 1698: Access denied for user 'root'@'localhost'`; após configurar acesso MySQL próprio, o usuário confirmou funcionamento normal. O relato não substitui homologação completa. Persistem pendentes revisão `APP_ENV=production`, ocultação de erros detalhados (`APP_DEBUG=false`), conferência de migrations e teste completo da recuperação de senha.
+
+## D-056 — Ícone da aba configurável no perfil profissional
+**Data:** 2026-10-12  
+**Status:** implementado em branch, aguardando homologação
+
+O perfil profissional permite selecionar um favicon por upload, independentemente da fotografia, do logotipo e do título HTML do site.
+
+- Formatos aceitos: ICO ou PNG; limite de 1 MB.
+- O upload autenticado reaproveita `POST /api/profissional/site/upload-imagem` com `tipo=favicon`, mantendo os demais uploads restritos aos formatos já aprovados.
+- A URL do arquivo é salva em `profissionais.favicon_url` (migration `014_profissional_favicon.sql`), via `PUT /api/profissional/perfil`.
+- A exclusão é autenticada em `DELETE /api/profissional/perfil/imagem/favicon` e respeita as proteções existentes para arquivos referenciados.
+- `GET /api/public/site` expõe somente a URL do favicon do profissional público, e o frontend configura `<link rel="icon">` para as rotas da aplicação.
+- O novo ícone é identificado por nome aleatório, permitindo atualização sem reutilizar o endereço do arquivo anterior.
+- Não altera as regras de avaliações, pontuação ou o título do site, nem modifica mídias de outros tipos.
+
+A branch será revisada e a migration deverá ser executada antes do deploy do código da API.
