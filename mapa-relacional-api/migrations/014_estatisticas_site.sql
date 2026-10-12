@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS site_analytics_paginas (
   visita_id BIGINT UNSIGNED NOT NULL,
   pagina VARCHAR(80) NOT NULL,
   visualizada_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_site_analytics_pagina_sessao (visita_id, pagina),
   KEY idx_site_analytics_paginas_visita (visita_id),
   CONSTRAINT fk_site_analytics_paginas_visita FOREIGN KEY (visita_id)
     REFERENCES site_analytics_visitas(id) ON DELETE CASCADE
