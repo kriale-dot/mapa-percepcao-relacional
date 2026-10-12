@@ -67,7 +67,7 @@ foreach ($files as $file) {
         $state = knownMigrationState($pdo, $filename);
         if ($state === 'complete') {
             $insert->execute(['filename' => $filename, 'checksum' => $checksum]);
-            echo "[reconciled] {$filename} (estrutura existente verificada)\\n";
+            echo "[reconciled] {$filename} (estrutura existente verificada)\n";
             continue;
         }
         if ($state === 'partial') {
