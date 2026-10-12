@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { listPublicLibrary } from '../services/api'
+import { trackInstitutionalPage } from '../utils/siteTracking'
 
 function navigate(path) {
   window.history.pushState({}, '', path)
@@ -37,6 +38,7 @@ export default function PublicLibrary() {
       setProfessional(result.profissional || null)
       setAppliedQuery(result.busca || '')
       setStatus('ready')
+      if (search === '') trackInstitutionalPage('/biblioteca')
     } catch (error) {
       setStatus('error')
       setMessage(
