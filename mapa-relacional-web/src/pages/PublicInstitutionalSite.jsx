@@ -56,6 +56,23 @@ export default function PublicInstitutionalSite() {
     }
   }, [site?.site_titulo])
 
+  useEffect(() => {
+    const faviconUrl = site?.profissional?.favicon_url
+
+    if (!faviconUrl) return
+
+    let favicon = document.querySelector('link[rel~="icon"]')
+
+    if (!favicon) {
+      favicon = document.createElement('link')
+      favicon.rel = 'icon'
+      document.head.appendChild(favicon)
+    }
+
+    favicon.type = 'image/x-icon'
+    favicon.href = faviconUrl
+  }, [site?.profissional?.favicon_url])
+
   if (status === 'loading') {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FEFDFB] px-6 text-[#385048]">
