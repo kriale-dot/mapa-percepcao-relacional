@@ -24,6 +24,7 @@ use App\Controller\RelationshipController;
 use App\Controller\ResultBandController;
 use App\Controller\SectionController;
 use App\Controller\SiteController;
+use App\Controller\SiteAnalyticsController;
 use App\Middleware\CorsMiddleware;
 use App\Middleware\SecurityHeadersMiddleware;
 use App\Service\AccessTokenService;
@@ -111,6 +112,7 @@ $instrumentController = new InstrumentController($auditService);
 $instrumentVersionController = new InstrumentVersionController($auditService);
 $sectionController = new SectionController();
 $siteController = new SiteController($auditService);
+$siteAnalyticsController = new SiteAnalyticsController();
 $libraryController = new LibraryController($auditService);
 $itemController = new ItemController();
 $personController = new PersonController();
@@ -129,6 +131,8 @@ $app->post('/api/auth/esqueci-senha', [$passwordResetController, 'request']);
 $app->post('/api/auth/redefinir-senha', [$passwordResetController, 'reset']);
 
 $app->get('/api/public/site', [$siteController, 'publicShow']);
+$app->post('/api/public/site/visita', [$siteAnalyticsController, 'track']);
+$app->get('/api/public/site/contador', [$siteAnalyticsController, 'publicCounter']);
 $app->get('/api/public/biblioteca', [$libraryController, 'publicIndex']);
 $app->get('/api/public/avaliacoes', [$publicEvaluationController, 'index']);
 $app->get(
@@ -184,6 +188,7 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $feedbackController,
     $notificationController,
     $siteController,
+    $siteAnalyticsController,
     $libraryController
 ) {
     $group->get('/me', [$authController, 'me']);
@@ -197,6 +202,9 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     );
 
     $group->post('/site/upload-imagem', [$siteController, 'uploadImage']);
+    $group->get('/site/estatisticas', [$siteAnalyticsController, 'report']);
+    $group->get('/site/estatisticas/configuracoes', [$siteAnalyticsController, 'showSettings']);
+    $group->put('/site/estatisticas/configuracoes', [$siteAnalyticsController, 'saveSettings']);
     $group->get('/site/configuracoes', [$siteController, 'showSettings']);
     $group->put('/site/configuracoes', [$siteController, 'updateSettings']);
     $group->get('/site/blocos', [$siteController, 'index']);
