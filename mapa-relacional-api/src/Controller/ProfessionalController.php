@@ -65,6 +65,7 @@ final class ProfessionalController
         $atuacao = $this->optional($data['atuacao'] ?? null);
         $fotoUrl = $this->optional($data['foto_url'] ?? null);
         $logoUrl = $this->optional($data['logo_url'] ?? null);
+        $faviconUrl = $this->optional($data['favicon_url'] ?? null);
         $dadosContato = $this->optional($data['dados_contato'] ?? null);
 
         if ($nome === '' || strlen($nome) > 150) {
@@ -95,7 +96,7 @@ final class ProfessionalController
             return $this->validation($response, 'Dados de contato muito longos.');
         }
 
-        foreach ([$fotoUrl, $logoUrl] as $url) {
+        foreach ([$fotoUrl, $logoUrl, $faviconUrl] as $url) {
             if ($url === null) {
                 continue;
             }
@@ -136,6 +137,7 @@ final class ProfessionalController
                     atuacao = :atuacao,
                     foto_url = :foto_url,
                     logo_url = :logo_url,
+                    favicon_url = :favicon_url,
                     dados_contato = :dados_contato
               WHERE id = :id'
         );
@@ -148,6 +150,7 @@ final class ProfessionalController
             'atuacao' => $atuacao,
             'foto_url' => $fotoUrl,
             'logo_url' => $logoUrl,
+            'favicon_url' => $faviconUrl,
             'dados_contato' => $dadosContato,
             'id' => $id,
         ]);
@@ -188,6 +191,7 @@ final class ProfessionalController
         $fields = [
             'foto' => 'foto_url',
             'logo' => 'logo_url',
+            'favicon' => 'favicon_url',
         ];
         $field = $fields[$type] ?? null;
 
@@ -263,11 +267,13 @@ final class ProfessionalController
             'SELECT COUNT(*)
                FROM profissionais
               WHERE foto_url = :foto_url
-                 OR logo_url = :logo_url'
+                 OR logo_url = :logo_url
+                 OR favicon_url = :favicon_url'
         );
         $professionalStmt->execute([
             'foto_url' => $url,
             'logo_url' => $url,
+            'favicon_url' => $url,
         ]);
 
         if ((int) $professionalStmt->fetchColumn() > 0) {
@@ -306,7 +312,7 @@ final class ProfessionalController
             $filename === ''
             || str_contains($filename, '/')
             || preg_match(
-                '/^[a-f0-9]{32}\.(?:jpg|png|webp)$/',
+                '/^[a-f0-9]{32}\.(?:jpg|png|webp|ico)$/',
                 $filename
             ) !== 1
         ) {
@@ -344,7 +350,7 @@ final class ProfessionalController
 
         $stmt = $pdo->prepare(
             'SELECT id, nome, email, telefone, descricao, atuacao,
-                    foto_url, logo_url, dados_contato, status,
+                    foto_url, logo_url, favicon_url, dados_contato, status,
                     ultimo_login_em, created_at, updated_at
                FROM profissionais
               WHERE id = :id

@@ -192,7 +192,7 @@ $app->group('/api/profissional', function (RouteCollectorProxy $group) use (
     $group->get('/perfil', [$professionalController, 'profile']);
     $group->put('/perfil', [$professionalController, 'updateProfile']);
     $group->delete(
-        '/perfil/imagem/{tipo:foto|logo}',
+        '/perfil/imagem/{tipo:foto|logo|favicon}',
         [$professionalController, 'deleteProfileImage']
     );
 

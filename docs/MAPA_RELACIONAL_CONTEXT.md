@@ -1022,6 +1022,12 @@ O profissional autenticado pode definir o título da aba do navegador em `/profi
 A recuperação de senha profissional adicionada na migration 012 permanece pendente de homologação, independentemente dessa confirmação.
 
 
+## Favicon da aba do navegador
+
+A partir da evolução registrada em 2026-10-12, a área `/profissional/perfil` também poderá configurar o ícone da aba do navegador. O favicon é independente da fotografia, do logotipo e de `site_titulo`. Aceita upload de ICO/PNG de até 1 MB; sua URL é salva em `profissionais.favicon_url` pela migration `015_profissional_favicon.sql`.
+
+A API devolve o endereço pelo perfil autenticado e pelo objeto `profissional` de `GET /api/public/site`; o frontend aplica esse ícone globalmente a `<link rel="icon">`. A opção inclui exclusão do ícone e mantém as proteções de uploads institucionais. Implementação em branch até revisão e homologação.
+
 ## Ambientes publicados — checkpoint 2026-10-10
 
 - Site público: `https://taniasantiago.com.br` — DocumentRoot Apache `/var/www/taniasantiago.com.br`.

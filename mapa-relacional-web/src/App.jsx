@@ -25,6 +25,7 @@ import PublicInstitutionalSite from './pages/PublicInstitutionalSite'
 import PublicLibrary from './pages/PublicLibrary'
 import {
   getApiHealth,
+  getPublicSite,
   getAuthenticatedProfessional,
   loginProfessional,
 } from './services/api'
@@ -49,6 +50,37 @@ function navigate(path) {
 
 function App() {
   const [path, setPath] = useState(window.location.pathname)
+
+  useEffect(() => {
+    let active = true
+    const refreshFavicon = () => {
+      getPublicSite()
+        .then((site) => {
+          if (!active) return
+          const url = site.profissional?.favicon_url || ''
+          let link = document.querySelector('link[rel="icon"][data-site-favicon="true"]')
+          if (!url) {
+            link?.remove()
+            return
+          }
+          if (!link) {
+            link = document.createElement('link')
+            link.rel = 'icon'
+            link.dataset.siteFavicon = 'true'
+            document.head.appendChild(link)
+          }
+          link.type = /\.ico(?:[?#]|$)/i.test(url) ? 'image/x-icon' : 'image/png'
+          link.href = url
+        })
+        .catch(() => {})
+    }
+    refreshFavicon()
+    window.addEventListener('site-favicon-updated', refreshFavicon)
+    return () => {
+      active = false
+      window.removeEventListener('site-favicon-updated', refreshFavicon)
+    }
+  }, [])
 
   useEffect(() => {
     const handlePopState = () => setPath(window.location.pathname)
