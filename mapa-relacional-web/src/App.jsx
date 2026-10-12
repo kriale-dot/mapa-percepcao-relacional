@@ -16,6 +16,7 @@ import ProfessionalApplicationDetail from './pages/ProfessionalApplicationDetail
 import ProfessionalDashboard from './pages/ProfessionalDashboard'
 import ProfessionalAudit from './pages/ProfessionalAudit'
 import ProfessionalSiteEditor from './pages/ProfessionalSiteEditor'
+import ProfessionalSiteStatistics from './pages/ProfessionalSiteStatistics'
 import ProfessionalLibrary from './pages/ProfessionalLibrary'
 import PublicEvaluations from './pages/PublicEvaluations'
 import PublicEvaluationStart from './pages/PublicEvaluationStart'
@@ -111,6 +112,10 @@ function App() {
 
   if (path === '/profissional/auditoria') {
     return <ProfessionalAudit />
+  }
+
+  if (path === '/profissional/site/estatisticas') {
+    return <ProfessionalSiteStatistics />
   }
 
   if (path === '/profissional/site') {
