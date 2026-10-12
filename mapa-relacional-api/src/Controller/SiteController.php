@@ -92,6 +92,7 @@ final class SiteController
                 atuacao,
                 foto_url,
                 logo_url,
+                favicon_url,
                 dados_contato,
                 site_titulo
              FROM profissionais
@@ -209,16 +210,24 @@ final class SiteController
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mime = (string) $finfo->buffer($contents);
 
+        $isIco = strlen($contents) >= 4
+            && substr($contents, 0, 4) === "\x00\x00\x01\x00";
+
         $extensions = [
             'image/jpeg' => 'jpg',
             'image/png' => 'png',
             'image/webp' => 'webp',
         ];
 
-        if (!isset($extensions[$mime])) {
+        if ($isIco) {
+            $mime = 'image/x-icon';
+            $extension = 'ico';
+        } elseif (isset($extensions[$mime])) {
+            $extension = $extensions[$mime];
+        } else {
             return $this->validation(
                 $response,
-                'Formato invalido. Envie JPG, PNG ou WEBP.'
+                'Formato invalido. Envie JPG, PNG, WEBP ou ICO.'
             );
         }
 
@@ -239,7 +248,7 @@ final class SiteController
 
         $filename = bin2hex(random_bytes(16))
             . '.'
-            . $extensions[$mime];
+            . $extension;
         $targetPath = $targetDir . '/' . $filename;
 
         if (@file_put_contents($targetPath, $contents, LOCK_EX) === false) {
@@ -899,6 +908,7 @@ final class SiteController
             'atuacao' => $professional['atuacao'],
             'foto_url' => $professional['foto_url'],
             'logo_url' => $professional['logo_url'],
+            'favicon_url' => $professional['favicon_url'],
             'dados_contato' => $professional['dados_contato'],
         ];
     }
