@@ -975,7 +975,7 @@ O perfil profissional permite selecionar um favicon por upload, independentement
 
 - Formatos aceitos: ICO ou PNG; limite de 1 MB.
 - O upload autenticado reaproveita `POST /api/profissional/site/upload-imagem` com `tipo=favicon`, mantendo os demais uploads restritos aos formatos já aprovados.
-- A URL do arquivo é salva em `profissionais.favicon_url` (migration `014_profissional_favicon.sql`), via `PUT /api/profissional/perfil`.
+- A URL do arquivo é salva em `profissionais.favicon_url` (migration `015_profissional_favicon.sql`), via `PUT /api/profissional/perfil`.
 - A exclusão é autenticada em `DELETE /api/profissional/perfil/imagem/favicon` e respeita as proteções existentes para arquivos referenciados.
 - `GET /api/public/site` expõe somente a URL do favicon do profissional público, e o frontend configura `<link rel="icon">` para as rotas da aplicação.
 - O novo ícone é identificado por nome aleatório, permitindo atualização sem reutilizar o endereço do arquivo anterior.
