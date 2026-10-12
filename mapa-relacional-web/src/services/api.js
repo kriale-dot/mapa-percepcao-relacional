@@ -63,6 +63,39 @@ export function getApiHealth() {
   return request('/api/health')
 }
 
+export function recordSiteVisit(data) {
+  return request('/api/public/site/visita', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function getPublicVisitCounter() {
+  return request('/api/public/site/contador', { method: 'GET' })
+}
+
+export function getSiteAnalytics(days = 30) {
+  return request(`/api/profissional/site/estatisticas?dias=${days}`, {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function getSiteAnalyticsSettings() {
+  return request('/api/profissional/site/estatisticas/configuracoes', {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export function saveSiteAnalyticsSettings(settings) {
+  return request('/api/profissional/site/estatisticas/configuracoes', {
+    method: 'PUT',
+    auth: true,
+    body: JSON.stringify(settings),
+  })
+}
+
 export function getPublicSite() {
   return request('/api/public/site', {
     method: 'GET',
