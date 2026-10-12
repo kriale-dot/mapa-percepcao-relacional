@@ -1,3 +1,15 @@
+## Checkpoint de estatísticas do site — 2026-10-12
+
+- **Branch:** `feature/estatisticas-site` (ainda não incorporada à `main`).
+- **Versão da branch:** `1.0.0-rc.2`.
+- **Escopo:** contagem de visitas do site institucional, relatório profissional e localização geográfica aproximada; sem estatísticas de avaliações ou pacientes.
+- **Relato de produção:** contador funcional e geolocalização funcionando após instalar `geoip2/geoip2` no servidor Ubuntu. Base `GeoLite2-City.mmdb` acessível.
+- **Alterações GitHub:** `VERSION`, versão do frontend, requisito Composer GeoIP2 e documentação de estatísticas atualizados.
+- **Pendência obrigatória de reprodutibilidade:** enviar ao GitHub o `mapa-relacional-api/composer.lock` resultante da instalação efetiva e conferir `composer install --no-dev` em ambiente limpo.
+- **Validações ainda pendentes:** testes automatizados, revisão de privacidade/retenção e merge da branch após homologação.
+
+---
+
 # Avaliação de Percepção Relacional — Status atual
 
 > Documento de checkpoint. Atualizar ao final de cada etapa relevante, correção ou mudança de estado do projeto.
