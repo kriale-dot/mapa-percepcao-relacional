@@ -20,6 +20,7 @@ const emptyProfile = {
   atuacao: '',
   foto_url: '',
   logo_url: '',
+  favicon_url: '',
   dados_contato: '',
   status: '',
 }
@@ -106,19 +107,26 @@ export default function ProfessionalProfile() {
   }
 
   async function handleImageDelete(field) {
-    const image = field === 'foto_url'
-      ? {
-          type: 'foto',
-          confirm: 'Deseja realmente excluir esta fotografia do perfil?',
-          success: 'Fotografia excluída com sucesso.',
-        }
-      : {
-          type: 'logo',
-          confirm: 'Deseja realmente excluir este logotipo do perfil?',
-          success: 'Logotipo excluído com sucesso.',
-        }
+    const images = {
+      foto_url: {
+        type: 'foto',
+        confirm: 'Deseja realmente excluir esta fotografia do perfil?',
+        success: 'Fotografia excluída com sucesso.',
+      },
+      logo_url: {
+        type: 'logo',
+        confirm: 'Deseja realmente excluir este logotipo do perfil?',
+        success: 'Logotipo excluído com sucesso.',
+      },
+      favicon_url: {
+        type: 'favicon',
+        confirm: 'Deseja realmente excluir o ícone da aba do navegador?',
+        success: 'Ícone da aba excluído com sucesso.',
+      },
+    }
+    const image = images[field]
 
-    if (!profile[field] || !window.confirm(image.confirm)) {
+    if (!image || !profile[field] || !window.confirm(image.confirm)) {
       return
     }
 
@@ -160,6 +168,7 @@ export default function ProfessionalProfile() {
         atuacao: profile.atuacao,
         foto_url: profile.foto_url,
         logo_url: profile.logo_url,
+        favicon_url: profile.favicon_url,
         dados_contato: profile.dados_contato,
       })
 
@@ -330,6 +339,17 @@ export default function ProfessionalProfile() {
               onUpload={(file) => handleImageUpload('logo_url', file)}
               onDelete={() => handleImageDelete('logo_url')}
             />
+            <ImageUploadField
+              label="Ícone da aba do navegador (favicon)"
+              value={profile.favicon_url || ''}
+              uploading={uploadingField === 'favicon_url'}
+              deleting={deletingField === 'favicon_url'}
+              deleteLabel="Excluir ícone"
+              accept=".ico,image/x-icon,image/vnd.microsoft.icon"
+              helpText="Arquivo ICO. Este ícone será usado na aba do navegador."
+              onUpload={(file) => handleImageUpload('favicon_url', file)}
+              onDelete={() => handleImageDelete('favicon_url')}
+            />
           </div>
 
           {message ? (
@@ -388,6 +408,8 @@ function ImageUploadField({
   deleteLabel,
   onUpload,
   onDelete,
+  accept = 'image/jpeg,image/png,image/webp',
+  helpText = 'JPG, PNG ou WEBP. Limite padrão: 5 MB.',
 }) {
   return (
     <div className="rounded-2xl border border-[#385048]/15 bg-[#FEFDFB] p-4">
@@ -407,7 +429,7 @@ function ImageUploadField({
 
       <input
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept={accept}
         disabled={uploading || deleting}
         onChange={(event) =>
           onUpload(event.target.files?.[0] || null)
@@ -427,7 +449,7 @@ function ImageUploadField({
       ) : null}
 
       <p className="mt-2 text-xs leading-5 text-[#385048]/55">
-        JPG, PNG ou WEBP. Limite padrão: 5 MB.
+        {helpText}
       </p>
 
       {uploading ? (
