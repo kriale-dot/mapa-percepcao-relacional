@@ -1,6 +1,6 @@
 # Estatísticas do site institucional — implementação em desenvolvimento
 
-Branch: `feature/estatisticas-site`. Versão-base: `1.0.0-rc.1`.
+Branch: `feature/estatisticas-site`. Versão atual da branch: `1.0.0-rc.2`.
 
 Escopo: site institucional; **não registrar nem exibir estatísticas de avaliações ou pacientes**.
 
@@ -25,9 +25,16 @@ Se o arquivo GeoIP estiver ausente ou ilegível, o sistema registra visitas com 
 
 A geolocalização é aproximada e pode ser imprecisa por VPN, operadoras móveis, proxies e bases desatualizadas. Exibir valores desconhecidos como "Não identificado". O rastreamento foi conectado à homepage e à biblioteca pública, sem eventos ou métricas de avaliações. A consulta `paginas` contabiliza uma visualização por página e sessão, e não cada recarregamento.
 
+## Estado de produção (2026-10-12)
+
+- Usuário confirmou que o contador de visitas está funcionando em `https://taniasantiago.com.br` e que a geolocalização passou a funcionar após instalar `geoip2/geoip2` via Composer no Ubuntu.
+- O arquivo MaxMind `GeoLite2-City.mmdb` é fornecido no servidor fora do controle de versão; `SITE_GEOIP_DB` foi verificado como legível.
+- O `composer.json` do GitHub declara `geoip2/geoip2` compatível com a versão 3.4; é necessário **sincronizar o `composer.lock` realmente gerado no ambiente com o GitHub**. Não assumir que o lock foi atualizado no repositório.
+- Correção em produção relatada pelo usuário; permanecem pendentes testes automatizados e homologação ampla. A branch de desenvolvimento ainda não foi incorporada à `main`.
+
 ## Validação pendente
 
-- Instalar dependências e atualizar `composer.lock` localmente; análise sintática PHP e build React.
+- Sincronizar o `composer.lock` atualizado e executar análise sintática PHP e build React no ambiente de referência.
 - Migration em MySQL de teste.
 - Verificar deduplicação de visitas, configurações, controles de acesso e consultas agregadas.
 - Validar geolocalização com IP público em ambiente sem proxy e atrás de proxy confiável.
