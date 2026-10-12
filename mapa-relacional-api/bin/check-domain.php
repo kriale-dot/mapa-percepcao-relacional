@@ -121,6 +121,7 @@ $requiredProfessionalColumns = [
     'atuacao',
     'foto_url',
     'logo_url',
+    'favicon_url',
     'dados_contato',
 ];
 
