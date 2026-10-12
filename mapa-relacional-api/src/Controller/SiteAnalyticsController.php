@@ -40,6 +40,36 @@ final class SiteAnalyticsController
         ];
     }
 
+    private function approximateLocation(ServerRequestInterface $request): array
+    {
+        $unknown = ['pais' => null, 'regiao' => null, 'cidade' => null];
+        $database = (string) ($_ENV['SITE_GEOIP_DB'] ?? '');
+        if ($database === '' || !is_readable($database) || !class_exists(\\GeoIp2\\Database\\Reader::class)) {
+            return $unknown;
+        }
+        // REMOTE_ADDR e o unico endereco considerado: nao confiar em headers enviados pelo cliente.
+        $server = $request->getServerParams();
+        $ip = (string) ($server['REMOTE_ADDR'] ?? '');
+        if (!filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            return $unknown;
+        }
+        try {
+            $reader = new \\GeoIp2\\Database\\Reader($database);
+            try {
+                $city = $reader->city($ip);
+                return [
+                    'pais' => mb_substr((string) ($city->country->name ?? ''), 0, 100) ?: null,
+                    'regiao' => mb_substr((string) ($city->mostSpecificSubdivision->name ?? ''), 0, 120) ?: null,
+                    'cidade' => mb_substr((string) ($city->city->name ?? ''), 0, 120) ?: null,
+                ];
+            } finally {
+                $reader->close();
+            }
+        } catch (\\Throwable) {
+            return $unknown;
+        }
+    }
+
     public function track(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $body = $request->getParsedBody();
@@ -66,13 +96,14 @@ final class SiteAnalyticsController
         $device = (string) ($body['dispositivo'] ?? 'outro');
         if (!in_array($device, ['celular', 'tablet', 'desktop', 'outro'], true)) $device = 'outro';
 
+        $location = $this->approximateLocation($request);
         $hash = hash('sha256', $token);
         $stmt = $pdo->prepare(
             'INSERT IGNORE INTO site_analytics_visitas
-            (profissional_id, sessao_hash, pagina, origem_dominio, dispositivo)
-            VALUES (:id, :hash, :pagina, :origem, :dispositivo)'
+            (profissional_id, sessao_hash, pagina, origem_dominio, dispositivo, pais, regiao, cidade)
+            VALUES (:id, :hash, :pagina, :origem, :dispositivo, :pais, :regiao, :cidade)'
         );
-        $stmt->execute(['id' => $id, 'hash' => $hash, 'pagina' => $page, 'origem' => $host, 'dispositivo' => $device]);
+        $stmt->execute(['id' => $id, 'hash' => $hash, 'pagina' => $page, 'origem' => $host, 'dispositivo' => $device, ...$location]);
         $new = $stmt->rowCount() === 1;
         if ($new) {
             $visitId = (int) $pdo->lastInsertId();
@@ -148,7 +179,18 @@ final class SiteAnalyticsController
         $origins = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $stmt = $pdo->prepare('SELECT p.pagina, COUNT(*) total FROM site_analytics_paginas p INNER JOIN site_analytics_visitas v ON v.id = p.visita_id WHERE v.profissional_id = ? AND p.visualizada_em >= ? GROUP BY p.pagina ORDER BY total DESC LIMIT 10');
         $stmt->execute([$id, $cutoff]);
+        $locations = [];
+        foreach (['pais', 'regiao', 'cidade'] as $dimension) {
+            $sql = "SELECT COALESCE(NULLIF($dimension, ''), 'Não identificado') local, COUNT(*) total
+                    FROM site_analytics_visitas
+                    WHERE profissional_id = ? AND iniciada_em >= ?
+                    GROUP BY local ORDER BY total DESC LIMIT 15";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$id, $cutoff]);
+            $locations[$dimension] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
         return $this->json($response, [
+            'localizacoes' => $locations,
             'dias' => $days, 'total' => $total, 'periodo' => $periodTotal,
             'evolucao' => $daily, 'dispositivos' => $devices,
             'origens' => $origins, 'paginas' => $stmt->fetchAll(PDO::FETCH_ASSOC),
