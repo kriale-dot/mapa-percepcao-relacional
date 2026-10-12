@@ -76,6 +76,9 @@ export default function ProfessionalSiteStatistics() {
               <Breakdown title="Páginas acessadas" rows={data.paginas || []} labelKey="pagina" number={number} />
               <Breakdown title="Origem dos acessos" rows={data.origens || []} labelKey="origem" number={number} />
               <Breakdown title="Dispositivos" rows={data.dispositivos || []} labelKey="dispositivo" number={number} />
+              <Breakdown title="Países" rows={data.localizacoes?.pais || []} labelKey="local" number={number} />
+              <Breakdown title="Estados e regiões" rows={data.localizacoes?.regiao || []} labelKey="local" number={number} />
+              <Breakdown title="Cidades" rows={data.localizacoes?.cidade || []} labelKey="local" number={number} />
             </div>
           </>
         ) : null}
