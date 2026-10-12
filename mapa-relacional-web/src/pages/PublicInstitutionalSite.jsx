@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { getPublicSite, recordSiteVisit, getPublicVisitCounter } from '../services/api'
+import { getPublicSite, getPublicVisitCounter } from '../services/api'
+import { trackInstitutionalPage } from '../utils/siteTracking'
 import { getVideoSource } from '../utils/video'
 
 function navigate(path) {
@@ -44,25 +45,10 @@ export default function PublicInstitutionalSite() {
   }, [])
 
   useEffect(() => {
-    // Token temporario por aba: evita duplicacoes por recarga e StrictMode.
-    try {
-      let token = sessionStorage.getItem('site_visita_token')
-      if (!token) {
-        const bytes = new Uint8Array(16)
-        crypto.getRandomValues(bytes)
-        token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
-        sessionStorage.setItem('site_visita_token', token)
-      }
-      const ua = navigator.userAgent
-      const dispositivo = /tablet|ipad/i.test(ua) ? 'tablet' : /mobi|android|iphone/i.test(ua) ? 'celular' : 'desktop'
-      recordSiteVisit({ sessao: token, pagina: '/', origem: document.referrer, dispositivo })
-        .catch(() => {})
-        .finally(() => getPublicVisitCounter().then(setCounter).catch(() => {}))
-    } catch {
-      // O site continua acessivel caso o navegador bloqueie o armazenamento.
-      getPublicVisitCounter().then(setCounter).catch(() => {})
-    }
-  }, [])
+    if (status !== 'ready') return
+    Promise.resolve(trackInstitutionalPage('/'))
+      .finally(() => getPublicVisitCounter().then(setCounter).catch(() => {}))
+  }, [status])
 
   useEffect(() => {
     if (site?.site_titulo) {
