@@ -182,6 +182,11 @@ export default function ProfessionalDashboard() {
               path: '/profissional/avaliacoes',
             },
             {
+              title: 'Estatísticas do site',
+              description: 'Visitas e relatórios do tráfego institucional, sem avaliações.',
+              path: '/profissional/site/estatisticas',
+            },
+            {
               title: 'Site institucional',
               description:
                 'Monte a página pública com textos, imagens, vídeos, links e chamadas para ação.',
