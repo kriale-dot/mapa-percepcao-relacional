@@ -3406,6 +3406,6 @@ Arquivos envolvidos:
 
 Reutilizado o fluxo de upload institucional existente, com nomes aleatórios, autenticação e auditoria. O formato ICO só é permitido quando o upload declara `tipo=favicon`. O botão de exclusão remove a referência no perfil e apaga o arquivo local somente quando ele não está referenciado em outro lugar.
 
-**Checklist pendente para homologação:** executar migration 014; executar `composer check` e `npm run build`; carregar um PNG e um ICO válidos; confirmar que a troca altera o ícone em uma aba com a home e outra com `/profissional/perfil`; recarregar a página; excluir o ícone e confirmar a remoção da configuração; rejeitar arquivo inválido ou acima de 1 MB; conferir que fotografia, logotipo, título do site e avaliações continuam funcionando.
+**Checklist pendente para homologação:** executar migration 015; executar `composer check` e `npm run build`; carregar um PNG e um ICO válidos; confirmar que a troca altera o ícone em uma aba com a home e outra com `/profissional/perfil`; recarregar a página; excluir o ícone e confirmar a remoção da configuração; rejeitar arquivo inválido ou acima de 1 MB; conferir que fotografia, logotipo, título do site e avaliações continuam funcionando.
 
 A alteração ainda não foi aplicada ou validada em produção.
