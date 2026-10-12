@@ -3396,7 +3396,7 @@ O título da aba é independente do bloco institucional do tipo TITULO. Limite d
 A área `/profissional/perfil` recebeu campo para enviar, pré-visualizar e excluir o ícone da aba do navegador independentemente da fotografia e do logotipo. A seleção aceita ICO ou PNG com limite de 1 MB, e o salvamento segue o botão existente `Salvar perfil`.
 
 Arquivos envolvidos:
-- `mapa-relacional-api/migrations/014_profissional_favicon.sql` (campo `profissionais.favicon_url`);
+- `mapa-relacional-api/migrations/015_profissional_favicon.sql` (campo `profissionais.favicon_url`);
 - `mapa-relacional-api/src/Controller/ProfessionalController.php` (leitura, gravação e exclusão);
 - `mapa-relacional-api/src/Controller/SiteController.php` (upload validado e URL pública);
 - `mapa-relacional-api/public/index.php` (rota de exclusão);
