@@ -105,10 +105,17 @@ final class SiteAnalyticsController
         );
         $stmt->execute(['id' => $id, 'hash' => $hash, 'pagina' => $page, 'origem' => $host, 'dispositivo' => $device, ...$location]);
         $new = $stmt->rowCount() === 1;
-        if ($new) {
-            $visitId = (int) $pdo->lastInsertId();
-            $pageStmt = $pdo->prepare('INSERT INTO site_analytics_paginas (visita_id, pagina) VALUES (?, ?)');
-            $pageStmt->execute([$visitId, $page]);
+        $visitIdStmt = $pdo->prepare(
+            'SELECT id FROM site_analytics_visitas WHERE profissional_id = ? AND sessao_hash = ? LIMIT 1'
+        );
+        $visitIdStmt->execute([$id, $hash]);
+        $visitId = $visitIdStmt->fetchColumn();
+        if ($visitId !== false) {
+            // Uma pagina por sessao evita duplicacao em StrictMode e refresh.
+            $pageStmt = $pdo->prepare(
+                'INSERT IGNORE INTO site_analytics_paginas (visita_id, pagina) VALUES (?, ?)'
+            );
+            $pageStmt->execute([(int) $visitId, $page]);
         }
         return $this->json($response, ['registrada' => $new]);
     }
