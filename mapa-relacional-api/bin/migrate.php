@@ -61,6 +61,23 @@ foreach ($files as $file) {
         continue;
     }
 
+    // Conciliacao somente para migrations conhecidas aplicadas manualmente.
+    // Nunca registrar uma migration se a estrutura estiver incompleta.
+    if (in_array($filename, ['013_site_titulo.sql', '014_estatisticas_site.sql'], true)) {
+        $state = knownMigrationState($pdo, $filename);
+        if ($state === 'complete') {
+            $insert->execute(['filename' => $filename, 'checksum' => $checksum]);
+            echo "[reconciled] {$filename} (estrutura existente verificada)\\n";
+            continue;
+        }
+        if ($state === 'partial') {
+            throw new RuntimeException(
+                "A migration {$filename} possui estrutura parcialmente existente ou divergente. "
+                . "Nenhuma alteracao foi feita. Revise o schema antes de prosseguir."
+            );
+        }
+    }
+
     try {
         foreach (splitSqlStatements($sql) as $statement) {
             $pdo->exec($statement);
@@ -86,6 +103,88 @@ foreach ($files as $file) {
 }
 
 echo "Migracoes aplicadas nesta execucao: {$applied}\n";
+
+
+/**
+ * Verifica migrations especificas executadas fora do runner.
+ * complete = todos os elementos minimos esperados existem;
+ * absent = nenhuma estrutura da migration existe;
+ * partial = existem elementos faltantes ou divergentes.
+ */
+function knownMigrationState(PDO $pdo, string $filename): string
+{
+    $column = $pdo->prepare(
+        'SELECT COLUMN_NAME, COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT
+         FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?'
+    );
+    $table = $pdo->prepare(
+        'SELECT COUNT(*) FROM information_schema.TABLES
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND TABLE_TYPE = \'BASE TABLE\''
+    );
+    $index = $pdo->prepare(
+        'SELECT COUNT(*) FROM information_schema.STATISTICS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND INDEX_NAME = ? AND NON_UNIQUE = ?'
+    );
+
+    if ($filename === '013_site_titulo.sql') {
+        $column->execute(['profissionais', 'site_titulo']);
+        $found = $column->fetch(PDO::FETCH_ASSOC);
+        if ($found === false) {
+            return 'absent';
+        }
+        return strtolower((string) $found['COLUMN_TYPE']) === 'varchar(160)'
+            && $found['IS_NULLABLE'] === 'YES'
+            ? 'complete' : 'partial';
+    }
+
+    $required = [
+        'site_analytics_config' => [
+            'profissional_id', 'registrar_visitas', 'mostrar_contador',
+        ],
+        'site_analytics_visitas' => [
+            'id', 'profissional_id', 'sessao_hash', 'pagina', 'origem_dominio',
+            'dispositivo', 'pais', 'regiao', 'cidade', 'iniciada_em',
+        ],
+        'site_analytics_paginas' => [
+            'id', 'visita_id', 'pagina', 'visualizada_em',
+        ],
+    ];
+    $present = 0;
+    foreach ($required as $tableName => $columns) {
+        $table->execute([$tableName]);
+        if (!(int) $table->fetchColumn()) {
+            continue;
+        }
+        $present++;
+        foreach ($columns as $name) {
+            $column->execute([$tableName, $name]);
+            if ($column->fetch(PDO::FETCH_ASSOC) === false) {
+                return 'partial';
+            }
+        }
+    }
+    if ($present === 0) {
+        return 'absent';
+    }
+    if ($present !== count($required)) {
+        return 'partial';
+    }
+
+    foreach ([
+        ['site_analytics_visitas', 'uq_site_analytics_sessao', 0],
+        ['site_analytics_visitas', 'idx_site_analytics_periodo', 1],
+        ['site_analytics_paginas', 'uq_site_analytics_pagina_sessao', 0],
+        ['site_analytics_paginas', 'idx_site_analytics_paginas_visita', 1],
+    ] as [$tableName, $indexName, $nonUnique]) {
+        $index->execute([$tableName, $indexName, $nonUnique]);
+        if (!(int) $index->fetchColumn()) {
+            return 'partial';
+        }
+    }
+
+    return 'complete';
+}
 
 /**
  * Divide um arquivo SQL em comandos sem depender de multi-statements do PDO.
