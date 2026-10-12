@@ -65,7 +65,7 @@ final class SiteAnalyticsController
             } finally {
                 $reader->close();
             }
-        } catch (\\Throwable) {
+        } catch (\Throwable) {
             return $unknown;
         }
     }
@@ -179,6 +179,7 @@ final class SiteAnalyticsController
         $origins = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $stmt = $pdo->prepare('SELECT p.pagina, COUNT(*) total FROM site_analytics_paginas p INNER JOIN site_analytics_visitas v ON v.id = p.visita_id WHERE v.profissional_id = ? AND p.visualizada_em >= ? GROUP BY p.pagina ORDER BY total DESC LIMIT 10');
         $stmt->execute([$id, $cutoff]);
+        $pages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $locations = [];
         foreach (['pais', 'regiao', 'cidade'] as $dimension) {
             $sql = "SELECT COALESCE(NULLIF($dimension, ''), 'Não identificado') local, COUNT(*) total
@@ -193,7 +194,7 @@ final class SiteAnalyticsController
             'localizacoes' => $locations,
             'dias' => $days, 'total' => $total, 'periodo' => $periodTotal,
             'evolucao' => $daily, 'dispositivos' => $devices,
-            'origens' => $origins, 'paginas' => $stmt->fetchAll(PDO::FETCH_ASSOC),
+            'origens' => $origins, 'paginas' => $pages,
         ]);
     }
 }
