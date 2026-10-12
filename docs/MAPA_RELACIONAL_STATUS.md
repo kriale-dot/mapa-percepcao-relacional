@@ -2,7 +2,7 @@
 
 > Documento de checkpoint. Atualizar ao final de cada etapa relevante, correção ou mudança de estado do projeto.
 
-**Data do checkpoint:** 2026-10-10  
+**Data do checkpoint:** 2026-10-12  
 **Repositório:** `kriale-dot/mapa-percepcao-relacional`  
 **Branch de referência:** `main`  
 **Versão:** `1.0.0-rc.1`  
@@ -3388,3 +3388,24 @@ O título da aba é independente do bloco institucional do tipo TITULO. Limite d
 **Verificações pendentes:** confirmar `APP_ENV=production` e `APP_DEBUG=false` (a resposta de health anterior informava `environment: development` e um erro HTTP 500 expôs stack trace); validar a aplicação completa no domínio; confirmar registro das migrations 012 e 013 em `schema_migrations` antes de qualquer reexecução; homologar a recuperação de senha por e-mail, ainda não testada; rodar os checklists de produção, backup e verificações de permissões.
 
 **Próxima ação:** revisão de segurança e homologação ponta a ponta antes do encerramento formal da V1.
+
+## 2026-10-12 — Favicon configurável no perfil profissional
+
+**Situação:** código criado na branch `feature/favicon-perfil-20261012`; pendente revisão, migration, build e homologação antes de integrar à `main`. **Versão mantida:** `1.0.0-rc.1`.
+
+A área `/profissional/perfil` recebeu campo para enviar, pré-visualizar e excluir o ícone da aba do navegador independentemente da fotografia e do logotipo. A seleção aceita ICO ou PNG com limite de 1 MB, e o salvamento segue o botão existente `Salvar perfil`.
+
+Arquivos envolvidos:
+- `mapa-relacional-api/migrations/014_profissional_favicon.sql` (campo `profissionais.favicon_url`);
+- `mapa-relacional-api/src/Controller/ProfessionalController.php` (leitura, gravação e exclusão);
+- `mapa-relacional-api/src/Controller/SiteController.php` (upload validado e URL pública);
+- `mapa-relacional-api/public/index.php` (rota de exclusão);
+- `mapa-relacional-web/src/pages/ProfessionalProfile.jsx` (seleção e pré-visualização);
+- `mapa-relacional-web/src/services/api.js` (tipo de upload);
+- `mapa-relacional-web/src/App.jsx` (ícone dinâmico em todas as páginas).
+
+Reutilizado o fluxo de upload institucional existente, com nomes aleatórios, autenticação e auditoria. O formato ICO só é permitido quando o upload declara `tipo=favicon`. O botão de exclusão remove a referência no perfil e apaga o arquivo local somente quando ele não está referenciado em outro lugar.
+
+**Checklist pendente para homologação:** executar migration 014; executar `composer check` e `npm run build`; carregar um PNG e um ICO válidos; confirmar que a troca altera o ícone em uma aba com a home e outra com `/profissional/perfil`; recarregar a página; excluir o ícone e confirmar a remoção da configuração; rejeitar arquivo inválido ou acima de 1 MB; conferir que fotografia, logotipo, título do site e avaliações continuam funcionando.
+
+A alteração ainda não foi aplicada ou validada em produção.
