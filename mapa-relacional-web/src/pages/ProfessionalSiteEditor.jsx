@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import {
   createSiteBlock,
   getSiteSettings,
+  getSiteAnalyticsSettings,
+  saveSiteAnalyticsSettings,
   updateSiteSettings,
   deleteSiteBlock,
   listSiteBlocks,
@@ -64,6 +66,8 @@ function normalizeBlock(block) {
 export default function ProfessionalSiteEditor() {
   const [blocks, setBlocks] = useState([])
   const [siteTitle, setSiteTitle] = useState('')
+  const [analyticsSettings, setAnalyticsSettings] = useState({ registrar_visitas: true, mostrar_contador: false })
+  const [savingAnalytics, setSavingAnalytics] = useState(false)
   const [savingTitle, setSavingTitle] = useState(false)
   const [newBlock, setNewBlock] = useState(emptyBlock)
   const [status, setStatus] = useState('loading')
@@ -85,7 +89,8 @@ export default function ProfessionalSiteEditor() {
     setMessage('')
 
     try {
-      const [result, settings] = await Promise.all([listSiteBlocks(), getSiteSettings()])
+      const [result, settings, analytics] = await Promise.all([listSiteBlocks(), getSiteSettings(), getSiteAnalyticsSettings()])
+      setAnalyticsSettings(analytics)
       setSiteTitle(settings.site_titulo || '')
       setBlocks((result.blocos || []).map(normalizeBlock))
       setStatus('ready')
@@ -121,6 +126,21 @@ export default function ProfessionalSiteEditor() {
       setMessage(error.message || 'Não foi possível salvar o título.')
     } finally {
       setSavingTitle(false)
+    }
+  }
+
+  async function saveAnalytics(event) {
+    event.preventDefault()
+    setSavingAnalytics(true)
+    setMessage('')
+    try {
+      const settings = await saveSiteAnalyticsSettings(analyticsSettings)
+      setAnalyticsSettings(settings)
+      setMessage('Configurações de visitas salvas com sucesso.')
+    } catch (error) {
+      setMessage(error.message || 'Não foi possível salvar as configurações de visitas.')
+    } finally {
+      setSavingAnalytics(false)
     }
   }
 
@@ -319,6 +339,34 @@ export default function ProfessionalSiteEditor() {
               className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">
               {savingTitle ? 'Salvando...' : 'Salvar título'}
             </button>
+          </form>
+        </section>
+        <section className="mb-8 rounded-3xl border border-[#A8C8B8]/45 bg-white p-7 shadow-sm">
+          <h2 className="text-xl font-semibold">Contador de visitas</h2>
+          <p className="mt-2 text-sm text-[#385048]/70">
+            Apenas tráfego do site institucional; não inclui dados de avaliações.
+          </p>
+          <form onSubmit={saveAnalytics} className="mt-5 space-y-4">
+            <label className="flex items-center gap-3 text-sm">
+              <input type="checkbox" checked={analyticsSettings.registrar_visitas}
+                onChange={(event) => setAnalyticsSettings((current) => ({ ...current, registrar_visitas: event.target.checked }))} />
+              Registrar visitas ao site
+            </label>
+            <label className="flex items-center gap-3 text-sm">
+              <input type="checkbox" checked={analyticsSettings.mostrar_contador}
+                onChange={(event) => setAnalyticsSettings((current) => ({ ...current, mostrar_contador: event.target.checked }))} />
+              Exibir o total de visitas no rodapé público
+            </label>
+            <div className="flex flex-wrap gap-3">
+              <button type="submit" disabled={savingAnalytics}
+                className="rounded-xl bg-[#385048] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50">
+                {savingAnalytics ? 'Salvando...' : 'Salvar contador'}
+              </button>
+              <button type="button" onClick={() => navigate('/profissional/site/estatisticas')}
+                className="rounded-xl border border-[#385048]/25 px-5 py-3 text-sm font-semibold">
+                Consultar estatísticas
+              </button>
+            </div>
           </form>
         </section>
         <section className="rounded-3xl border border-[#A8C8B8]/45 bg-white p-7 shadow-sm">
