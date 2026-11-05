@@ -20,6 +20,7 @@ const emptyProfile = {
   atuacao: '',
   foto_url: '',
   logo_url: '',
+  favicon_url: '',
   dados_contato: '',
   status: '',
 }
@@ -81,7 +82,10 @@ export default function ProfessionalProfile() {
     setMessage('')
 
     try {
-      const result = await uploadSiteImage(file)
+      const result = await uploadSiteImage(
+        file,
+        field === 'favicon_url' ? 'favicon' : null,
+      )
       const url = result.imagem?.url
 
       if (!url) {
@@ -90,7 +94,7 @@ export default function ProfessionalProfile() {
 
       updateField(field, url)
       setMessage(
-        'Imagem enviada. Clique em Salvar perfil para confirmar a alteração.',
+        'Arquivo enviado. Clique em Salvar perfil para confirmar a alteração.',
       )
     } catch (error) {
       if (error.status === 401) {
@@ -112,11 +116,17 @@ export default function ProfessionalProfile() {
           confirm: 'Deseja realmente excluir esta fotografia do perfil?',
           success: 'Fotografia excluída com sucesso.',
         }
-      : {
-          type: 'logo',
-          confirm: 'Deseja realmente excluir este logotipo do perfil?',
-          success: 'Logotipo excluído com sucesso.',
-        }
+      : field === 'logo_url'
+        ? {
+            type: 'logo',
+            confirm: 'Deseja realmente excluir este logotipo do perfil?',
+            success: 'Logotipo excluído com sucesso.',
+          }
+        : {
+            type: 'favicon',
+            confirm: 'Deseja realmente excluir o ícone da aba do navegador?',
+            success: 'Ícone da aba excluído com sucesso.',
+          }
 
     if (!profile[field] || !window.confirm(image.confirm)) {
       return
@@ -133,6 +143,9 @@ export default function ProfessionalProfile() {
         ...result.profissional,
       })
       setMessage(image.success)
+      if (field === 'favicon_url') {
+        window.dispatchEvent(new Event('site-favicon-updated'))
+      }
     } catch (error) {
       if (error.status === 401) {
         clearAuthToken()
@@ -160,6 +173,7 @@ export default function ProfessionalProfile() {
         atuacao: profile.atuacao,
         foto_url: profile.foto_url,
         logo_url: profile.logo_url,
+        favicon_url: profile.favicon_url,
         dados_contato: profile.dados_contato,
       })
 
@@ -169,6 +183,7 @@ export default function ProfessionalProfile() {
       })
       setStatus('ready')
       setMessage('Perfil atualizado com sucesso.')
+      window.dispatchEvent(new Event('site-favicon-updated'))
     } catch (error) {
       if (error.status === 401) {
         clearAuthToken()
@@ -332,6 +347,21 @@ export default function ProfessionalProfile() {
             />
           </div>
 
+          <div className="mt-5 max-w-md">
+            <ImageUploadField
+              label="Ícone da aba do navegador (favicon)"
+              value={profile.favicon_url || ''}
+              uploading={uploadingField === 'favicon_url'}
+              deleting={deletingField === 'favicon_url'}
+              deleteLabel="Excluir ícone"
+              accept=".ico,image/x-icon,image/vnd.microsoft.icon,image/png"
+              hint="ICO ou PNG, até 1 MB. Preferencialmente quadrado, 32 × 32 ou 48 × 48 pixels."
+              compact
+              onUpload={(file) => handleImageUpload('favicon_url', file)}
+              onDelete={() => handleImageDelete('favicon_url')}
+            />
+          </div>
+
           {message ? (
             <div className="mt-6 rounded-xl bg-[#A8C8B8]/18 px-4 py-3 text-sm">
               {message}
@@ -388,6 +418,9 @@ function ImageUploadField({
   deleteLabel,
   onUpload,
   onDelete,
+  accept = 'image/jpeg,image/png,image/webp',
+  hint = 'JPG, PNG ou WEBP. Limite padrão: 5 MB.',
+  compact = false,
 }) {
   return (
     <div className="rounded-2xl border border-[#385048]/15 bg-[#FEFDFB] p-4">
@@ -397,17 +430,17 @@ function ImageUploadField({
         <img
           src={value}
           alt={label}
-          className="mt-3 h-40 w-full rounded-xl border border-[#A8C8B8]/40 object-contain"
+          className={`${compact ? 'h-24' : 'h-40'} mt-3 w-full rounded-xl border border-[#A8C8B8]/40 object-contain`}
         />
       ) : (
-        <div className="mt-3 flex h-40 items-center justify-center rounded-xl border border-dashed border-[#A8C8B8] text-sm text-[#385048]/50">
+        <div className={`${compact ? 'h-24' : 'h-40'} mt-3 flex items-center justify-center rounded-xl border border-dashed border-[#A8C8B8] text-sm text-[#385048]/50`}>
           Nenhuma imagem enviada
         </div>
       )}
 
       <input
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept={accept}
         disabled={uploading || deleting}
         onChange={(event) =>
           onUpload(event.target.files?.[0] || null)
@@ -427,7 +460,7 @@ function ImageUploadField({
       ) : null}
 
       <p className="mt-2 text-xs leading-5 text-[#385048]/55">
-        JPG, PNG ou WEBP. Limite padrão: 5 MB.
+        {hint}
       </p>
 
       {uploading ? (

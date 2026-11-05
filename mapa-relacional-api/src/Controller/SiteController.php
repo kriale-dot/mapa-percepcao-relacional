@@ -92,6 +92,7 @@ final class SiteController
                 atuacao,
                 foto_url,
                 logo_url,
+                favicon_url,
                 dados_contato,
                 site_titulo
              FROM profissionais
@@ -156,6 +157,14 @@ final class SiteController
             return $this->unauthorized($response);
         }
 
+        $data = $request->getParsedBody();
+        $data = is_array($data) ? $data : [];
+        $type = trim((string) ($data['tipo'] ?? ''));
+        if ($type !== '' && $type !== 'favicon') {
+            return $this->validation($response, 'Tipo de imagem invalido.');
+        }
+        $isFavicon = $type === 'favicon';
+
         $uploadedFiles = $request->getUploadedFiles();
         $image = $uploadedFiles['imagem'] ?? null;
 
@@ -185,6 +194,9 @@ final class SiteController
             1,
             min(20, (int) ($_ENV['SITE_IMAGE_MAX_MB'] ?? 5))
         );
+        if ($isFavicon) {
+            $maxMb = min(1, $maxMb);
+        }
         $maxBytes = $maxMb * 1024 * 1024;
         $size = $image->getSize();
 
@@ -215,10 +227,32 @@ final class SiteController
             'image/webp' => 'webp',
         ];
 
+        if ($isFavicon) {
+            // O fileinfo pode classificar ICO como octet-stream.
+            $extensions = ['image/png' => 'png'];
+            $icoMimes = [
+                'image/x-icon',
+                'image/vnd.microsoft.icon',
+                'image/ico',
+                'application/x-ico',
+                'application/octet-stream',
+            ];
+            if (
+                in_array($mime, $icoMimes, true)
+                && strlen($contents) >= 6
+                && substr($contents, 0, 4) === "\x00\x00\x01\x00"
+                && unpack('v', substr($contents, 4, 2))[1] > 0
+            ) {
+                $extensions[$mime] = 'ico';
+            }
+        }
+
         if (!isset($extensions[$mime])) {
             return $this->validation(
                 $response,
-                'Formato invalido. Envie JPG, PNG ou WEBP.'
+                $isFavicon
+                    ? 'Formato invalido. Envie ICO ou PNG.'
+                    : 'Formato invalido. Envie JPG, PNG ou WEBP.'
             );
         }
 
@@ -274,6 +308,7 @@ final class SiteController
             [
                 'mime' => $mime,
                 'tamanho_bytes' => strlen($contents),
+                'tipo' => $isFavicon ? 'favicon' : 'imagem',
             ],
             $request,
             $professionalId
@@ -899,6 +934,7 @@ final class SiteController
             'atuacao' => $professional['atuacao'],
             'foto_url' => $professional['foto_url'],
             'logo_url' => $professional['logo_url'],
+            'favicon_url' => $professional['favicon_url'],
             'dados_contato' => $professional['dados_contato'],
         ];
     }
